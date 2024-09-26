@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Operations</title>
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        table, th, td { border: 1px solid black; }
+        th, td { padding: 8px; text-align: left; }
+        pre { white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>SQL Operations by Table</h1>
+
+        <h2>Table: mall2.pms_product</h2>
+        <table>
+            <tr>
+                <th>Operation</th>
+                <th>id</th><th>brand_id</th><th>product_category_id</th><th>feight_template_id</th><th>product_attribute_category_id</th><th>name</th><th>pic</th><th>product_sn</th><th>delete_status</th><th>publish_status</th><th>new_status</th><th>recommand_status</th><th>verify_status</th><th>sort</th><th>sale</th><th>price</th><th>promotion_price</th><th>gift_growth</th><th>gift_point</th><th>use_point_limit</th><th>sub_title</th><th>description</th><th>original_price</th><th>stock</th><th>low_stock</th><th>unit</th><th>weight</th><th>preview_status</th><th>service_ids</th><th>keywords</th><th>note</th><th>album_pics</th><th>detail_title</th><th>detail_desc</th><th>detail_html</th><th>detail_mobile_html</th><th>promotion_start_time</th><th>promotion_end_time</th><th>promotion_per_limit</th><th>promotion_type</th><th>brand_name</th><th>product_category_name</th>
+                <th>Condition</th>
+            </tr>
+    
+            <tr>
+                <td>INSERT</td>
+                <td>1</td><td>49</td><td>7</td><td>0</td><td>0</td><td>银色星芒刺绣网纱底裤</td><td>newValue1</td><td>xxxxx</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>100</td><td>0</td><td>100.00</td><td>null</td><td>0</td><td>100</td><td>null</td><td>111</td><td>111</td><td>120.00</td><td>100</td><td>20</td><td>件</td><td>1000.00</td><td>0</td><td>null</td><td>银色星芒刺绣网纱底裤</td><td>银色星芒刺绣网纱底裤</td><td>null</td><td>银色星芒刺绣网纱底裤</td><td>银色星芒刺绣网纱底裤</td><td>银色星芒刺绣网纱底裤</td><td>银色星芒刺绣网纱底裤</td><td>null</td><td>null</td><td>null</td><td>0</td><td>七匹狼</td><td>外套</td>
+                <td><pre></pre></td>
+            </tr>
+        
+            <tr>
+                <td>INSERT</td>
+                <td>2</td><td>49</td><td>7</td><td>0</td><td>0</td><td>银色星芒刺绣网纱底裤2</td><td>newValue1</td><td>xxxxx</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>100.00</td><td>null</td><td>0</td><td>100</td><td>null</td><td>111</td><td>111</td><td>120.00</td><td>100</td><td>20</td><td>件</td><td>1000.00</td><td>0</td><td>null</td><td>银色星芒刺绣网纱底裤2</td><td>银色星芒刺绣网纱底裤</td><td>null</td><td>银色星芒刺绣网纱底裤</td><td>银色星芒刺绣网纱底裤</td><td>&lt;p&gt;银色星芒刺绣网纱底裤&lt;/p&gt;</td><td>&lt;p&gt;银色星芒刺绣网纱底裤&lt;/p&gt;</td><td>null</td><td>null</td><td>null</td><td>0</td><td>七匹狼</td><td>外套</td>
+                <td><pre></pre></td>
+            </tr>
+        
+        </table>
+        <h2>Table: mall2.pms_product_attribute</h2>
+        <table>
+            <tr>
+                <th>Operation</th>
+                <th>product_attribute_category_id</th><th>name</th><th>select_type</th><th>input_type</th><th>input_list</th><th>sort</th><th>filter_type</th><th>search_type</th><th>related_status</th><th>hand_add_status</th><th>type</th>
+                <th>Condition</th>
+            </tr>
+    
+            <tr>
+                <td>UPDATE</td>
+                <td>0</td><td>适用对象3</td><td>2</td><td>888</td><td>QQQQ</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td>
+                <td><pre>type = 1
+    AND select_type = &#39;2&#39;
+    AND id = 21
+    AND id = 21</pre></td>
+            </tr>
+        
+        </table>
+        <h2>Table: mall2.pms_brand</h2>
+        <table>
+            <tr>
+                <th>Operation</th>
+                <th>name</th><th>sort</th>
+                <th>Condition</th>
+            </tr>
+    
+            <tr>
+                <td>UPDATE</td>
+                <td>小米</td><td>1234</td>
+                <td><pre>sort = &#39;500&#39;
+    AND id = 6</pre></td>
+            </tr>
+        
+        </table>
+</body>
+</html>

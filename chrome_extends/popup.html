@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multi-environment Login</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div>
+      <h2>插件更新</h2>
+      <p>当前版本：<span id="current-version"></span></p>
+      <p id="update-info" style="display: none">
+        新版本：<span id="latest-version"></span><br />
+        <a id="update-link" href="#" target="_blank">下载新版本</a>
+      </p>
+      <p id="update-status"></p>
+    </div>
+    <div class="container">
+      <h2>测试环境</h2>
+      <input type="text" id="test-username" placeholder="用户名" />
+      <input type="password" id="test-password" placeholder="密码" />
+      <button id="test-login-btn">登录</button>
+      <button id="test-logout-btn">退出</button>
+      <p id="test-status">状态: 未登录</p>
+
+      <h2>生产环境</h2>
+      <input type="text" id="prod-username" placeholder="用户名" />
+      <input type="password" id="prod-password" placeholder="密码" />
+      <button id="prod-login-btn">登录</button>
+      <button id="prod-logout-btn">退出</button>
+      <p id="prod-status">状态: 未登录</p>
+
+      <button id="clear-cache-btn">清理缓存</button>
+    </div>
+    <div>
+      <h3 id="sku-display">当前 SKU:</h3>
+      <button class="api-button" data-endpoint="https://example.com/api1">
+        请求 API 1
+      </button>
+      <button class="api-button" data-endpoint="https://example.com/api2">
+        请求 API 2
+      </button>
+      <button class="api-button" data-endpoint="https://example.com/api3">
+        请求 API 3
+      </button>
+      <button class="api-button" id="getCookies">Get Cookies</button>
+    </div>
+    <script src="config.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

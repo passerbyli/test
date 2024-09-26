@@ -1,0 +1,63 @@
+{
+    "name": "MyExtension",
+    "version": "1.0",
+    "manifest_version": 3,
+    "description": "xxxxxxxx",
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "css": [
+                "mystyles.css"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        },
+        "default_title": "地址栏最后附加图标。含图标及行为等",
+        "default_popup": "popup.html"
+    },
+    "file_browser_handlers": [],
+    "offline_enabled": true,
+    "options_page": "options.html",
+    "options_ui": {
+        "page": "options.html"
+    },
+    "permissions": [
+        "contextMenus",
+        "downloads",
+        "cookies",
+        "scripting",
+        "contextMenus",
+        "notifications",
+        "background",
+        "tabs",
+        "storage",
+        "webRequest",
+        "webRequestBlocking",
+        "declarativeContent",
+        "activeTab",
+        "clipboardWrite",
+        "<all_urls>",
+        "*://*/*"
+    ]
+}
