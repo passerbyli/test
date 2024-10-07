@@ -1,0 +1,125 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+}
+
+.content {
+  padding: 20px;
+}
+
+.toolbar {
+  background: #fff;
+  border: 1px solid #edf1f2;
+  box-shadow: 0 0 5px 0 #e9e9e9;
+  z-index: 999 !important;
+  height: 30px;
+  width: auto;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+}
+
+.toolbar-btn {
+  float: left;
+  margin-left: 10px;
+  margin-top: 6px;
+  background-color: #3ea54f;
+  border: none;
+  color: white;
+  padding: 2px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.toolbar .logo {
+  float: left;
+}
+.hidden-elements-count {
+  float: left;
+}
+.toolbar-close-btn {
+  float: left;
+  border-left: 1px solid #edf1f2;
+  height: 100%;
+  width: 30px;
+  position: relative;
+}
+.toolbar-close-btn > .arrow {
+  cursor: pointer;
+  position: absolute;
+  top: 7px;
+  border: solid black;
+  border-width: 0 2px 2px 0;
+  display: inline-block;
+  padding: 7px;
+  left: 8px;
+}
+.toolbar-close-btn > .arrow.right {
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+}
+.toolbar-close-btn > .arrow.left {
+  transform: rotate(135deg);
+  -webkit-transform: rotate(135deg);
+}
+
+.popup {
+  position: absolute;
+  width: 300px;
+  max-height: 400px;
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  z-index: 1001;
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px;
+  background-color: #f0f0f0;
+  border-bottom: 1px solid #ccc;
+  cursor: move; /* 表示可以拖动 */
+}
+
+.popup-content {
+  padding: 10px;
+}
+
+.close-btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.back-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px;
+  margin: 10px;
+  cursor: pointer;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+  color: #333;
+}
+
+.highlight {
+  border: 2px solid red;
+}
