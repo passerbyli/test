@@ -68,7 +68,11 @@ function removeGrid() {
   document.getElementById("grid-background")?.remove();
   document.getElementById("ruler-horizontal")?.remove();
   document.getElementById("ruler-vertical")?.remove();
-  guides.forEach((guide) => guide.remove());
+  guides.forEach((guide) => {
+    if (guide) {
+      guide.remove();
+    }
+  });
   guides = [];
 }
 
@@ -83,16 +87,18 @@ function drawRulerTicks(ruler, direction) {
     if (isHorizontal) {
       tick.style.position = "absolute";
       tick.style.left = `${i}px`;
-      tick.style.height = "100%";
-      tick.style.width = i % 50 === 0 ? "6px" : "3px";
-      tick.style.backgroundColor = "black";
+      tick.style.height = i % 50 === 0 ? "100%" : "50%";
+      tick.style.top = i % 50 === 0 ? "" : "50%";
+      tick.style.width = "1px";
     } else {
       tick.style.position = "absolute";
       tick.style.top = `${i}px`;
-      tick.style.width = "100%";
-      tick.style.height = i % 50 === 0 ? "6px" : "3px";
-      tick.style.backgroundColor = "black";
+      tick.style.width = i % 50 === 0 ? "100%" : "50%";
+      tick.style.left = i % 50 === 0 ? "" : "50%";
+      tick.style.height = "1px";
     }
+    tick.style.backgroundColor = "black";
+    tick.innerText = i % 50 === 0 ? i : "";
     ruler.appendChild(tick);
   }
 }
@@ -106,6 +112,7 @@ function addRulerListeners() {
 
   // 在水平标尺上拖动鼠标创建水平刻度线
   rulerHorizontal.addEventListener("mousedown", (e) => {
+    e.preventDefault(); // 阻止选中文本的默认行为
     isDragging = true;
     currentGuide = document.createElement("div");
     currentGuide.className = "guide-line guide-horizontal";
@@ -119,6 +126,7 @@ function addRulerListeners() {
 
   // 在垂直标尺上拖动鼠标创建垂直刻度线
   rulerVertical.addEventListener("mousedown", (e) => {
+    e.preventDefault(); // 阻止选中文本的默认行为
     isDragging = true;
     currentGuide = document.createElement("div");
     currentGuide.className = "guide-line guide-vertical";
