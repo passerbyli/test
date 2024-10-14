@@ -134,6 +134,7 @@ document.addEventListener("click", function (event) {
 // 监听来自背景脚本的消息
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "toggleFloatingButton") {
+    debugger;
     toggleFloatingButton();
     // 只有在切换浮窗状态时，才要设置浮窗的显示状态
     floatingButton.style.display = isFloatingButtonVisible ? "block" : "none";

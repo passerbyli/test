@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      /* 限制删格和标尺只在 conte 内显示 */
+      .conte {
+        position: relative;
+        width: 800px;
+        height: 500px;
+        overflow: auto;
+        margin: 20px;
+        border: 1px solid #000;
+      }
+
+      /* 删格背景 */
+      #grid-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-size: 20px 20px;
+        background-image: linear-gradient(
+            to right,
+            rgba(0, 0, 0, 0.1) 1px,
+            transparent 1px
+          ),
+          linear-gradient(to bottom, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      /* 水平和垂直标尺 */
+      #ruler-horizontal,
+      #ruler-vertical {
+        position: sticky;
+        background-color: #e0e0e0;
+        z-index: 2;
+        font-size: 10px;
+        color: #000;
+      }
+
+      /* 固定水平标尺在 conte 顶部 */
+      #ruler-horizontal {
+        top: 0;
+        left: 20px; /* 让出垂直标尺的空间 */
+        height: 20px;
+        border-bottom: 1px solid #000;
+      }
+
+      /* 固定垂直标尺在 conte 左侧 */
+      #ruler-vertical {
+        top: 20px; /* 让出水平标尺的空间 */
+        left: 0;
+        width: 20px;
+        border-right: 1px solid #000;
+      }
+
+      /* 刻度线 */
+      .guide-line {
+        position: absolute;
+        background-color: rgba(255, 0, 0, 0.8);
+        z-index: 9999;
+        pointer-events: none;
+      }
+
+      .guide-horizontal {
+        height: 1px;
+        width: 100%;
+      }
+
+      .guide-vertical {
+        width: 1px;
+        height: 100%;
+      }
+
+      /* 标尺刻度 */
+      .ruler-tick {
+        position: absolute;
+        background-color: #000;
+      }
+
+      .ruler-tick.short {
+        height: 5px;
+      }
+
+      .ruler-tick.long {
+        height: 10px;
+      }
+
+      .ruler-number {
+        position: absolute;
+        font-size: 10px;
+        color: black;
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="conte">
+      <div id="grid-background"></div>
+      <div id="ruler-horizontal"></div>
+      <div id="ruler-vertical"></div>
+      <ul>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+        <li>xxxx</li>
+      </ul>
+    </div>
+
+    <script>
+      let isGridVisible = true;
+      let guides = [];
+      toggleGrid(true);
+
+      // 切换标尺和删格
+      function toggleGrid(show) {
+        isGridVisible = show;
+        if (isGridVisible) {
+          showGrid();
+        } else {
+          removeGrid();
+        }
+      }
+
+      // 显示标尺和删格
+      function showGrid() {
+        const conte = document.querySelector(".conte");
+        const gridBackground = document.getElementById("grid-background");
+        const rulerHorizontal = document.getElementById("ruler-horizontal");
+        const rulerVertical = document.getElementById("ruler-vertical");
+
+        // 调整删格和标尺的宽高，适应conte内容
+        gridBackground.style.width = conte.scrollWidth + "px";
+        gridBackground.style.height = conte.scrollHeight + "px";
+
+        rulerHorizontal.style.width = conte.scrollWidth + "px";
+        rulerVertical.style.height = conte.scrollHeight + "px";
+
+        drawRulerTicks(rulerHorizontal, "horizontal", conte.scrollWidth);
+        drawRulerTicks(rulerVertical, "vertical", conte.scrollHeight);
+        addRulerListeners(conte);
+      }
+
+      // 移除删格和标尺
+      function removeGrid() {
+        document.getElementById("grid-background").style.display = "none";
+        document.getElementById("ruler-horizontal").style.display = "none";
+        document.getElementById("ruler-vertical").style.display = "none";
+        guides.forEach((guide) => guide?.remove());
+        guides = [];
+      }
+
+      // 绘制标尺刻度
+      function drawRulerTicks(ruler, direction, length) {
+        ruler.innerHTML = ""; // 清空之前的刻度
+        for (let i = 0; i < length; i += 10) {
+          const tick = document.createElement("div");
+          tick.className = "ruler-tick " + (i % 50 === 0 ? "long" : "short");
+          if (direction === "horizontal") {
+            tick.style.left = `${i}px`;
+            tick.style.height = i % 50 === 0 ? "100%" : "50%";
+          } else {
+            tick.style.top = `${i}px`;
+            tick.style.width = i % 50 === 0 ? "100%" : "50%";
+          }
+          ruler.appendChild(tick);
+        }
+      }
+
+      // 监听标尺的拖动
+      function addRulerListeners(container) {
+        const rulerHorizontal = document.getElementById("ruler-horizontal");
+        const rulerVertical = document.getElementById("ruler-vertical");
+        let isDragging = false;
+        let currentGuide = null;
+
+        // 在水平标尺上拖动鼠标创建水平刻度线
+        rulerHorizontal.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          isDragging = true;
+          currentGuide = document.createElement("div");
+          currentGuide.className = "guide-line guide-horizontal";
+          currentGuide.style.top = `${e.clientY - container.offsetTop}px`;
+          container.appendChild(currentGuide);
+        });
+
+        // 在垂直标尺上拖动鼠标创建垂直刻度线
+        rulerVertical.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          isDragging = true;
+          currentGuide = document.createElement("div");
+          currentGuide.className = "guide-line guide-vertical";
+          currentGuide.style.left = `${e.clientX - container.offsetLeft}px`;
+          container.appendChild(currentGuide);
+        });
+
+        // 监听鼠标移动事件
+        document.addEventListener("mousemove", (e) => {
+          if (isDragging && currentGuide) {
+            if (currentGuide.classList.contains("guide-horizontal")) {
+              currentGuide.style.top = `${e.clientY - container.offsetTop}px`;
+            } else if (currentGuide.classList.contains("guide-vertical")) {
+              currentGuide.style.left = `${e.clientX - container.offsetLeft}px`;
+            }
+          }
+        });
+
+        // 鼠标释放时，停止拖动
+        document.addEventListener("mouseup", () => {
+          isDragging = false;
+          guides.push(currentGuide);
+          currentGuide = null;
+        });
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>带勾选的表格</title>
+    <style>
+      table {
+        width: 50%;
+        border-collapse: collapse;
+      }
+      table,
+      th,
+      td {
+        border: 1px solid black;
+      }
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>带勾选的表格</h2>
+    <table id="checkboxTable">
+      <thead>
+        <tr>
+          <th><input type="checkbox" id="selectAll" /> 全选</th>
+          <th>名称</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><input type="checkbox" class="rowCheckbox" value="option1" /></td>
+          <td>选项 1</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" class="rowCheckbox" value="option2" /></td>
+          <td>选项 2</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" class="rowCheckbox" value="option3" /></td>
+          <td>选项 3</td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" class="rowCheckbox" value="option4" /></td>
+          <td>选项 4</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <button id="getSelectedValues">获取选中值</button>
+    <p id="selectedValuesDisplay"></p>
+
+    <script>
+      // 获取表格和相关元素
+      const selectAllCheckbox = document.getElementById("selectAll");
+      const rowCheckboxes = document.querySelectorAll(".rowCheckbox");
+      const getSelectedValuesButton =
+        document.getElementById("getSelectedValues");
+      const selectedValuesDisplay = document.getElementById(
+        "selectedValuesDisplay"
+      );
+
+      // 设置默认选中值
+      const defaultSelectedValues = ["option2", "option4"];
+
+      // 初始化默认值
+      window.onload = function () {
+        rowCheckboxes.forEach((checkbox) => {
+          if (defaultSelectedValues.includes(checkbox.value)) {
+            checkbox.checked = true;
+          }
+        });
+        updateSelectAllCheckbox();
+      };
+
+      // 全选功能实现
+      selectAllCheckbox.addEventListener("change", function () {
+        rowCheckboxes.forEach((checkbox) => {
+          checkbox.checked = selectAllCheckbox.checked;
+        });
+      });
+
+      // 单个复选框点击事件处理，检查是否需要更新全选按钮
+      rowCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener("change", function () {
+          updateSelectAllCheckbox();
+        });
+      });
+
+      // 更新全选按钮状态
+      function updateSelectAllCheckbox() {
+        const allChecked = [...rowCheckboxes].every(
+          (checkbox) => checkbox.checked
+        );
+        selectAllCheckbox.checked = allChecked;
+      }
+
+      // 获取当前选中的值
+      getSelectedValuesButton.addEventListener("click", function () {
+        const selectedValues = [...rowCheckboxes]
+          .filter((checkbox) => checkbox.checked)
+          .map((checkbox) => checkbox.value);
+
+        selectedValuesDisplay.textContent = `选中的值: ${selectedValues.join(
+          ", "
+        )}`;
+      });
+    </script>
+  </body>
+</html>

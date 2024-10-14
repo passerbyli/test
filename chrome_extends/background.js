@@ -7,6 +7,7 @@ chrome.webRequest.onCompleted.addListener(
   (details) => {
     if (details.method === "POST") {
       const { url, method, requestId } = details;
+      console.log(url);
       const request = {
         url: url,
         method: method,
@@ -32,7 +33,7 @@ chrome.webRequest.onCompleted.addListener(
       });
 
       // 打印请求日志到 console
-      console.log("Request saved:", { url, method, requestBody });
+      console.log("Request saved:", { url, method, request });
     }
   },
   { urls: ["<all_urls>"] },
@@ -137,6 +138,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // 处理右键菜单点击事件
 chrome.contextMenus.onClicked.addListener((info) => {
   if (info.menuItemId === "toggleFloatingButton") {
+    console.log("xxxx");
     // 向当前活动的标签页发送消息以切换浮窗
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.tabs.sendMessage(tabs[0].id, { action: "toggleFloatingButton" });

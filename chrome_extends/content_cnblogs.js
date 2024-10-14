@@ -1,13 +1,6 @@
 let isGridVisible = false;
 let guides = [];
 
-// 监听来自 background.js 的消息
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.toggleGrid !== undefined) {
-    toggleGrid(request.toggleGrid);
-  }
-});
-
 // 切换标尺和删格
 function toggleGrid(show) {
   isGridVisible = show;

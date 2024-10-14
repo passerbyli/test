@@ -56,7 +56,7 @@
                 "*://*.jianshu.com/*"
             ],
             "js": [
-                "content_zx.js"
+                "content.js"
             ]
         },
         {
