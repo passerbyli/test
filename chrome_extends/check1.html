@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>带勾选的表格</title>
+    <title>列表选择与表格选择映射</title>
     <style>
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        padding: 10px;
+        cursor: pointer;
+        border: 1px solid #ccc;
+        margin-bottom: 5px;
+      }
+      li.selected {
+        background-color: #b3d4fc;
+      }
       table {
-        width: 50%;
+        width: 100%;
         border-collapse: collapse;
       }
       table,
@@ -17,97 +30,151 @@
       th,
       td {
         padding: 10px;
-        text-align: left;
+        text-align: center;
       }
     </style>
   </head>
   <body>
-    <h2>带勾选的表格</h2>
-    <table id="checkboxTable">
+    <p>选择一个选项:</p>
+    <ul id="listEl"></ul>
+
+    <table id="tableEl">
       <thead>
         <tr>
-          <th><input type="checkbox" id="selectAll" /> 全选</th>
-          <th>名称</th>
+          <th>勾选</th>
+          <th>选项</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td><input type="checkbox" class="rowCheckbox" value="option1" /></td>
-          <td>选项 1</td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" class="rowCheckbox" value="option2" /></td>
-          <td>选项 2</td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" class="rowCheckbox" value="option3" /></td>
-          <td>选项 3</td>
-        </tr>
-        <tr>
-          <td><input type="checkbox" class="rowCheckbox" value="option4" /></td>
-          <td>选项 4</td>
-        </tr>
-      </tbody>
+      <tbody></tbody>
     </table>
 
-    <button id="getSelectedValues">获取选中值</button>
-    <p id="selectedValuesDisplay"></p>
+    <button id="saveBtn">保存</button>
+
+    <p><strong>保存的映射:</strong></p>
+    <pre id="result"></pre>
 
     <script>
-      // 获取表格和相关元素
-      const selectAllCheckbox = document.getElementById("selectAll");
-      const rowCheckboxes = document.querySelectorAll(".rowCheckbox");
-      const getSelectedValuesButton =
-        document.getElementById("getSelectedValues");
-      const selectedValuesDisplay = document.getElementById(
-        "selectedValuesDisplay"
-      );
+      // 初始数组
+      const arr = ["aa", "bb", "cc", "dd", "ee", "ff"];
 
-      // 设置默认选中值
-      const defaultSelectedValues = ["option2", "option4"];
+      // 全局变量res，用来存储保存的映射关系，支持初始值
+      let res = [{ aa: ["bb", "cc"] }];
 
-      // 初始化默认值
-      window.onload = function () {
-        rowCheckboxes.forEach((checkbox) => {
-          if (defaultSelectedValues.includes(checkbox.value)) {
-            checkbox.checked = true;
-          }
+      // 当前选中的值
+      let selectedValue = null;
+
+      // 获取DOM元素
+      const listEl = document.getElementById("listEl");
+      const tableEl = document.getElementById("tableEl").querySelector("tbody");
+      const resultEl = document.getElementById("result");
+      const saveBtn = document.getElementById("saveBtn");
+
+      // 初始化列表选项
+      function updateListOptions() {
+        listEl.innerHTML = "";
+        arr.forEach((option) => {
+          const hasMapping = res.some((mapping) => mapping[option]);
+          const li = document.createElement("li");
+          li.textContent = option + (hasMapping ? " (已保存)" : "");
+          li.dataset.value = option;
+
+          // 点击时选择该项
+          li.addEventListener("click", () => {
+            selectedValue = option;
+            updateTable();
+            updateSelectedList();
+          });
+
+          listEl.appendChild(li);
         });
-        updateSelectAllCheckbox();
-      };
-
-      // 全选功能实现
-      selectAllCheckbox.addEventListener("change", function () {
-        rowCheckboxes.forEach((checkbox) => {
-          checkbox.checked = selectAllCheckbox.checked;
-        });
-      });
-
-      // 单个复选框点击事件处理，检查是否需要更新全选按钮
-      rowCheckboxes.forEach((checkbox) => {
-        checkbox.addEventListener("change", function () {
-          updateSelectAllCheckbox();
-        });
-      });
-
-      // 更新全选按钮状态
-      function updateSelectAllCheckbox() {
-        const allChecked = [...rowCheckboxes].every(
-          (checkbox) => checkbox.checked
-        );
-        selectAllCheckbox.checked = allChecked;
+        updateSelectedList();
       }
 
-      // 获取当前选中的值
-      getSelectedValuesButton.addEventListener("click", function () {
-        const selectedValues = [...rowCheckboxes]
-          .filter((checkbox) => checkbox.checked)
-          .map((checkbox) => checkbox.value);
+      // 更新列表选项的样式，显示选中的状态
+      function updateSelectedList() {
+        Array.from(listEl.children).forEach((li) => {
+          if (li.dataset.value === selectedValue) {
+            li.classList.add("selected");
+          } else {
+            li.classList.remove("selected");
+          }
+        });
+      }
 
-        selectedValuesDisplay.textContent = `选中的值: ${selectedValues.join(
-          ", "
-        )}`;
-      });
+      // 根据选择的值更新表格内容并处理勾选状态
+      function updateTable() {
+        const availableOptions = arr.filter(
+          (option) => option !== selectedValue
+        );
+        tableEl.innerHTML = "";
+
+        // 查找当前选中值是否已有保存的映射
+        const existingMapping =
+          res.find((mapping) => mapping[selectedValue]) || {};
+        const selectedOptions = existingMapping[selectedValue] || [];
+
+        availableOptions.forEach((option) => {
+          const row = document.createElement("tr");
+          const checkboxCell = document.createElement("td");
+          const optionCell = document.createElement("td");
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = option;
+
+          // 如果当前选项已经在映射中，设置为已勾选
+          if (selectedOptions.includes(option)) {
+            checkbox.checked = true;
+          }
+
+          checkboxCell.appendChild(checkbox);
+          optionCell.textContent = option;
+
+          row.appendChild(checkboxCell);
+          row.appendChild(optionCell);
+          tableEl.appendChild(row);
+        });
+      }
+
+      // 点击保存按钮时，保存映射关系
+      function saveMapping() {
+        if (!selectedValue) return;
+
+        const selectedCheckboxes = Array.from(
+          tableEl.querySelectorAll('input[type="checkbox"]:checked')
+        ).map((checkbox) => checkbox.value);
+
+        // 查找是否已经有该选项的映射
+        const existingMappingIndex = res.findIndex(
+          (mapping) => mapping[selectedValue]
+        );
+
+        if (existingMappingIndex > -1) {
+          // 更新已有映射
+          res[existingMappingIndex][selectedValue] = selectedCheckboxes;
+        } else {
+          // 插入新的映射
+          const newMapping = {};
+          newMapping[selectedValue] = selectedCheckboxes;
+          res.push(newMapping);
+        }
+
+        // 更新列表选项以显示标记
+        updateListOptions();
+        displayResult();
+      }
+
+      // 展示res的内容
+      function displayResult() {
+        resultEl.textContent = JSON.stringify(res, null, 2);
+      }
+
+      // 初始化页面
+      updateListOptions();
+      updateTable();
+      saveBtn.addEventListener("click", saveMapping);
+
+      displayResult();
     </script>
   </body>
 </html>
