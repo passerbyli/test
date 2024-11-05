@@ -1,37 +1,73 @@
 {
   "name": "your-app-name",
   "version": "1.0.0",
-  "main": "src/main.js",
+  "author": "jie xie",
+  "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac"
+    "build": "electron-builder",
+    "build:win": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac",
+    "build-icon": "electron-icon-builder --input=./assets/image.jpeg --flatten"
   },
   "build": {
-    "appId": "com.example.myapp",
-    "productName": "MyElectronApp",
-    "files": [
-      "src/**/*",
-      "index.html",
-      "settings.html",
-      "config/**/*",
-      "userData/**/*"
-    ],
+    "appId": "com.yourcompany.markdowneditor",
+    "productName": "MarkdownEditor",
+    "directories": {
+      "output": "build"
+    },
     "win": {
-      "target": "nsis",
+      "target": [
+        "nsis"
+      ],
       "icon": "build/icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
     "mac": {
-      "target": "dmg",
-      "icon": "build/icon.icns"
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "pkg"
+      ]
+    },
+    "dmg": {
+      "title": "Markdown Editor",
+      "icon": "./icons",
+      "background": "./assets/image.jpeg",
+      "window": {
+        "width": 660,
+        "height": 400
+      },
+      "contents": [
+        {
+          "x": 180,
+          "y": 170
+        },
+        {
+          "x": 480,
+          "y": 170,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "pkg": {
+      "installLocation": "/Applications"
     }
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
   },
   "devDependencies": {
     "electron": "^29.4.6",
     "electron-builder": "^25.1.8",
     "electron-icon-builder": "^2.0.1",
-    "exceljs": "^4.4.0",
-    "fs": "0.0.1-security",
-    "xlsx": "^0.18.5"
+    "fs": "0.0.1-security"
   }
 }

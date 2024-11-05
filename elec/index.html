@@ -2,12 +2,92 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>JSON to Excel Exporter</title>
+    <title>多功能工具</title>
+    <style>
+      /* 导航栏和内容布局样式 */
+      #navbar {
+        display: flex;
+        background-color: #333;
+        padding: 10px;
+        color: white;
+      }
+      #navbar button {
+        background-color: #333;
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        margin-right: 10px;
+      }
+      #navbar button:hover {
+        background-color: #555;
+      }
+      #content {
+        padding: 20px;
+      }
+      #settings-btn {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background-color: #333;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+      }
+    </style>
   </head>
   <body>
-    <h1>JSON to Excel Exporter</h1>
-    <button id="export-btn">选择 JSON 文件并导出为 Excel</button>
-    <button onclick="window.location.href='settings.html'">设置</button>
-    <script src="./src/renderer.js"></script>
+    <div id="navbar">
+      <button id="nav-excel">Excel 生成器</button>
+      <button id="nav-encoder">信息编解码工具</button>
+      <button id="nav-json">JSON 格式化</button>
+    </div>
+
+    <div id="content">
+      <!-- Excel 生成器工具区域 -->
+      <div id="excel-generator" style="display: none">
+        <h1>Excel 生成器</h1>
+        <div>
+          <h2>JSON 文件选择</h2>
+          <button id="select-file">选择 JSON 文件</button>
+          <span id="file-path">未选择文件</span>
+        </div>
+        <div>
+          <h2>生成 Excel 文件</h2>
+          <button id="generate">生成 Excel 文件</button>
+          <p id="export-status"></p>
+        </div>
+      </div>
+
+      <!-- 信息编解码工具区域 -->
+      <div id="encoder-tool" style="display: none">
+        <h1>信息编解码工具</h1>
+        <textarea
+          id="encode-input"
+          placeholder="输入要编码/解码的字符串"
+        ></textarea>
+        <div>
+          <button id="url-encode">URL 编码</button>
+          <button id="url-decode">URL 解码</button>
+          <button id="base64-encode">Base64 编码</button>
+          <button id="base64-decode">Base64 解码</button>
+        </div>
+        <p>结果：<span id="encode-output"></span></p>
+      </div>
+
+      <!-- JSON 格式化工具区域 -->
+      <div id="json-formatter" style="display: none">
+        <h1>JSON 格式化</h1>
+        <textarea id="json-input" placeholder="输入 JSON 字符串"></textarea>
+        <button id="format-json">格式化 JSON</button>
+        <pre id="json-output"></pre>
+      </div>
+    </div>
+
+    <!-- 右下角的设置按钮 -->
+    <button id="settings-btn">⚙️ 设置</button>
+
+    <script src="renderer.js"></script>
   </body>
 </html>
