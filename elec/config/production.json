@@ -1,0 +1,11 @@
+{
+    "database": {
+        "host": "prod-db-host",
+        "username": "prod-user",
+        "password": "prod-pass"
+    },
+    "login": {
+        "username": "prod-admin",
+        "password": "prod-admin-pass"
+    }
+}

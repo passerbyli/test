@@ -1,0 +1,37 @@
+{
+  "name": "your-app-name",
+  "version": "1.0.0",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win",
+    "build:mac": "electron-builder --mac"
+  },
+  "build": {
+    "appId": "com.example.myapp",
+    "productName": "MyElectronApp",
+    "files": [
+      "src/**/*",
+      "index.html",
+      "settings.html",
+      "config/**/*",
+      "userData/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "build/icon.icns"
+    }
+  },
+  "devDependencies": {
+    "electron": "^29.4.6",
+    "electron-builder": "^25.1.8",
+    "electron-icon-builder": "^2.0.1",
+    "exceljs": "^4.4.0",
+    "fs": "0.0.1-security",
+    "xlsx": "^0.18.5"
+  }
+}
