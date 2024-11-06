@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>设置</title>
+  </head>
+  <body>
+    <h2>设置</h2>
+    <form id="settings-form">
+      <h3>全局设置</h3>
+      <label
+        >环境:
+        <select id="environment">
+          <option value="testing">测试</option>
+          <option value="production">生产</option>
+        </select>
+      </label>
+
+      <h3>测试环境</h3>
+      <label>数据库连接: <input type="text" id="test-db-connection" /></label
+      ><br />
+      <label>管理员账号: <input type="text" id="test-admin-account" /></label
+      ><br />
+      <label>网站地址: <input type="text" id="test-website-url" /></label><br />
+      <label>API 地址: <input type="text" id="test-api-endpoint" /></label
+      ><br />
+
+      <h3>生产环境</h3>
+      <label>数据库连接: <input type="text" id="prod-db-connection" /></label
+      ><br />
+      <label>管理员账号: <input type="text" id="prod-admin-account" /></label
+      ><br />
+      <label>网站地址: <input type="text" id="prod-website-url" /></label><br />
+      <label>API 地址: <input type="text" id="prod-api-endpoint" /></label
+      ><br />
+
+      <h3>文件导出路径</h3>
+      <label
+        >导出路径:
+        <input type="text" id="export-path" placeholder="默认 output 目录" />
+      </label>
+      <button type="button" id="select-path-btn">选择路径</button>
+
+      <br /><br />
+      <button type="button" id="save-settings">保存</button>
+      <button type="button" id="close-settings">关闭</button>
+    </form>
+    <script>
+      window.electronAPI.getConfig().then((config) => {
+        document.getElementById("environment").value = config.environment;
+        document.getElementById("test-db-connection").value =
+          config.test.dbConnection || "";
+        document.getElementById("test-admin-account").value =
+          config.test.adminAccount || "";
+        document.getElementById("test-website-url").value =
+          config.test.websiteURL || "";
+        document.getElementById("test-api-endpoint").value =
+          config.test.apiEndpoint || "";
+        document.getElementById("prod-db-connection").value =
+          config.production.dbConnection || "";
+        document.getElementById("prod-admin-account").value =
+          config.production.adminAccount || "";
+        document.getElementById("prod-website-url").value =
+          config.production.websiteURL || "";
+        document.getElementById("prod-api-endpoint").value =
+          config.production.apiEndpoint || "";
+        document.getElementById("export-path").value =
+          config.exportPath || "output";
+      });
+
+      document
+        .getElementById("select-path-btn")
+        .addEventListener("click", async () => {
+          const path = await window.electronAPI.selectDirectory();
+          if (path) {
+            document.getElementById("export-path").value = path;
+          }
+        });
+
+      document.getElementById("save-settings").onclick = () => {
+        const config = {
+          environment: document.getElementById("environment").value,
+          test: {
+            dbConnection: document.getElementById("test-db-connection").value,
+            adminAccount: document.getElementById("test-admin-account").value,
+            websiteURL: document.getElementById("test-website-url").value,
+            apiEndpoint: document.getElementById("test-api-endpoint").value,
+          },
+          production: {
+            dbConnection: document.getElementById("prod-db-connection").value,
+            adminAccount: document.getElementById("prod-admin-account").value,
+            websiteURL: document.getElementById("prod-website-url").value,
+            apiEndpoint: document.getElementById("prod-api-endpoint").value,
+          },
+          exportPath: document.getElementById("export-path").value || "output",
+        };
+        window.electronAPI.saveConfig(config).then(() => {
+          alert("设置已保存");
+          window.close();
+        });
+      };
+
+      document.getElementById("close-settings").onclick = () => {
+        window.close();
+      };
+    </script>
+  </body>
+</html>

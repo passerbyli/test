@@ -1,0 +1,36 @@
+# 应用的基本信息
+appId: com.example.yourapp
+productName: YourAppName
+copyright: "Copyright © 2023"
+directories:
+  output: dist # 输出路径
+
+# 生成的文件格式和平台支持
+files:
+  - "dist/**/*" # 包含 dist 文件夹内的文件
+  - "!node_modules/**/*" # 排除不必要的 node_modules 文件
+  - "!**/*.map" # 排除 source map 文件
+
+# 打包平台设置
+mac:
+  target:
+    - dmg
+    - zip # 支持 DMG 和 ZIP 格式
+  category: public.app-category.productivity # macOS 的应用类别
+
+win:
+  target:
+    - nsis # Windows 使用 NSIS 打包成安装包
+  icon: "build/icon.ico" # Windows 图标文件路径
+  publisherName: "Your Publisher Name" # Windows 应用发布者名称
+
+# NSIS 安装包配置（用于 Windows 安装）
+nsis:
+  oneClick: false # 设置为 false，启用安装向导
+  allowToChangeInstallationDirectory: true # 允许用户更改安装路径
+  perMachine: true # 以管理员权限安装，适用于所有用户
+
+# 发布设置（可选）
+# publish:
+#   provider: generic
+#   url: "https://yourapp.com/download" # 更新文件下载路径

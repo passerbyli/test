@@ -1,0 +1,22 @@
+{
+    "environment": "production",
+    "test": {
+        "dbConnection": "1",
+        "adminAccount": "2",
+        "websiteURL": "3",
+        "apiEndpoint": "4"
+    },
+    "production": {
+        "dbConnection": "5",
+        "adminAccount": "6",
+        "websiteURL": "7",
+        "apiEndpoint": "8"
+    },
+    "exportPath": "/Users/lihaomin/projects/GitHub/test/elec——error",
+    "login": {
+        "cookies": "xxx",
+        "username": "lihaomoin",
+        "password": "admin",
+        "rememberMe": true
+    }
+}

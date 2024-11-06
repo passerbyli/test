@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>桌面应用</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>桌面应用</h1>
+      <div class="header-right">
+        <span id="app-version">版本: 1.0.0</span>
+        <span id="login-status">未登录</span>
+        <button id="login-btn">登录</button>
+        <button id="settings-btn">设置</button>
+        <label for="environment-toggle">环境选择：</label>
+        <select id="environment-toggle">
+          <option value="testing">测试</option>
+          <option value="production">生产</option>
+        </select>
+      </div>
+    </header>
+
+    <nav>
+      <button id="json-converter">JSON 转换</button>
+      <button id="excel-parser">Excel 解析</button>
+      <button id="weather">最新天气</button>
+    </nav>
+
+    <main id="content">
+      <h2>欢迎使用桌面应用</h2>
+      <p>请选择左侧功能按钮开始操作。</p>
+    </main>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>

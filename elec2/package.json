@@ -1,0 +1,26 @@
+{
+  "name": "elec2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder -c electron-builder.yml",
+    "build:mac": "electron-builder --mac",
+    "build:win": "electron-builder --win --x64"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "build": {
+    "extends": "./electron-builder.yml"
+  },
+  "devDependencies": {
+    "electron": "29",
+    "electron-builder": "^25.1.8"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "exceljs": "^4.4.0"
+  }
+}
