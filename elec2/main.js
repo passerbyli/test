@@ -254,7 +254,11 @@ ipcMain.handle("select-directory", async () => {
 
 ipcMain.on("open-settings", openSettingsWindow);
 
-app.whenReady().then(createWindow);
+// app.whenReady().then(createWindow);
+app.on("ready", () => {
+  createWindow();
+  console.log("Config:", readConfig());
+});
 
 app.on("window-all-closed", () => {
   // 对于 macOS，通常需要在应用关闭时保留进程，但可以设置为直接退出

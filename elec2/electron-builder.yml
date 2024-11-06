@@ -27,7 +27,8 @@ mac:
 
 win:
   target:
-    - nsis # Windows 使用 NSIS 打包成安装包
+    - portable # 指定生成便携式应用
+    # - nsis # Windows 使用 NSIS 打包成安装包
   icon: "build/icon.ico" # Windows 图标文件路径
   publisherName: "Your Publisher Name" # Windows 应用发布者名称
 
