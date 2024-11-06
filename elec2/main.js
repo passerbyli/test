@@ -3,7 +3,6 @@ const path = require("path");
 const fs = require("fs");
 const ExcelJS = require("exceljs");
 const axios = require("axios"); // 用于天气 API 请求
-const configPath = path.join(__dirname, "config.json");
 
 const LOGIN_URL = "https://auth.example.com/login.do";
 const LOGOUT_URL = "https://auth.example.com/logout.do";
@@ -12,8 +11,26 @@ const CHECK_LOGIN_URL = "https://news.example.com/list";
 let mainWindow;
 let loginInterval;
 
+// 获取 config.json 文件路径
+function getConfigPath() {
+  // 检查是否在开发环境中
+  const isDev = !app.isPackaged;
+  const configPath = isDev
+    ? path.join(__dirname, "config.json")
+    : path.join(app.getPath("userData"), "config.json");
+
+  // 如果在生产环境中且文件不存在，复制默认配置
+  if (!isDev && !fs.existsSync(configPath)) {
+    const defaultConfigPath = path.join(__dirname, "config.json");
+    fs.copyFileSync(defaultConfigPath, configPath);
+  }
+
+  return configPath;
+}
+
 // 保存配置文件
 function saveConfig(newConfig) {
+  const configPath = getConfigPath();
   const currentConfig = readConfig();
   const updatedConfig = { ...currentConfig, ...newConfig };
   fs.writeFileSync(configPath, JSON.stringify(updatedConfig, null, 4));
@@ -152,6 +169,7 @@ ipcMain.on("open-login", () => {
 // 读取配置，初始化配置文件
 function readConfig() {
   let config = {};
+  const configPath = getConfigPath();
   try {
     config = JSON.parse(fs.readFileSync(configPath));
   } catch (error) {

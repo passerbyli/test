@@ -1,16 +1,16 @@
 {
-    "environment": "production",
+    "environment": "testing",
     "test": {
-        "dbConnection": "1",
-        "adminAccount": "2",
-        "websiteURL": "3",
-        "apiEndpoint": "4"
+        "dbConnection": "12",
+        "adminAccount": "22",
+        "websiteURL": "22",
+        "apiEndpoint": "42"
     },
     "production": {
-        "dbConnection": "5",
-        "adminAccount": "6",
-        "websiteURL": "7",
-        "apiEndpoint": "8"
+        "dbConnection": "225",
+        "adminAccount": "622",
+        "websiteURL": "722",
+        "apiEndpoint": "228"
     },
     "exportPath": "/Users/lihaomin/projects/GitHub/test/elec——error",
     "login": {

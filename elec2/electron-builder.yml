@@ -7,9 +7,16 @@ directories:
 
 # 生成的文件格式和平台支持
 files:
-  - "dist/**/*" # 包含 dist 文件夹内的文件
-  - "!node_modules/**/*" # 排除不必要的 node_modules 文件
-  - "!**/*.map" # 排除 source map 文件
+  - "style.css"
+  - "renderer.js"
+  - "main.js"
+  - "preload.js"
+  - "index.html"
+  - "login.html"
+  - "settings.html"
+  - "config.json"
+  - "node_modules/**/*" # 确保 node_modules 文件夹包含在内
+  - "!**/*.map"
 
 # 打包平台设置
 mac:
