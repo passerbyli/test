@@ -7,6 +7,7 @@ directories:
 
 # 生成的文件格式和平台支持
 files:
+  - "icons/**/*"
   - "style.css"
   - "renderer.js"
   - "main.js"
@@ -17,7 +18,9 @@ files:
   - "config.json"
   - "node_modules/**/*" # 确保 node_modules 文件夹包含在内
   - "!**/*.map"
-
+extraResources:
+  - from: "config.json" # 指定源文件路径
+    to: "./config.json" # 复制到输出根目录
 # 打包平台设置
 mac:
   target:
@@ -29,7 +32,7 @@ win:
   target:
     - portable # 指定生成便携式应用
     # - nsis # Windows 使用 NSIS 打包成安装包
-  icon: "build/icon.ico" # Windows 图标文件路径
+  icon: "icons/icon.ico" # Windows 图标文件路径
   publisherName: "Your Publisher Name" # Windows 应用发布者名称
 
 # NSIS 安装包配置（用于 Windows 安装）

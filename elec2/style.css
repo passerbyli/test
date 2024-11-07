@@ -1,11 +1,11 @@
-/* 主界面和设置界面通用样式 */
-body {
-  font-family: Arial, sans-serif;
+/* 通用样式 */
+body,
+html {
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  overflow: hidden; /* 隐藏页面的全局滚动条 */
 }
 
 header {
@@ -22,19 +22,27 @@ header h1 {
   font-size: 1.5em;
 }
 
-header button,
-header select {
+header .header-right button,
+header .header-right select {
   margin-left: 10px;
   padding: 5px;
 }
 
-nav {
+/* 主容器布局 */
+.main-container {
   display: flex;
-  flex-direction: column;
+  height: calc(100vh - 60px); /* 减去 header 的高度 */
+  overflow: hidden; /* 隐藏主容器的滚动条 */
+}
+
+/* 左侧导航栏 */
+nav {
   width: 200px;
   background-color: #f0f0f0;
   padding: 10px;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 nav button {
@@ -52,10 +60,12 @@ nav button:hover {
   background-color: #45a049;
 }
 
+/* 主内容区域 */
 main {
   flex: 1;
   padding: 20px;
-  overflow-y: auto;
+  overflow-y: auto; /* 仅在内容过多时出现滚动条 */
+  box-sizing: border-box;
 }
 
 h2 {

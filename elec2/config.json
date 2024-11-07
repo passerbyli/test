@@ -1,7 +1,7 @@
 {
-    "environment": "testing",
+    "environment": "production",
     "test": {
-        "dbConnection": "12",
+        "dbConnection": "12333",
         "adminAccount": "22",
         "websiteURL": "22",
         "apiEndpoint": "42"

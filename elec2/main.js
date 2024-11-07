@@ -4,6 +4,14 @@ const fs = require("fs");
 const ExcelJS = require("exceljs");
 const axios = require("axios"); // 用于天气 API 请求
 
+// 仅在开发环境中启用热更新
+if (!app.isPackaged) {
+  require("electron-reload")(__dirname, {
+    electron: path.join(__dirname, "node_modules", ".bin", "electron"),
+    awaitWriteFinish: true,
+  });
+}
+
 const LOGIN_URL = "https://auth.example.com/login.do";
 const LOGOUT_URL = "https://auth.example.com/logout.do";
 const CHECK_LOGIN_URL = "https://news.example.com/list";
@@ -11,15 +19,17 @@ const CHECK_LOGIN_URL = "https://news.example.com/list";
 let mainWindow;
 let loginInterval;
 
-// 获取 config.json 文件路径
+/**
+ * 获取 config.json 文件路径
+ * @returns
+ */
 function getConfigPath() {
-  // 检查是否在开发环境中
   const isDev = !app.isPackaged;
   const configPath = isDev
     ? path.join(__dirname, "config.json")
-    : path.join(app.getPath("userData"), "config.json");
+    : path.join(process.cwd(), "config.json");
 
-  // 如果在生产环境中且文件不存在，复制默认配置
+  // 如果在生产环境中没有找到 config.json，可以复制一个默认的配置
   if (!isDev && !fs.existsSync(configPath)) {
     const defaultConfigPath = path.join(__dirname, "config.json");
     fs.copyFileSync(defaultConfigPath, configPath);
