@@ -1,4 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // 日志容器
+  const logContainer = document.getElementById("logContainer");
+
+  // 重写 console 方法，用于显示渲染进程日志
+  // ["log", "info", "warn", "error", "debug"].forEach((method) => {
+  //   const originalMethod = console[method];
+  //   console[method] = function (...args) {
+  //     const logItem = document.createElement("div");
+  //     logItem.className = `log-${method}`;
+  //     logItem.textContent = `[RENDERER ${method.toUpperCase()}] ${args.join(
+  //       " "
+  //     )}`;
+  //     logContainer.appendChild(logItem);
+  //     logContainer.scrollTop = logContainer.scrollHeight; // 自动滚动到底部
+  //     originalMethod.apply(console, args);
+  //   };
+  // });
+
+  // 接收并显示主进程日志
+  electronAPI.onMainLog((log) => {
+    // const logItem = document.createElement("div");
+    // logItem.className = `log-${log.level}`;
+    // logItem.textContent = `[MAIN ${log.level.toUpperCase()}] ${log.message}`;
+    // logContainer.appendChild(logItem);
+    // logContainer.scrollTop = logContainer.scrollHeight; // 自动滚动到底部
+  });
+
   // 显示登录状态
   window.electronAPI.onLoginStatusChange((status) => {
     document.getElementById("login-status").innerText = status;
@@ -8,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // 登录或注销按钮
-  document.getElementById("login-btn").addEventListener("click", () => {
+  document.getElementById("login-btn").onclick = () => {
     const isLoggedIn = document
       .getElementById("login-status")
       .innerText.includes("已登录");
@@ -17,16 +44,13 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       window.electronAPI.openLogin();
     }
-  });
+  };
+
   // 监听登录状态变化
   window.electronAPI.onLoginStatusChange((status) => {
     document.getElementById("login-status").innerText = status;
   });
 
-  // 打开登录窗口
-  document.getElementById("login-btn").addEventListener("click", () => {
-    window.electronAPI.openLogin();
-  });
   // 读取配置并更新环境选择
   window.electronAPI.getConfig().then((config) => {
     document.getElementById("environment-toggle").value = config.environment;

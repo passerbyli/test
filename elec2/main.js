@@ -1,23 +1,39 @@
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
+const { app, BrowserWindow, ipcMain, dialog, session } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const ExcelJS = require("exceljs");
 const axios = require("axios"); // 用于天气 API 请求
 
-// 仅在开发环境中启用热更新
-if (!app.isPackaged) {
-  require("electron-reload")(__dirname, {
-    electron: path.join(__dirname, "node_modules", ".bin", "electron"),
-    awaitWriteFinish: true,
-  });
-}
-
-const LOGIN_URL = "https://auth.example.com/login.do";
-const LOGOUT_URL = "https://auth.example.com/logout.do";
-const CHECK_LOGIN_URL = "https://news.example.com/list";
+const LOGIN_URL = "http://localhost:3000/login";
+const LOGOUT_URL = "http://localhost:3000/logout";
+const CHECK_LOGIN_URL = "http://localhost:3000/messages";
 
 let mainWindow;
 let loginInterval;
+// 仅在开发环境中启用热更新
+// if (!app.isPackaged) {
+//   require("electron-reload")(__dirname, {
+//     electron: path.join(__dirname, "node_modules", ".bin", "electron"),
+//     awaitWriteFinish: true,
+//   });
+// }
+
+// 重写 console 方法
+["log", "warn", "error", "info", "debug"].forEach((method) => {
+  const originalMethod = console[method];
+  console[method] = function (...args) {
+    // 输出到控制台
+    originalMethod.apply(console, args);
+
+    // 发送日志到渲染进程
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.send("main-log", {
+        level: method,
+        message: args.join(" "),
+      });
+    }
+  };
+});
 
 /**
  * 获取 config.json 文件路径
@@ -50,6 +66,7 @@ function saveConfig(newConfig) {
 async function login(username, password) {
   try {
     const response = await axios.post(LOGIN_URL, { username, password });
+
     const cookies = response.headers["set-cookie"];
     if (cookies) {
       saveConfig({ login: { cookies, username, password, rememberMe: true } });
@@ -77,7 +94,7 @@ function updateCookies(cookies) {
 function parseCookie(cookieString) {
   const [nameValue, ...attributes] = cookieString.split("; ");
   const [name, value] = nameValue.split("=");
-  const cookie = { name, value, url: "https://example.com" }; // 设置URL域
+  let cookie = { name, value, url: "http://localhost:3000" }; // 设置URL域
   attributes.forEach((attr) => {
     const [key, val] = attr.split("=");
     cookie[key.toLowerCase()] = val || true;
@@ -90,6 +107,7 @@ async function autoLogin() {
   const config = readConfig();
   if (config.login && config.login.rememberMe && config.login.cookies) {
     const isLoggedIn = await checkLoginStatus();
+    console.log("isLoggedIn", isLoggedIn);
     if (!isLoggedIn) {
       await login(config.login.username, config.login.password);
     } else {
@@ -105,6 +123,7 @@ async function checkLoginStatus() {
     const response = await axios.get(CHECK_LOGIN_URL, {
       withCredentials: true,
     });
+    console.log("--", response);
     const isLoggedIn =
       response.status === 200 && response.data.code === "success";
     return isLoggedIn;
@@ -128,8 +147,12 @@ function startLoginCheckInterval() {
 // 注销功能
 async function logout() {
   try {
+    const config = readConfig();
+
+    let loginConf = config.login;
     await axios.post(LOGOUT_URL, {}, { withCredentials: true });
-    saveConfig({ login: { cookies: null, rememberMe: false } });
+    loginConf.cookies = null;
+    saveConfig(loginConf);
     clearInterval(loginInterval);
     session.defaultSession.clearStorageData({ storages: ["cookies"] });
     mainWindow.webContents.send("login-status", "未登录");
@@ -155,15 +178,55 @@ function createWindow() {
   });
 
   // 确保关闭窗口时退出应用
-  mainWindow.on("closed", () => {
-    app.quit();
+  mainWindow.on("closed", (event) => {
+    event.preventDefault(); // 阻止默认行为
+
+    // // 通知渲染进程执行退出登录
+    // const shouldClose = logout();
+
+    // if (shouldClose) {
+    //   mainWindow.destroy(); // 关闭窗口
+    //   app.quit(); // 退出应用
+    // }
+
+    mainWindow.hide(); // 隐藏窗口而不是销毁
+    // app.quit();
+    // logout();
+    // 创建系统托盘图标
+    tray = new Tray("icon.png"); // 使用你自己的图标路径
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: "显示主窗口",
+        click: () => {
+          mainWindow.show(); // 显示窗口
+        },
+      },
+      {
+        label: "退出应用",
+        click: () => {
+          app.quit(); // 退出应用
+        },
+      },
+    ]);
+
+    tray.setToolTip("我的 Electron 应用");
+    tray.setContextMenu(contextMenu);
   });
 }
 
+// mainWindow.on("close", (event) => {
+//   event.preventDefault();
+//   mainWindow.hide();
+//   tray.displayBalloon({
+//     title: "应用仍在后台运行",
+//     content: "点击系统托盘图标以重新打开窗口或退出应用。",
+//   });
+// });
+
 // IPC 事件处理
-ipcMain.handle("login", async (_, { username, password }) =>
-  login(username, password)
-);
+ipcMain.handle("login", async (_, { username, password }) => {
+  return await login(username, password);
+});
 ipcMain.on("logout", () => logout());
 ipcMain.on("open-login", () => {
   const loginWin = new BrowserWindow({
@@ -264,15 +327,14 @@ ipcMain.handle("select-directory", async () => {
 
 ipcMain.on("open-settings", openSettingsWindow);
 
-// app.whenReady().then(createWindow);
 app.on("ready", () => {
   createWindow();
-  console.log("Config:", readConfig());
 });
 
 app.on("window-all-closed", () => {
   // 对于 macOS，通常需要在应用关闭时保留进程，但可以设置为直接退出
   if (process.platform !== "darwin") {
+    logout();
     app.quit();
   }
 });

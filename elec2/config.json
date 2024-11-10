@@ -14,9 +14,15 @@
     },
     "exportPath": "/Users/lihaomin/projects/GitHub/test/elec——error",
     "login": {
-        "cookies": "xxx",
-        "username": "lihaomoin",
-        "password": "admin",
+        "cookies": [
+            "connect.sid=s%3AKixIu5EiLgcxIXfVmm8FH-RKKMxbQgz5.BvKevQYF8J4UKTU4XeQpu4f%2FeCqnvjpzdlX4SlOdt%2FM; Path=/; Expires=Sun, 10 Nov 2024 19:51:26 GMT; HttpOnly"
+        ],
+        "username": "admin",
+        "password": "123456",
         "rememberMe": true
-    }
+    },
+    "cookies": null,
+    "username": "admin",
+    "password": "123456",
+    "rememberMe": true
 }

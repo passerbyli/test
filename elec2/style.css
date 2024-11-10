@@ -1,4 +1,8 @@
 /* 通用样式 */
+* {
+  padding: 0;
+  margin: 0;
+}
 body,
 html {
   margin: 0;
@@ -11,7 +15,6 @@ html {
 header {
   background-color: #4caf50;
   color: white;
-  padding: 1em;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -31,8 +34,7 @@ header .header-right select {
 /* 主容器布局 */
 .main-container {
   display: flex;
-  height: calc(100vh - 60px); /* 减去 header 的高度 */
-  overflow: hidden; /* 隐藏主容器的滚动条 */
+  /* height: calc(100vh - 60px); */
 }
 
 /* 左侧导航栏 */
@@ -90,4 +92,32 @@ button {
 
 button:hover {
   background-color: #45a049;
+}
+#logContainer {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-top: 20px;
+  height: 200px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  font-family: monospace;
+}
+.log-log {
+  color: black;
+}
+.log-info {
+  color: blue;
+}
+.log-warn {
+  color: orange;
+}
+.log-error {
+  color: red;
+}
+.log-debug {
+  color: purple;
+}
+.footer {
+  display: flex;
+  height: 100px;
 }
