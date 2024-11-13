@@ -166,6 +166,11 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1000,
     height: 700,
+    // parent: parentWindow, // 设置父窗口
+    frame: false, // 去掉默认标题栏
+    resizable: false, // 禁止调整大小
+    minimizable: false, // 禁止最小化
+    maximizable: false, // 禁止最大化
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
