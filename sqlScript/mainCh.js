@@ -68,6 +68,9 @@ function formatValue(value, dataType) {
   } else if (dataType === "decimal") {
     // 保留decimal类型的原始精度
     return value.toString();
+  } else if (dataType === "BLOB" || dataType === "LONG_BLOB") {
+    // 将 BLOB 字段转为十六进制
+    return `x'${value.toString("hex")}'`;
   } else if (typeof value === "string") {
     return `'${value}'`;
   } else if (value instanceof Date) {

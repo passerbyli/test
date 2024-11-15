@@ -184,9 +184,12 @@ async function getPrimaryKeyColumns(connection, tableName) {
  * @param {any} value - 要格式化的值
  * @returns {string} - 格式化后的值
  */
-function formatValue(value) {
+function formatValue(value, dataType) {
   if (value === null || value === undefined) {
     return "null";
+  } else if (dataType === "BLOB" || dataType === "LONG_BLOB") {
+    // 将 BLOB 字段转为十六进制
+    return `x'${value.toString("hex")}'`;
   } else if (typeof value === "string") {
     return `'${value}'`;
   } else if (value instanceof Date) {
@@ -385,6 +388,33 @@ async function generateSQL(tablesConfig) {
   const { connection, connect, disconnect } = createConnection(dbConfig);
   try {
     await connect();
+
+    console.log("111");
+    // 准备插入数据
+    const title = "Sample Title";
+    const description = "This is a description";
+    try {
+      // 模拟读取一个文件作为 LONGBLOB 数据
+      const blobData = fs.readFileSync("./ZfRGPRC_(Sc)02.pdf"); // 替换为你的文件路径
+
+      console.log("11122", blobData);
+      // 插入语句
+      const query = `INSERT INTO mall2.pms_product (name,product_sn,file) VALUES ('11','222',?)`;
+
+      // 执行插入
+      connection.query(query, [blobData], (error, results) => {
+        if (error) {
+          console.error("插入失败:", error.message);
+        } else {
+          console.log("数据插入成功，插入 ID:", results.insertId);
+        }
+        console.log("99999");
+        // connection.end(); // 关闭数据库连接
+      });
+    } catch (error) {
+      console.log(error);
+    }
+
     let sqlScript = "";
     for (const tableConfig of tablesConfig) {
       const sqlStatements = await processTable(connection, tableConfig);
@@ -413,6 +443,22 @@ async function generateBackupScript(tables) {
     await connect();
     for (const tableInfo of tables) {
       const { tableName, whereClause } = tableInfo;
+
+      // 获取表的字段信息，包括字段名和数据类型
+      const [columnsInfo] = await connection.query(
+        `
+        SELECT COLUMN_NAME, DATA_TYPE
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+      `,
+        [dbConfig.database, tableName]
+      );
+
+      const columnDataTypes = {};
+      columnsInfo.forEach((col) => {
+        columnDataTypes[col.COLUMN_NAME] = col.DATA_TYPE;
+      });
+
       const query = `SELECT * FROM ${
         dbConfig.database
       }.${tableName}  WHERE ${buildWhereClause(whereClause)}`;
@@ -423,15 +469,25 @@ async function generateBackupScript(tables) {
         dbConfig.database
       }.${tableName} WHERE ${buildWhereClause(whereClause)};\n`;
 
-      const [results] = await connection.query(query);
+      const [results, fields] = await connection.query(query);
+
+      // 找到 LONGBLOB 类型的字段
+      const blobFields = fields
+        .filter(
+          (field) =>
+            field.type === mysql.Types.BLOB ||
+            field.type === mysql.Types.LONG_BLOB
+        )
+        .map((field) => field.name);
 
       results.forEach((row) => {
         let columns = Object.keys(row)
           .map((col) => `\`${col}\``)
           .join(", ");
         let values = Object.values(row)
-          .map((val) => {
-            return formatValue(val);
+          .map(([col, val]) => {
+            console.log(col);
+            return formatValue(val, columnDataTypes[col]);
           })
           .join(", ");
 
@@ -453,7 +509,7 @@ async function generateBackupScript(tables) {
 const tables = [
   {
     tableName: "pms_product",
-    whereClause: { brand_id: "49", id: ["1", "2"] },
+    whereClause: { name: "11" },
     operationType: "insert",
     fieldsToUpdate: { pic: "newValue1", product_sn: "xxxxx" },
     ignorePK: true,
