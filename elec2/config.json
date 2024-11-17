@@ -1,16 +1,52 @@
 {
     "environment": "production",
     "test": {
-        "dbConnection": "12333",
-        "adminAccount": "22",
+        "database": {
+            "host": "localhost",
+            "user": "root",
+            "password": "admin2312",
+            "database": "test",
+            "port": "3306",
+            "timezone": "+00:00"
+        },
+        "account": {
+            "login": "http://test.com/login",
+            "logout": "http://test.com/logout",
+            "username": "test",
+            "password": "test",
+            "cookie": ""
+        },
+        "getToken": {
+            "api": "",
+            "staticToken": "",
+            "token": ""
+        },
         "websiteURL": "22",
         "apiEndpoint": "42"
     },
     "production": {
-        "dbConnection": "225",
-        "adminAccount": "622",
-        "websiteURL": "722",
-        "apiEndpoint": "228"
+        "database": {
+            "host": "localhost",
+            "user": "root",
+            "password": "admin2312",
+            "database": "test",
+            "port": "3306",
+            "timezone": "+00:00"
+        },
+        "account": {
+            "login": "http://test.com/login",
+            "logout": "http://test.com/logout",
+            "username": "test",
+            "password": "test",
+            "cookie": ""
+        },
+        "getToken": {
+            "api": "",
+            "staticToken": "",
+            "token": ""
+        },
+        "websiteURL": "22",
+        "apiEndpoint": "42"
     },
     "exportPath": "/Users/lihaomin/projects/GitHub/test/elec——error",
     "login": {
