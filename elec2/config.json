@@ -1,58 +1,26 @@
 {
-    "environment": "production",
+    "environment": "test",
     "test": {
-        "database": {
-            "host": "localhost",
-            "user": "root",
-            "password": "admin2312",
-            "database": "test",
-            "port": "3306",
-            "timezone": "+00:00"
-        },
         "account": {
-            "login": "http://test.com/login",
-            "logout": "http://test.com/logout",
-            "username": "test",
-            "password": "test",
-            "cookie": ""
+            "login": "http://test.com/login"
         },
-        "getToken": {
-            "api": "",
-            "staticToken": "",
-            "token": ""
-        },
-        "websiteURL": "22",
         "apiEndpoint": "42"
     },
     "production": {
-        "database": {
-            "host": "localhost",
-            "user": "root",
-            "password": "admin2312",
-            "database": "test",
-            "port": "3306",
-            "timezone": "+00:00"
-        },
         "account": {
-            "login": "http://test.com/login",
-            "logout": "http://test.com/logout",
-            "username": "test",
-            "password": "test",
-            "cookie": ""
+            "login": "http://test.com/login"
         },
-        "getToken": {
-            "api": "",
-            "staticToken": "",
-            "token": ""
-        },
-        "websiteURL": "22",
         "apiEndpoint": "42"
+    },
+    "database": {
+        "host": "localhost",
+        "user": "root",
+        "password": "admin2312",
+        "database": "test"
     },
     "exportPath": "/Users/lihaomin/projects/GitHub/test/elec——error",
     "login": {
-        "cookies": [
-            "connect.sid=s%3AKixIu5EiLgcxIXfVmm8FH-RKKMxbQgz5.BvKevQYF8J4UKTU4XeQpu4f%2FeCqnvjpzdlX4SlOdt%2FM; Path=/; Expires=Sun, 10 Nov 2024 19:51:26 GMT; HttpOnly"
-        ],
+        "cookies": "connect.sid=s%3AKixIu5EiLgcxIXfVmm8FH-RKKMxbQgz5.BvKevQYF8J4UKTU4XeQpu4f%2FeCqnvjpzdlX4SlOdt%2FM; Path=/; Expires=Sun, 10 Nov 2024 19:51:26 GMT; HttpOnly",
         "username": "admin",
         "password": "123456",
         "rememberMe": true
