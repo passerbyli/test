@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>登录</title>
+  </head>
+  <body>
+    <h1>登录</h1>
+    <form id="loginForm">
+      <label>用户名:</label>
+      <input type="text" id="username" required />
+      <label>密码:</label>
+      <input type="password" id="password" required />
+      <button type="submit">登录</button>
+    </form>
+
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", (event) => {
+          event.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          // 这里可以进行实际的登录请求
+          // 假设登录成功，更新状态
+          ipcRenderer.send("login-success", { username, password });
+        });
+    </script>
+  </body>
+</html>

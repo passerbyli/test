@@ -1,12 +1,24 @@
 {
     "environment": "test",
     "test": {
+        "database": {
+            "host": "",
+            "user": "",
+            "password": "",
+            "database": ""
+        },
         "account": {
             "login": "http://test.com/login"
         },
         "apiEndpoint": "42"
     },
     "production": {
+        "database": {
+            "host": "",
+            "user": "",
+            "password": "",
+            "database": ""
+        },
         "account": {
             "login": "http://test.com/login"
         },
