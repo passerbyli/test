@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todolist App</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f7fc;
+        margin: 0;
+        padding: 20px;
+      }
+      h1,
+      h2 {
+        text-align: center;
+      }
+      .todo-container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      input,
+      button {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+      }
+      button {
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      button:hover {
+        background-color: #0056b3;
+      }
+      #repeatOptions {
+        display: none;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+      ul {
+        list-style-type: none;
+        padding: 0;
+      }
+      li {
+        background-color: #fff;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .todo-actions button {
+        background-color: #28a745;
+        color: #fff;
+        border: none;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .todo-actions button:hover {
+        background-color: #218838;
+      }
+      #settingsBtn {
+        background-color: #17a2b8;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        color: white;
+        font-size: 16px;
+        margin-top: 20px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      #settingsBtn:hover {
+        background-color: #138496;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Todo List</h1>
+
+    <div>
+      <input type="text" id="todoTitle" placeholder="Title" />
+      <input type="text" id="todoContent" placeholder="Content" />
+      <input type="datetime-local" id="startTime" />
+      <input type="datetime-local" id="endTime" />
+      <input type="checkbox" id="isRepeating" /> Repeat
+      <div id="repeatOptions" style="display: none">
+        <label>Repeat every (Minutes):</label>
+        <input type="number" id="repeatPeriod" min="1" />
+      </div>
+      <button id="addTodoBtn" onclick="updateTodos()">Add Todo</button>
+    </div>
+
+    <h2>Todos</h2>
+    <ul id="todoList"></ul>
+
+    <button id="settingsBtn" onclick="openSettings()">Settings</button>
+
+    <script src="renderer.js"></script>
+  </body>
+</html>
