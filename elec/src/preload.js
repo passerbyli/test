@@ -6,4 +6,6 @@ contextBridge.exposeInMainWorld("electron", {
   on: (channel, func) =>
     ipcRenderer.on(channel, (event, ...args) => func(...args)), // 接收事件
   invoke: (channel, data) => ipcRenderer.invoke(channel, data), // 异步调用
+  moveWindow: (deltaX, deltaY) =>
+    ipcRenderer.send("move-window", { deltaX, deltaY }),
 });

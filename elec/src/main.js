@@ -40,6 +40,7 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
+    frame: false, // 去掉原生边框
     webPreferences: {
       preload: path.join(__dirname, "preload.js"), // 预加载文件
       contextIsolation: true, // 启用上下文隔离
@@ -158,5 +159,18 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+  }
+});
+
+// 监听来自渲染进程的窗口位置变化请求
+ipcMain.on("move-window", (event, { deltaX, deltaY }) => {
+  if (mainWindow) {
+    const bounds = mainWindow.getBounds();
+    mainWindow.setBounds({
+      x: bounds.x + deltaX,
+      y: bounds.y + deltaY,
+      width: bounds.width,
+      height: bounds.height,
+    });
   }
 });

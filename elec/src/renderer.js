@@ -1,7 +1,13 @@
 // 页面加载时请求待办事项
+
 window.onload = function () {
   window.electron.send("load-todos"); // 请求加载待办事项
 };
+
+// 控制窗口关闭
+document.getElementById("close-btn").addEventListener("click", () => {
+  ipcRenderer.send("close-window");
+});
 
 // 监听待办事项更新
 window.electron.on("todos-updated", (todos) => {
@@ -81,3 +87,42 @@ document.getElementById("isRepeating").addEventListener("change", (e) => {
 function openSettings() {
   window.electron.send("open-settings");
 }
+
+// 控制窗口关闭
+document.getElementById("close-btn").addEventListener("click", () => {
+  ipcRenderer.send("close-window");
+});
+// 控制窗口关闭
+document.getElementById("close-btn").addEventListener("click", () => {
+  window.electron.closeWindow();
+});
+
+// 实现拖动窗口功能
+const titleBar = document.getElementById("title-bar");
+let isMouseDown = false;
+let offsetX, offsetY;
+
+titleBar.addEventListener("mousedown", (event) => {
+  isMouseDown = true;
+  offsetX = event.clientX;
+  offsetY = event.clientY;
+  titleBar.style.cursor = "grabbing";
+});
+
+window.addEventListener("mousemove", (event) => {
+  if (isMouseDown) {
+    const deltaX = event.clientX - offsetX;
+    const deltaY = event.clientY - offsetY;
+
+    // 通过 window.electron 发送窗口位置的改变
+    window.electron.moveWindow(deltaX, deltaY);
+
+    offsetX = event.clientX;
+    offsetY = event.clientY;
+  }
+});
+
+window.addEventListener("mouseup", () => {
+  isMouseDown = false;
+  titleBar.style.cursor = "grab";
+});
