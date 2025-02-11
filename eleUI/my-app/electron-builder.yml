@@ -1,0 +1,10 @@
+appId: com.example.electronapp
+productName: ElectronApp
+directories:
+  output: dist_electron
+files:
+  - dist/**
+  - src/**
+mac:
+  category: public.app-category.productivity
+  target: app

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>数据库血缘关系图</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      .node {
+        fill: #f39c12;
+        cursor: pointer;
+      }
+
+      .link {
+        stroke: #ccc;
+      }
+
+      .label {
+        font-size: 12px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>数据库血缘关系图</h2>
+    <svg width="960" height="600"></svg>
+
+    <script>
+      // 从后端获取数据库结构数据
+      fetch("/api/schema")
+        .then((response) => response.json())
+        .then((data) => {
+          const links = [];
+          const nodes = [];
+          const tableMap = new Map();
+
+          // 处理表格和外键关系
+          data.foreignKeys.forEach((fk) => {
+            const fromNode = fk.fromTable;
+            const toNode = fk.toTable;
+            if (!tableMap.has(fromNode))
+              tableMap.set(fromNode, { id: fromNode });
+            if (!tableMap.has(toNode)) tableMap.set(toNode, { id: toNode });
+
+            links.push({ source: fromNode, target: toNode });
+          });
+
+          data.tables.forEach((table) => {
+            nodes.push({
+              id: table.table,
+              label: `${table.table} (${table.columns.join(", ")})`,
+            });
+          });
+
+          // 创建力导向图
+          const width = 960,
+            height = 600;
+          const svg = d3.select("svg");
+
+          const simulation = d3
+            .forceSimulation(nodes)
+            .force(
+              "link",
+              d3
+                .forceLink(links)
+                .id((d) => d.id)
+                .distance(150)
+            )
+            .force("charge", d3.forceManyBody().strength(-500))
+            .force("center", d3.forceCenter(width / 2, height / 2));
+
+          const link = svg
+            .append("g")
+            .selectAll(".link")
+            .data(links)
+            .enter()
+            .append("line")
+            .attr("class", "link");
+
+          const node = svg
+            .append("g")
+            .selectAll(".node")
+            .data(nodes)
+            .enter()
+            .append("circle")
+            .attr("class", "node")
+            .attr("r", 10)
+            .call(
+              d3
+                .drag()
+                .on("start", dragstart)
+                .on("drag", dragged)
+                .on("end", dragend)
+            );
+
+          node.append("title").text((d) => d.id);
+
+          svg
+            .append("g")
+            .selectAll(".label")
+            .data(nodes)
+            .enter()
+            .append("text")
+            .attr("class", "label")
+            .attr("dx", 12)
+            .attr("dy", ".35em")
+            .text((d) => d.label);
+
+          simulation.on("tick", () => {
+            link
+              .attr("x1", (d) => d.source.x)
+              .attr("y1", (d) => d.source.y)
+              .attr("x2", (d) => d.target.x)
+              .attr("y2", (d) => d.target.y);
+
+            node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+          });
+
+          function dragstart(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+          }
+
+          function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+          }
+
+          function dragend(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+          }
+        })
+        .catch((error) => console.error("Error fetching schema:", error));
+    </script>
+  </body>
+</html>
