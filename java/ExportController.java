@@ -1,86 +1,102 @@
+package com.macro.mall.tiny.exportPkg;
+
+import com.macro.mall.tiny.common.api.CommonResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.io.ByteArrayInputStream;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.concurrent.TimeoutException;
+import java.util.HashMap;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
-@RestController
+@Controller
+@RequestMapping("/export")
 public class ExportController {
-
-    private final ExportManager exportManager;
+    private static final Logger log = LoggerFactory.getLogger(ExportController.class);
 
     @Autowired
-    public ExportController(ExportManager exportManager) {
-        this.exportManager = exportManager;
-    }
+    private ExportTaskManager exportTaskManager;
+
+    @Resource
+    private ExportService exportService;
+
 
     /**
-     * 订单导出接口
-     * @param startDate 开始日期
-     * @param endDate 结束日期
-     * @param timeout 超时时间（秒）
-     * @return 返回文件流
+     * **同步导出（直接下载文件）**
+     * - 没有等待逻辑，直接返回 Excel 文件流
+     * - 如果线程池满，则返回 503 错误
      */
-    @GetMapping("/export/order")
-    public ResponseEntity<byte[]> exportOrderData(@RequestParam String startDate, @RequestParam String endDate, @RequestParam long timeout) {
-        try {
-            // 创建订单导出任务
-            ExportTask exportTask = new OrderExportTask(startDate, endDate);
+    @RequestMapping(value = "/download", method = RequestMethod.GET)
+    @ResponseBody
+    public void download(HttpServletRequest request, HttpServletResponse response) {
+        HashMap<String, Object> param = new HashMap<>();
+// 提交到 ExportTaskManager 的线程池中同步执行
 
-            // 执行导出任务，设置超时
-            ByteArrayOutputStream fileStream = exportManager.executeExportTask(exportTask, timeout);
 
-            // 获取字节流
-            byte[] fileBytes = fileStream.toByteArray();
+        TaskStatusVO taskStatusVO = exportTaskManager.submitTask(() -> {
+            try {
+                response.setContentType("application/vnd.ms-excel");
+                response.setHeader("Content-Disposition", "attachment; filename=\"export.xlsx\"");
+                exportService.exportToResponse(request, response.getOutputStream(), param);
+            } catch (IOException e) {
+                log.error("任务执行失败：{}", e.getMessage(), e);
+                throw new RuntimeException("导出失败");
+            }
+        }, 30); // 超时时间 30 秒
 
-            // 设置响应头，返回文件流
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachment; filename=order_export.xlsx");
-            headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-            return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
-        } catch (TimeoutException e) {
-            // 超时错误返回
-            return new ResponseEntity<>("现在导出任务过多，请稍后再试".getBytes(), HttpStatus.REQUEST_TIMEOUT);
-        } catch (Exception e) {
-            return new ResponseEntity<>("导出任务失败".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR);
+        if (!taskStatusVO.getStatus()) {
+            response.reset(); // 重置响应内容
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            try {
+                response.getWriter().write("导出任务超时或失败，请稍后重试" + taskStatusVO.getStatusCode());
+            } catch (IOException e) {
+                log.error("写入错误信息失败：{},{}", e.getMessage(), taskStatusVO.getStatusCode());
+            }
         }
     }
 
+
     /**
-     * 用户导出接口
-     * @param timeout 超时时间（秒）
-     * @return 返回文件流
+     * **创建异步导出任务**
+     * - 立即返回任务 ID，不阻塞主线程
+     * - 任务进入 `taskManager`，最多等待 `req.getWaitTime()` 秒
+     * - 任务超时后自动失败
      */
-    @GetMapping("/export/user")
-    public ResponseEntity<byte[]> exportUserData(@RequestParam long timeout) {
-        try {
-            // 创建用户导出任务
-            ExportTask exportTask = new UserExportTask();
+    @RequestMapping(value = "/createTask", method = RequestMethod.GET)
+    @ResponseBody
+    public CommonResult createTask() {
+        String taskId = UUID.randomUUID().toString();
+        String fileName = "export_" + taskId + ".xlsx";
+        // 1️⃣ 记录任务初始化状态
+        exportService.updateTaskStatus("初始化", taskId, fileName, "");
 
-            // 执行导出任务，设置超时
-            ByteArrayOutputStream fileStream = exportManager.executeExportTask(exportTask, timeout);
+        // 2️⃣ 获取当前 HTTP 请求（存入线程上下文）
+        HttpServletRequest requestContext =
+                ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
 
-            // 获取字节流
-            byte[] fileBytes = fileStream.toByteArray();
+        // 3️⃣ 启动异步任务，后台等待 `req.getWaitTime()` 秒
+        CompletableFuture.runAsync(() -> {
 
-            // 设置响应头，返回文件流
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachment; filename=user_export.xlsx");
-            headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            TaskStatusVO submitted = exportTaskManager.submitTask(() -> {
+                exportService.exportToFile(requestContext, taskId, fileName, new HashMap<>());
+            }, 30);
 
-            return new ResponseEntity<>(fileBytes, headers, HttpStatus.OK);
-        } catch (TimeoutException e) {
-            return new ResponseEntity<>("现在导出任务过多，请稍后再试".getBytes(), HttpStatus.REQUEST_TIMEOUT);
-        } catch (Exception e) {
-            return new ResponseEntity<>("导出任务失败".getBytes(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            if (!submitted.getStatus()) {
+                exportService.updateTaskStatus("失败", taskId, fileName, "导出任务过多，请稍后再试" + submitted.getStatusCode());
+            }
+        });
+
+        // 4️⃣ 立即返回任务创建成功
+        return CommonResult.success("任务创建成功");
     }
 }

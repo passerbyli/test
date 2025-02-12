@@ -1,19 +1,25 @@
 <template>
-    <el-menu :default-active="activeMenu" router>
-        <el-menu-item index="/">首页</el-menu-item>
-        <el-menu-item index="/task">查询任务</el-menu-item>
-        <el-menu-item index="/jsonFormatter">格式化 JSON</el-menu-item>
-        <el-menu-item index="/jsonAnalyzer">分析 JSON</el-menu-item>
-        <el-menu-item index="/sqlExporter">导出 SQL</el-menu-item>
+    <el-menu :default-active="$route.path" class="sidebar-menu" router>
+        <el-menu-item index="/">
+            <i class="el-icon-house"></i>
+            <span slot="title">首页1</span>
+        </el-menu-item>
+        <el-menu-item index="/tasks">
+            <i class="el-icon-tickets"></i>
+            <span slot="title">任务管理</span>
+        </el-menu-item>
     </el-menu>
 </template>
 
 <script>
 export default {
-    data() {
-        return {
-            activeMenu: "/",
-        };
-    },
+    name: "SidebarComp"
 };
 </script>
+
+<style scoped>
+.sidebar-menu {
+    height: 100%;
+    border-right: none;
+}
+</style>

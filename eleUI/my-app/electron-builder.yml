@@ -1,10 +1,16 @@
-appId: com.example.electronapp
-productName: ElectronApp
+appId: com.example.myelectronapp
+productName: MyElectronApp
 directories:
   output: dist_electron
 files:
-  - dist/**
-  - src/**
+  - "dist/**/*"
+  - "electron/**/*"
+  - "package.json"
+asar: true
 mac:
+  target:
+    - dmg
   category: public.app-category.productivity
-  target: app
+win:
+  target:
+    - nsis

@@ -1,40 +1,15 @@
-const { defineConfig } = require("@vue/cli-service");
-
-module.exports = defineConfig({
-  publicPath: "./", // 确保资源路径是相对路径
+module.exports = {
+  publicPath: "./", // 保证资源相对路径正确
   transpileDependencies: true,
-
   pluginOptions: {
     electronBuilder: {
-      // mainProcessFile: "./src/main/background.js",
-      // preload: "./src/main/preload.js",
-      nodeIntegration: true, // 允许 Node.js 模块在渲染进程中使用
-      contextIsolation: false, // 关闭上下文隔离，确保可以使用 `window.require`
-      enableRemoteModule: true, // 允许 remote 模块（如需）
+      // 指定 Electron 主进程入口和预加载脚本路径（相对于项目根目录）
+      mainProcessFile: "electron/main.js",
+      preload: "electron/preload.js",
+      customFileProtocol: "./", // 让 Electron 加载本地文件
     },
   },
-
-  configureWebpack: {
-    resolve: {
-      alias: {
-        "@": require("path").resolve(__dirname, "src"),
-      },
-    },
-  },
-
   chainWebpack: (config) => {
-    config.plugin("define").tap((args) => {
-      args[0]["process.env.FS"] = JSON.stringify(true);
-      return args;
-    });
+    config.target("electron-renderer");
   },
-});
-
-// module.exports = {
-//   pluginOptions: {
-//     electronBuilder: {
-//       mainProcessFile: "src/main/background.js",
-//       preload: "src/main/preload.js",
-//     },
-//   },
-// };
+};
