@@ -17,3 +17,5 @@ pnpm-lock.yaml
 /elec copy
 /elec2/dist
 dist
+*.xlsx
+*.sql

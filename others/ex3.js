@@ -107,7 +107,8 @@ function processExcel(inputFilePath, outputFilePath) {
   }
 }
 
+const date = new Date();
 // 示例使用
 const inputFilePath = path.join(__dirname, "input1.xlsx"); // 输入文件路径
-const outputFilePath = path.join(__dirname, "output.xlsx"); // 输出文件路径
+const outputFilePath = path.join(__dirname, `output_${date.getTime()}.xlsx`);
 processExcel(inputFilePath, outputFilePath);
