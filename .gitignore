@@ -19,3 +19,5 @@ pnpm-lock.yaml
 dist
 *.xlsx
 *.sql
+/musit-app/out
+musit-app/package-lock.json
