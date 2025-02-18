@@ -1,0 +1,70 @@
+{
+  "name": "all-test",
+  "version": "0.1.0",
+  "author": "abcd username",
+  "description": "wa haha",
+  "private": true,
+  "main": "main.js",
+  "engines": {
+    "node": "18"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build",
+    "dist": "vue-cli-service build && electron-builder --publish never",
+    "start": "chcp 65001 && electron .",
+    "start-mac": "electron .",
+    "release": "vue-cli-service build && electron-builder --publish always",
+    "dist-arm": "USE_SYSTEM_FPM=true npm run dist"
+  },
+  "dependencies": {
+    "core-js": "^3.8.3",
+    "vue": "^2.6.14",
+    "vue-router": "^3.5.1",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-router": "~5.0.0",
+    "@vue/cli-plugin-vuex": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "dayjs": "^1.11.13",
+    "electron": "25",
+    "electron-builder": "24",
+    "element-plus": "^2.9.4",
+    "vue-template-compiler": "^2.6.14"
+  },
+  "build": {
+    "productName": "JDTreasureGrabber",
+    "appId": "com.hogan.JDTreasureGrabber",
+    "icon": "./public/favicon_512x512.png",
+    "win": {
+      "artifactName": "${productName}-${os}-${arch}-${version}.${ext}",
+      "target": [
+        "msi",
+        "nsis",
+        "zip"
+      ],
+      "icon": "./public/favicon.ico"
+    },
+    "mac": {
+      "artifactName": "${productName}-${os}-${arch}-${version}.${ext}",
+      "icon": "./public/favicon.png",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "nsis": {
+      "allowToChangeInstallationDirectory": true,
+      "oneClick": false,
+      "perMachine": false
+    },
+    "extraFiles": [
+      {
+        "from": "./LICENSE",
+        "to": "./"
+      }
+    ]
+  }
+}
