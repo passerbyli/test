@@ -1,0 +1,9 @@
+{
+    "login": {
+        "username": "user123",
+        "password": "password123"
+    },
+    "settings": {
+        "notifications": true
+    }
+}

@@ -1,64 +1,33 @@
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Menu,
-  MenuItem,
-  dialog,
-  shell,
-} = require("electron");
-const path = require("node:path");
-const { ipcHandle } = require("./server/ipcHandle");
-const { getUserDataProperty } = require("./server/utils/storeUtil");
-const Constants = require("./constant/constants");
+const { app, BrowserWindow, ipcMain } = require("electron");
+const path = require("path");
+const { readConfig } = require("./src/utils/fileUtils"); // 使用 require
+
+let mainWindow;
 
 function createWindow() {
-  const iconPath = path.join(__dirname, "public/favicon.png");
-  // 创建浏览器窗口
-  const win = new BrowserWindow({
-    width: 1440,
-    height: 800,
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      enableRemoteModule: false,
-      preload: path.join(__dirname, "preload.js"), // use a preload script
+      nodeIntegration: true,
     },
-    icon: iconPath,
   });
 
-  win.loadURL("http://localhost:8080");
-  win.webContents.openDevTools();
+  mainWindow.loadURL("http://localhost:8080"); // 如果你用 Vue CLI
+  // mainWindow.loadFile(path.join(__dirname, 'index.html')); // 如果你用 Vue + Webpack 打包
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
-app.whenReady().then(function () {
-  createWindow();
-
-  // 查询是否启用自动更新，未查到时，默认自动更新
-  const options = getUserDataProperty(Constants.StoreKeys.OPTIONS_KEY) || {};
-  const enableAutoUpdate = options.enableAutoUpdate;
-  if (
-    enableAutoUpdate === undefined ||
-    enableAutoUpdate === null ||
-    enableAutoUpdate
-  ) {
-  }
+// 配置读取和保存
+ipcMain.handle("get-config", () => {
+  return readConfig();
 });
 
-// ipcRenderer.invoke 处理
-ipcMain.handle("toMain", async (e, args) => {
-  console.log("root main handle toMain");
-  return await ipcHandle(e, args);
-});
+app.on("ready", createWindow);
 
-// ipcRenderer.on 处理
-ipcMain.on("toMain", async (e, args) => {
-  console.log("root main on toMain");
-  if (!args || !args.event) {
-    return;
-  }
-  const data = await ipcHandle(e, args);
-  const webContents = e.sender;
-  const win = BrowserWindow.fromWebContents(webContents);
-  win.webContents.send("fromMain", { event: args.event, data: data });
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
 });
