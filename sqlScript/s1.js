@@ -66,7 +66,8 @@ const parseSQL = (sql) => {
   const procedureRegex = /CREATE\s+(PROCEDURE|FUNCTION)\s+([a-zA-Z0-9_]+)/gi;
 
   // 匹配 SELECT、INSERT INTO、UPDATE、DELETE 中的表
-  const fromRegex = /FROM\s+([a-zA-Z0-9_\.]+)/gi;
+  // 修改 fromRegex 排除 DELETE FROM
+  const fromRegex = /FROM\s+(?!DELETE\s+FROM\s+)([a-zA-Z0-9_\.]+)/gi;
   const insertIntoRegex = /INSERT\s+INTO\s+([a-zA-Z0-9_\.]+)/gi;
   const updateRegex = /UPDATE\s+([a-zA-Z0-9_\.]+)/gi;
   const deleteFromRegex = /DELETE\s+FROM\s+([a-zA-Z0-9_\.]+)/gi;
