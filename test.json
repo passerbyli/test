@@ -1,0 +1,43 @@
+[
+    {
+        "filePath": "xy/data/etl_user_orders.sql",
+        "scriptIndex": 1,
+        "type": "PROCEDURE",
+        "schema": "ct_cms",
+        "name": "etl_user_orders",
+        "sourceTables": [
+            {
+                "schema": "",
+                "table": "tmp_raw_orders",
+                "isTemporary": true
+            },
+            {
+                "schema": "",
+                "table": "user_stats",
+                "isTemporary": true
+            },
+            {
+                "schema": "",
+                "table": "latest_orders",
+                "isTemporary": true
+            },
+            {
+                "schema": "ct_cms",
+                "table": "orders",
+                "isTemporary": false
+            },
+            {
+                "schema": "ct_cms",
+                "table": "users",
+                "isTemporary": false
+            }
+        ],
+        "targetTables": [
+            {
+                "schema": "ct_cms",
+                "table": "user_orders_wide",
+                "isTemporary": false
+            }
+        ]
+    }
+]

@@ -1,0 +1,54 @@
+[
+  {
+    "filePath": "xy/data/etl_wide_table_procedure.sql",
+    "scriptIndex": 1,
+    "procedures": [
+      {
+        "type": "PROCEDURE",
+        "schema": "ct_cms",
+        "name": "etl_user_orders"
+      }
+    ],
+    "functionNames": [],
+    "sourceTables": [
+      {
+        "schema": "ct_cms",
+        "table": "orders",
+        "isTemporary": true
+      },
+      {
+        "schema": "tmp_raw_orders",
+        "isTemporary": true
+      },
+      {
+        "schema": "tmp_raw_orders",
+        "isTemporary": true
+      },
+      {
+        "schema": "ct_cms",
+        "table": "users",
+        "isTemporary": true
+      },
+      {
+        "schema": "ct_cms",
+        "table": "users",
+        "isTemporary": true
+      },
+      {
+        "schema": "user_stats",
+        "isTemporary": true
+      },
+      {
+        "schema": "latest_orders",
+        "isTemporary": true
+      }
+    ],
+    "targetTables": [
+      {
+        "schema": "ct_cms",
+        "table": "user_orders_wide",
+        "isTemporary": true
+      }
+    ]
+  }
+]
