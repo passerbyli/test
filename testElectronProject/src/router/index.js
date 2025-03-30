@@ -1,0 +1,42 @@
+import { createRouter, createWebHistory } from "vue-router";
+import HomeView from "../views/HomeView.vue";
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    {
+      path: "/",
+      name: "home",
+      component: HomeView,
+      meta: {
+        title: "首页",
+      },
+    },
+    {
+      path: "/myExport",
+      name: "myExport",
+      component: () => import("../views/MyExportView.vue"),
+      meta: {
+        title: "我的导出",
+      },
+    },
+    {
+      path: "/about",
+      name: "about",
+      component: () => import("../views/AboutView.vue"),
+      meta: {
+        title: "关于",
+      },
+    },
+    {
+      path: "/setting",
+      name: "setting",
+      component: () => import("../views/SettingView.vue"),
+      meta: {
+        title: "设置",
+      },
+    },
+  ],
+});
+
+export default router;
