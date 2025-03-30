@@ -1,34 +1,3 @@
-<script setup>
-import { computed, ref } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
-
-
-const routes = useRouter().getRoutes()
-const menuRoutes = computed(() => {
-  const adjustedRoutes = routes.flatMap(route => {
-    if (route.path === '/' && route.children) {
-      return route.children.map((child) => ({
-        ...child,
-        path: child.path,
-        meta: child.meta
-      }))
-    }
-    if (route.meta?.hidden) {
-      return []
-    }
-    return route
-  })
-  return adjustedRoutes
-})
-
-const dialogVisible = ref(false)
-
-const openLoginWin = () => {
-  dialogVisible.value = true
-}
-
-</script>
-
 <template>
   <div class="common-layout">
     <el-container>
@@ -60,18 +29,64 @@ const openLoginWin = () => {
       </el-container>
     </el-container>
     <el-dialog v-model="dialogVisible" title="登录" draggable>
-      xxxx
+      <el-form :model="form" label-width="auto">
+        <el-form-item label="用户名">
+          <el-input v-model="form.username" placeholder="请输入用户名" />
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input v-model="form.password" type="password" placeholder="请输入密码" />
+        </el-form-item>
+      </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">确认</el-button>
+          <el-button type="primary" @click="dialogVisible = false">登录</el-button>
         </span>
       </template>
     </el-dialog>
   </div>
 
 </template>
+<script setup>
+import { computed, ref } from 'vue'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
 
+
+const routes = useRouter().getRoutes()
+const menuRoutes = computed(() => {
+  const adjustedRoutes = routes.flatMap(route => {
+    if (route.path === '/' && route.children) {
+      return route.children.map((child) => ({
+        ...child,
+        path: child.path,
+        meta: child.meta
+      }))
+    }
+    if (route.meta?.hidden) {
+      return []
+    }
+    return route
+  })
+  return adjustedRoutes
+})
+
+const dialogVisible = ref(true)
+
+const openLoginWin = () => {
+
+  window.ipc.sendInvoke('toMain', { event: 'login', param: form.value }).then((res) => {
+    console.log(res)
+  })
+
+  dialogVisible.value = true
+}
+
+const form = ref({
+  username: 'zhangshan',
+  password: 'zhangshan'
+})
+
+</script>
 <style scoped>
 .common-layout {
   position: relative;

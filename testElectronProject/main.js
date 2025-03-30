@@ -1,12 +1,4 @@
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Menu,
-  MenuItem,
-  dialog,
-  shell,
-} = require("electron");
+const { app, BrowserWindow, ipcMain, Menu, MenuItem } = require("electron");
 const path = require("node:path");
 require("electron-reload")(__dirname);
 const { ipcHandle } = require("./server/ipcHandle");

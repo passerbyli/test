@@ -34,6 +34,8 @@ async function ipcHandle(e, args) {
     data = await db.getRoutines(params.database);
   } else if (event === "getProcedureDefinition") {
     data = await db.getProcedureDefinition(params.database, params.procName);
+  } else if (event === "login") {
+    data = params;
   }
   console.log("data:", data);
   return data;

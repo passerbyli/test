@@ -1,6 +1,12 @@
+const { ipcRenderer } = require("electron");
+const axios = require("axios");
 const https = require("https");
 const fs = require("fs");
 
+async function login(params) {
+  const data = {};
+  return data;
+}
 function fetchPageAndGetCookie() {
   const options = {
     hostname: "example.com", // 修改为目标网站的主机名
@@ -42,4 +48,7 @@ function fetchPageAndGetCookie() {
   req.end();
 }
 
-fetchPageAndGetCookie();
+module.exports = {
+  fetchPageAndGetCookie,
+  login,
+};
