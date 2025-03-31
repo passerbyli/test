@@ -40,7 +40,7 @@
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">登录</el-button>
+          <el-button type="primary" @click="login()">登录</el-button>
         </span>
       </template>
     </el-dialog>
@@ -70,20 +70,29 @@ const menuRoutes = computed(() => {
   return adjustedRoutes
 })
 
-const dialogVisible = ref(true)
+const dialogVisible = ref(false)
 
 const openLoginWin = () => {
-
-  window.ipc.sendInvoke('toMain', { event: 'login', param: form.value }).then((res) => {
-    console.log(res)
-  })
-
   dialogVisible.value = true
 }
 
+const login = () => {
+  if (window.ipc) {
+    window.ipc.sendInvoke('toMain', {
+      event: 'login',
+      params: {
+        username: form.value.username,
+        password: form.value.password
+      }
+    }).then((res) => {
+      console.log(res)
+    })
+  }
+}
+
 const form = ref({
-  username: 'zhangshan',
-  password: 'zhangshan'
+  username: 'admin',
+  password: '123456'
 })
 
 </script>

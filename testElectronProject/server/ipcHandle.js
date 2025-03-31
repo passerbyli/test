@@ -6,6 +6,8 @@ const {
 const { shell, app } = require("electron");
 const path = require("node:path");
 const db = require("./utils/db");
+const { getToBid } = require("./index");
+const { login, getMessage } = require("./utils/request");
 
 async function ipcHandle(e, args) {
   if (!args || !args.event) {
@@ -35,7 +37,11 @@ async function ipcHandle(e, args) {
   } else if (event === "getProcedureDefinition") {
     data = await db.getProcedureDefinition(params.database, params.procName);
   } else if (event === "login") {
-    data = params;
+    data = login(params.username, params.password);
+  } else if (event === "startBid") {
+    getToBid(params);
+  } else if (event == "getMessage") {
+    data = await getMessage();
   }
   console.log("data:", data);
   return data;

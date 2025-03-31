@@ -11,16 +11,16 @@ import { defineComponent, onMounted, toRefs, reactive } from 'vue'
 export default defineComponent({
   name: 'HomeView',
   setup(props, context) {
-    const onMounted = () => {
+    onMounted(() => {
+      window.ipc.sendInvoke('toMain', { event: 'getMessage' }).then((res) => {
+        console.log('=----', res)
+      })
       console.log('HomeView mounted')
-    }
+    })
 
     const dataMap = reactive({
       open() {
-        window.ipc.sendInvoke('toMain', { event: 'openDirectory', params: 'config' }).then((res) => {
-          console.log(res)
-        })
-        window.ipc.sendInvoke('toMain', { event: 'getDataBases' }, (res) => {
+        window.ipc.sendInvoke('toMain', { event: 'startBid' }, (res) => {
           console.log(res)
         })
       }

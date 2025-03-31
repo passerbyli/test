@@ -1,20 +1,53 @@
 const { ipcRenderer } = require("electron");
 const axios = require("axios");
 const https = require("https");
+const http = require("http");
 const fs = require("fs");
+const { setUserDataJsonProperty, getUserDataProperty } = require("./storeUtil");
 
-async function login(params) {
-  const data = {};
-  return data;
+const myAxios = axios.create({
+  httpsAgent: new https.Agent({
+    rejectUnauthorized: false,
+  }),
+});
+
+async function login(username, password) {
+  myAxios
+    .post("http://localhost:3000/login", {
+      username,
+      password,
+    })
+    .then((response) => {
+      let data = response.data;
+      if (response.status !== 200) {
+        return false;
+      } else {
+        console.log("=======data:", response.headers["set-cookie"]);
+        setUserDataJsonProperty(
+          "cookies",
+          JSON.stringify(response.headers["set-cookie"])
+        );
+      }
+      return data;
+    })
+    .catch((err) => {
+      console.log("====xxx:", err.response.data);
+    });
 }
-function fetchPageAndGetCookie() {
+function fetchPageAndGetCookie(username, password) {
   const options = {
-    hostname: "example.com", // 修改为目标网站的主机名
-    path: "/", // 修改为目标网页的路径
-    method: "GET",
+    hostname: "localhost", // 修改为目标网站的主机名
+    port: 3000,
+    path: "/login", // 修改为目标网页的路径
+    method: "POST",
+    headers: {},
+    data: {
+      username: username,
+      password: password,
+    },
   };
 
-  const req = https.request(options, (res) => {
+  const req = http.request(options, (res) => {
     let cookies = [];
 
     // 获取所有的 Set-Cookie 头
@@ -48,7 +81,24 @@ function fetchPageAndGetCookie() {
   req.end();
 }
 
+async function getMessage() {
+  return myAxios
+    .get("http://localhost:3000/messages", {
+      headers: {
+        Cookie: getUserDataProperty("cookies"),
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch((err) => {
+      console.log("====getMessage:", err.response.data);
+      return ["getMessage"];
+    });
+}
+
 module.exports = {
+  getMessage,
   fetchPageAndGetCookie,
   login,
 };
