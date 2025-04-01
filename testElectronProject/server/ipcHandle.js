@@ -3,7 +3,7 @@ const {
   setUserDataJsonProperty,
 } = require("./utils/storeUtil");
 
-const { shell, app } = require("electron");
+const { shell, app, dialog } = require("electron");
 const path = require("node:path");
 const db = require("./utils/db");
 const { getToBid } = require("./index");
@@ -42,6 +42,11 @@ async function ipcHandle(e, args) {
     getToBid(params);
   } else if (event == "getMessage") {
     data = await getMessage();
+  } else if (event == "select-folder") {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      properties: ["openDirectory"],
+    });
+    data = canceled ? null : filePaths; // 返回绝对路径
   }
   console.log("data:", data);
   return data;

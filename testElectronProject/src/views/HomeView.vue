@@ -12,9 +12,11 @@ export default defineComponent({
   name: 'HomeView',
   setup(props, context) {
     onMounted(() => {
-      window.ipc.sendInvoke('toMain', { event: 'getMessage' }).then((res) => {
-        console.log('=----', res)
-      })
+      if (window.ipc) {
+        window.ipc.sendInvoke('toMain', { event: 'getMessage' }).then((res) => {
+          console.log('=----', res)
+        })
+      }
       console.log('HomeView mounted')
     })
 

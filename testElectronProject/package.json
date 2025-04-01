@@ -26,6 +26,7 @@
     "electron-reload": "2.0.0-alpha.1",
     "element-plus": "^2.9.7",
     "exceljs": "^4.4.0",
+    "graphlib": "^2.1.8",
     "mysql2": "^3.14.0",
     "node-sql-parser": "^5.3.8",
     "node-xlsx": "^0.24.0",

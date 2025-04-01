@@ -13,6 +13,23 @@ const router = createRouter({
       },
     },
     {
+      path: "/dataGovernance",
+      name: "dataGovernance",
+      meta: {
+        title: "数据治理",
+      },
+      children: [
+        {
+          path: "dataLineage",
+          name: "dataLineage",
+          component: () => import("../views/DataLineageView.vue"),
+          meta: {
+            title: "数据管理",
+          },
+        },
+      ],
+    },
+    {
       path: "/myExport",
       name: "myExport",
       component: () => import("../views/MyExportView.vue"),

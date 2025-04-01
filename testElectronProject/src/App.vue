@@ -14,10 +14,21 @@
       </el-header>
       <el-container class="classic-content">
         <el-aside width="200px">
-          <el-menu v-for="(item, index) in routes" router>
-            <el-menu-item :index="item.path" :class="$route.path === item.path ? 'is-active' : ''">
-              <span>{{ item.meta.title }}</span>
-            </el-menu-item>
+          <el-menu class="el-menu-vertical-demo" router>
+            <template v-for="(item, index) in menuRoutes">
+              <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
+                <template #title>
+                  <span>{{ item.meta.title }}</span>
+                </template>
+                <el-menu-item v-for="(child, childIndex) in item.children" :key="childIndex" :index="child.path">
+                  <span>{{ child.meta.title }}</span>
+                </el-menu-item>
+              </el-sub-menu>
+              <el-menu-item v-else :index="item.path" :class="$route.path === item.path ? 'is-active' : ''">
+                <span>{{ item.meta.title }}</span>
+              </el-menu-item>
+
+            </template>
           </el-menu>
         </el-aside>
         <el-container class="classic-main">
@@ -52,7 +63,11 @@ import { computed, ref } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 
 
+
+
+
 const routes = useRouter().getRoutes()
+
 const menuRoutes = computed(() => {
   const adjustedRoutes = routes.flatMap(route => {
     if (route.path === '/' && route.children) {
@@ -67,6 +82,7 @@ const menuRoutes = computed(() => {
     }
     return route
   })
+
   return adjustedRoutes
 })
 
