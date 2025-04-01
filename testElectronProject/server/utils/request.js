@@ -92,7 +92,7 @@ async function getMessage() {
       return response.data;
     })
     .catch((err) => {
-      console.log("====getMessage:", err.response.data);
+      console.log("====getMessage:", err?.response?.data);
       return ["getMessage"];
     });
 }

@@ -1,6 +1,7 @@
 <template>
-    <button @click="selectFolder">选择文件夹</button>
-    <p v-if="path">绝对路径：{{ path }}</p>
+    <el-button @click="selectFolder">选择文件夹</el-button>
+    <p>绝对路径：{{ path }}</p>
+    <el-button type="" v-if="path">分析</el-button>
 </template>
 
 <script>
@@ -10,9 +11,6 @@ export default defineComponent({
     name: 'DataLineageView',
     setup() {
         const path = ref('')
-
-
-
         const selectFolder = async () => {
             if (window.ipc) {
                 await window.ipc.sendInvoke('toMain', {
@@ -22,7 +20,6 @@ export default defineComponent({
                         path.value = result[0]
                     }
                 });
-
             }
         };
 

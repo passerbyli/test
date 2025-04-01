@@ -2,30 +2,39 @@
   <div id="about">
     <el-row>
       <el-col :span="24">
-        <el-select v-model="selectedDatabase" placeholder="请选择数据库" @change="loadTablesAndRoutines"
+        数据库： <el-select v-model="selectedDatabase" placeholder="请选择数据库" @change="loadTablesAndRoutines"
           style="width: 200px;">
           <el-option v-for="db in databases" :key="db.Database" :label="db.Database" :value="db.Database"></el-option>
         </el-select>
       </el-col>
     </el-row>
 
-    <el-row v-if="selectedDatabase">
+    <el-row>
       <el-col :span="12">
-        <el-table :data="tables" style="width: 100%" @row-click="loadTableData">
-          <el-table-column prop="Tables_in_information_schema" label="表名" />
-          <el-table-column prop="Tables_in_sys" label="sys" />
-          <el-table-column prop="Tables_in_mysql" label="创建时间" />
-          <el-table-column prop="Tables_in_performance_schema" label="更新时间" />
-        </el-table>
+        <!-- <el-table :data="tables" style="width: 100%" @row-click="loadTableData"> -->
+        <!-- <el-table-column prop="Tables_in_information_schema" label="表名" /> -->
+        <!-- <el-table-column prop="Tables_in_sys" label="sys" /> -->
+        <!-- <el-table-column prop="Tables_in_mysql" label="创建时间" /> -->
+        <!-- <el-table-column prop="Tables_in_performance_schema" label="更新时间" /> -->
+        <!-- </el-table> -->
+        <p>Table</p>
+        <el-select v-model="selectedTable" placeholder="请选择数据库" @change="loadTableData" style="width: 200px;">
+          <el-option v-for="table in tables" :key="table" :label="table" :value="table"></el-option>
+        </el-select>
+
       </el-col>
 
       <el-col :span="12">
-        <h2>存储过程列表</h2>
-        <el-table :data="routines" style="width: 100%" @row-click="loadProcedureDefinition">
+        <p>Procedure</p>
+        <!-- <el-table :data="routines" style="width: 100%" @row-click="loadProcedureDefinition">
           <el-table-column prop="Name" label="表名" />
           <el-table-column prop="Db" label="数据库" />
           <el-table-column prop="Type" label="类型" />
-        </el-table>
+        </el-table> -->
+        <el-select v-model="selectedProcedure" placeholder="请选择数据库" @change="loadProcedureDefinition"
+          style="width: 200px;">
+          <el-option v-for="routine in routines" :key="routine" :label="routine" :value="routine"></el-option>
+        </el-select>
       </el-col>
     </el-row>
 
@@ -52,6 +61,9 @@ export default defineComponent({
     const tables = ref([]);
     const routines = ref([]);
     const selectedDatabase = ref("");
+    const selectedTable = ref("");
+    const selectedProcedure = ref("");
+
     const tableData = ref([]);
     const tableHeaders = ref([]);
     const procedureDefinition = ref("");
