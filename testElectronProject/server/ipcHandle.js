@@ -8,6 +8,8 @@ const path = require("node:path");
 const db = require("./utils/db");
 const { getToBid } = require("./index");
 const { login, getMessage } = require("./utils/request");
+const consoleUtil = require("./utils/consoleLogUtil");
+const { main } = require("../plugins/sqlParse/sqlParse2");
 
 async function ipcHandle(e, args) {
   if (!args || !args.event) {
@@ -16,10 +18,6 @@ async function ipcHandle(e, args) {
   const event = args.event;
   const params = args.params;
   let data;
-
-  console.group("【ipcHandle】:", event);
-  console.log("params:", params);
-  console.groupEnd();
   if (event === "getUserDataProperty") {
     data = getUserDataProperty(params);
   } else if (event === "setUserDataJsonProperty") {
@@ -47,22 +45,23 @@ async function ipcHandle(e, args) {
       properties: ["openDirectory"],
     });
     data = canceled ? null : filePaths; // 返回绝对路径
+  } else if (event == "data-lineage-analysis") {
+    data = await main(params);
   }
-  console.log("data:", data);
+  console.log("ipcHandle", event, params);
   return data;
 }
 
 async function openDirectory() {
   let folderPath = path.join(app.getPath("userData"));
-  console.log("folderPath:", folderPath);
   //  folderPath = "/Users/lihaomin/projects/GitHub/test";
   shell
     .openPath(folderPath)
     .then(() => {
-      console.log("文件夹已打开");
+      consoleUtil.log("文件夹已打开");
     })
     .catch((err) => {
-      console.error("无法打开文件夹:", err);
+      consoleUtil.error("无法打开文件夹:", err);
     });
 }
 

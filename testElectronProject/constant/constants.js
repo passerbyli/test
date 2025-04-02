@@ -1,5 +1,8 @@
 module.exports = {
-  StoreKeys: { COOKIES_KEY: "cookies", OPTIONS_KEY: "options" },
+  StoreKeys: {
+    COOKIES_KEY: "cookies",
+    OPTIONS_KEY: "options",
+  },
   API: {
     api_jd_hostname: "api.m.jd.com",
     api_jd_path: "/api",

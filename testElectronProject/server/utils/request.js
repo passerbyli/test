@@ -4,6 +4,7 @@ const https = require("https");
 const http = require("http");
 const fs = require("fs");
 const { setUserDataJsonProperty, getUserDataProperty } = require("./storeUtil");
+const consoleUtil = require("./consoleLogUtil");
 
 const myAxios = axios.create({
   httpsAgent: new https.Agent({
@@ -92,7 +93,7 @@ async function getMessage() {
       return response.data;
     })
     .catch((err) => {
-      console.log("====getMessage:", err?.response?.data);
+      consoleUtil.error("getMessage:", err?.response?.data);
       return ["getMessage"];
     });
 }

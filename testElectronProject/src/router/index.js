@@ -7,7 +7,8 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: HomeView,
+      // component: HomeView,
+      component: () => import("../views/DataLineageView.vue"),
       meta: {
         title: "首页",
       },
@@ -19,6 +20,14 @@ const router = createRouter({
         title: "数据治理",
       },
       children: [
+        {
+          path: "dataScriptAnalysis",
+          name: "dataScriptAnalysis",
+          component: () => import("../views/DataScriptAnalysisView.vue"),
+          meta: {
+            title: "数据脚本分析",
+          },
+        },
         {
           path: "dataLineage",
           name: "dataLineage",

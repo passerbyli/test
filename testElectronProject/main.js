@@ -1,4 +1,11 @@
-const { app, BrowserWindow, ipcMain, Menu, MenuItem } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  MenuItem,
+  Notification,
+} = require("electron");
 const path = require("node:path");
 require("electron-reload")(__dirname);
 const { ipcHandle } = require("./server/ipcHandle");
@@ -64,7 +71,22 @@ ipcMain.on("toMain", async (e, args) => {
 // initialization and is ready to create browser windows.
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(function () {
+  app.setAppUserModelId("testElectronProject");
   createWindow();
+
+  if (!Notification.isSupported()) {
+    consoleLogUtil.log("Notifications are not supported");
+    return;
+  }
+  // console.log("-----1:", Notification.requestPermission());
+  // Notification.requestPermission().then((permission) => {
+  //   console.log("-----2:", Notification.isSupported());
+  //   if (permission === "granted") {
+  //     consoleLogUtil.log("Notifications are granted");
+  //   } else {
+  //     consoleLogUtil.log("Notifications are denied");
+  //   }
+  // });
 
   // 查询是否启用自动更新，未查到时，默认自动更新
   const options = getUserDataProperty(Constants.StoreKeys.OPTIONS_KEY) || {};

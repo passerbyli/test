@@ -15,6 +15,9 @@
       <el-container class="classic-content">
         <el-aside width="200px">
           <el-menu class="el-menu-vertical-demo" router>
+            <el-menu-item index="/" :class="$route.path === '/' ? 'is-active' : ''">
+              <span>Home</span>
+            </el-menu-item>
             <template v-for="(item, index) in menuRoutes">
               <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
                 <template #title>
@@ -59,12 +62,21 @@
 
 </template>
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter } from 'vue-router'
 
 
-
-
+onMounted(() => {
+  if (window.ipc) {
+    window.ipc.receive('fromMain', (data) => {
+      if (data && data.event) {
+        if (data.event === 'console') {
+          console.log('%c助手：', 'color:#fff;font-size:14px', data.data);
+        }
+      }
+    })
+  }
+})
 
 const routes = useRouter().getRoutes()
 

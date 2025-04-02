@@ -8,6 +8,11 @@ const {
 } = require("./utils/storeUtil.js");
 const Constants = require("../constant/constants");
 const consoleUtil = require("./utils/consoleLogUtil");
+
+const { mainSendToRender } = require("./utils/mainProcessMsgHandle.js");
+
+const { sendNotice } = require("./utils/noticeUtil.js");
+
 const API = Constants.API;
 let Browser;
 let isLogin = false;
@@ -21,20 +26,20 @@ let BrowserDisconnected = false;
 let Item_URL;
 
 function getToBid(params) {
-  console.log("xxx----");
-  return new Promise((resolve, reject) => {
-    if (Browser && Browser.isConnected()) {
-      if (isLogin) {
-        handleSendNotice("登录成功，开始抢标");
-        resolve({});
-        return;
-      }
-    }
+  handleSendNotice("xxajdioa");
+  // return new Promise((resolve, reject) => {
+  //   if (Browser && Browser.isConnected()) {
+  //     if (isLogin) {
+  //       handleSendNotice("登录成功，开始抢标");
+  //       resolve({});
+  //       return;
+  //     }
+  //   }
 
-    resetData();
+  //   resetData();
 
-    initBid();
-  });
+  //   initBid();
+  // });
 }
 
 function updateBid(params) {}
@@ -50,7 +55,7 @@ async function initBid() {
     [Constants.StoreKeys.COOKIES_KEY]: cookies,
   } = getUserData();
 
-  console.log("options:", options);
+  consoleUtil.log("options:", options);
   if (options.enableAutoLogin && cookies && cookies.length > 0) {
     page
       .waitForResponse(async (response) => {
@@ -151,7 +156,7 @@ async function handleGoToTargetPage() {
 }
 
 function handleSendNotice(msg) {
-  console.log(msg);
+  consoleUtil.log(msg);
 }
 
 function getLoginStatus() {
@@ -165,6 +170,9 @@ function getLoginStatus() {
 
 function isBrowerDisconnected() {
   return BrowserDisconnected;
+}
+function handleSendNotice(msg) {
+  sendNotice(msg);
 }
 
 module.exports = {

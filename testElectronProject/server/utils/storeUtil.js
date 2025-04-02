@@ -2,6 +2,8 @@ const { app } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
 
+const consoleUtil = require("./consoleLogUtil");
+
 function getUserData() {
   const dataPath = path.join(app.getPath("userData"), "data.json");
   if (!fs.existsSync(dataPath)) {
