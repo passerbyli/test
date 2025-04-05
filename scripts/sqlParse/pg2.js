@@ -2,10 +2,10 @@ const pgStructure = require("pg-structure");
 const { Client } = require("pg");
 
 const client = new Client({
-  user: "your_user",
+  user: "lihaomin",
   host: "localhost",
-  database: "your_database",
-  password: "your_password",
+  database: "postgres",
+  password: "postgres",
   port: 5432,
 });
 
@@ -19,3 +19,11 @@ pgStructure(client)
   })
   .catch((err) => console.error(err))
   .finally(() => client.end());
+
+/**
+ * pgsql_ast_parser
+ * node_xlsx
+ * sheetjs_style
+ * sql_parser
+ * user_agents
+ */

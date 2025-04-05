@@ -47,14 +47,20 @@ function detectDatabaseType(sqlContent) {
   return "Unknown";
 }
 
-// 获取所有 SQL 文件（递归）
+/**
+ * 获取所有SQL文件
+ * @param {*} dir
+ * @returns
+ */
 function getSqlFiles(dir) {
   let results = [];
+  // 获取目录下的所有文件和文件夹
   const list = fs.readdirSync(dir);
   list.forEach((file) => {
     const filePath = path.join(dir, file);
     const stat = fs.statSync(filePath);
     if (stat && stat.isDirectory()) {
+      // 如果是文件夹，递归遍历
       results = results.concat(getSqlFiles(filePath));
     } else if (path.extname(file) === ".sql") {
       results.push(filePath);
@@ -63,7 +69,11 @@ function getSqlFiles(dir) {
   return results;
 }
 
-// 去除注释
+/**
+ * 去除注释
+ * @param {*} sql
+ * @returns
+ */
 function removeComments(sql) {
   sql = sql.replace(/--.*$/gm, "");
   sql = sql.replace(/\/\*[\s\S]*?\*\//g, "");
@@ -245,7 +255,6 @@ async function main(filePath) {
     "utf-8"
   );
   console.log("\n✅ 分析完成，结果已写入：sql_analysis_result.json");
-
   return result;
 }
 
@@ -253,7 +262,6 @@ async function main(filePath) {
 if (require.main === module) {
   main("./sql");
 }
-
 module.exports = {
   main,
   parseSql,

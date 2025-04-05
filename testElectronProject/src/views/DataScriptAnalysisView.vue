@@ -151,6 +151,8 @@ export default defineComponent({
             tables,
             routines,
             selectedDatabase,
+            selectedTable,
+            selectedProcedure,
             tableData,
             tableHeaders,
             procedureDefinition,

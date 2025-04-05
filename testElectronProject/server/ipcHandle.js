@@ -9,6 +9,7 @@ const db = require("./utils/db");
 const { getToBid } = require("./index");
 const { login, getMessage } = require("./utils/request");
 const consoleUtil = require("./utils/consoleLogUtil");
+const fs = require("node:fs");
 const { main } = require("../plugins/sqlParse/sqlParse2");
 
 async function ipcHandle(e, args) {
@@ -23,7 +24,7 @@ async function ipcHandle(e, args) {
   } else if (event === "setUserDataJsonProperty") {
     setUserDataJsonProperty(params.key, params.value);
   } else if (event === "openDirectory") {
-    data = await openDirectory();
+    data = await openDirectory(params);
   } else if (event === "getDataBases") {
     data = await db.getDatabases();
   } else if (event === "getTables") {
@@ -35,7 +36,7 @@ async function ipcHandle(e, args) {
   } else if (event === "getProcedureDefinition") {
     data = await db.getProcedureDefinition(params.database, params.procName);
   } else if (event === "login") {
-    data = login(params.username, params.password);
+    data = await login(params.username, params.password);
   } else if (event === "startBid") {
     getToBid(params);
   } else if (event == "getMessage") {
@@ -52,9 +53,26 @@ async function ipcHandle(e, args) {
   return data;
 }
 
-async function openDirectory() {
+async function openDirectory(type) {
+  let settingConfig = await getUserDataProperty("settings");
   let folderPath = path.join(app.getPath("userData"));
-  //  folderPath = "/Users/lihaomin/projects/GitHub/test";
+  if (type === "config") {
+  } else if (type === "log") {
+    folderPath = path.join(settingConfig.config.basePath, "log");
+  } else if (type === "export") {
+    folderPath = path.join(settingConfig.config.basePath, "export");
+  }
+
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdir(folderPath, { recursive: true }, (error) => {
+      if (error) {
+        console.log("Error creating directory", error);
+      } else {
+        console.log("Directory created successfully");
+      }
+    });
+  }
+
   shell
     .openPath(folderPath)
     .then(() => {

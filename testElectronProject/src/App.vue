@@ -5,33 +5,24 @@
         <div class="header-lf"></div>
         <div class="header-ri">
           <div class="tool-bar-ri">
-            <span class="username">zhangshan</span>
-            <el-button @click="openLoginWin()">注销</el-button>
-            <el-button>最小化</el-button>
-            <router-link to="/setting">设置</router-link>
+            <div v-if="isLogin">
+              <span class="username"></span>
+              <el-button @click="openLoginWin()">注销</el-button>
+            </div>
+            <div v-else>
+              <el-button @click="openLoginWin()">登录</el-button>
+            </div>
+            <el-button :icon="SemiSelect" size="large" circle></el-button>
+            <router-link to="/setting"><el-button :icon="Setting" size="large" circle /></router-link>
+
           </div>
         </div>
       </el-header>
       <el-container class="classic-content">
         <el-aside width="200px">
-          <el-menu class="el-menu-vertical-demo" router>
-            <el-menu-item index="/" :class="$route.path === '/' ? 'is-active' : ''">
-              <span>Home</span>
-            </el-menu-item>
-            <template v-for="(item, index) in menuRoutes">
-              <el-sub-menu v-if="item.children && item.children.length" :index="item.path">
-                <template #title>
-                  <span>{{ item.meta.title }}</span>
-                </template>
-                <el-menu-item v-for="(child, childIndex) in item.children" :key="childIndex" :index="child.path">
-                  <span>{{ child.meta.title }}</span>
-                </el-menu-item>
-              </el-sub-menu>
-              <el-menu-item v-else :index="item.path" :class="$route.path === item.path ? 'is-active' : ''">
-                <span>{{ item.meta.title }}</span>
-              </el-menu-item>
-
-            </template>
+          <el-menu :default-active="activeMenu" class="el-menu-vertical" background-color="#fff" text-color="#333"
+            active-text-color="#409EFF" router>
+            <MenuItem v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
           </el-menu>
         </el-aside>
         <el-container class="classic-main">
@@ -50,6 +41,7 @@
         <el-form-item label="密码">
           <el-input v-model="form.password" type="password" placeholder="请输入密码" />
         </el-form-item>
+        <el-alert v-if="loginReqError" :title="loginMsg" type="error" effect="dark" :closable="false" />
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -62,9 +54,11 @@
 
 </template>
 <script setup>
+import { Setting, SemiSelect } from "@element-plus/icons-vue"
 import { computed, ref, onMounted } from 'vue'
-import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 
+import MenuItem from "./MenuItem.vue"; // 递归组件
 
 onMounted(() => {
   if (window.ipc) {
@@ -78,27 +72,20 @@ onMounted(() => {
   }
 })
 
-const routes = useRouter().getRoutes()
+const router = useRouter();
+const route = useRoute();
+// 获取当前激活的菜单项
+const activeMenu = computed(() => route.path);
 
-const menuRoutes = computed(() => {
-  const adjustedRoutes = routes.flatMap(route => {
-    if (route.path === '/' && route.children) {
-      return route.children.map((child) => ({
-        ...child,
-        path: child.path,
-        meta: child.meta
-      }))
-    }
-    if (route.meta?.hidden) {
-      return []
-    }
-    return route
-  })
+// 过滤出有 meta.title 的路由作为菜单显示
+const routes = computed(() =>
+  router.options.routes.filter((r) => r.meta?.title || (r.children && r.children.length))
+);
 
-  return adjustedRoutes
-})
-
+const isLogin = ref(false)
 const dialogVisible = ref(false)
+const loginReqError = ref(false)
+const loginMsg = ref("")
 
 const openLoginWin = () => {
   dialogVisible.value = true
@@ -113,6 +100,8 @@ const login = () => {
         password: form.value.password
       }
     }).then((res) => {
+      loginReqError.value = true
+      loginMsg.value = res.message
       console.log(res)
     })
   }

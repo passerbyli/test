@@ -13,7 +13,7 @@ const myAxios = axios.create({
 });
 
 async function login(username, password) {
-  myAxios
+  return myAxios
     .post("http://localhost:3000/login", {
       username,
       password,
@@ -32,7 +32,18 @@ async function login(username, password) {
       return data;
     })
     .catch((err) => {
-      console.log("====xxx:", err.response.data);
+      console.log("====xxx:", err);
+      if (err.response) {
+        return {
+          type: "error",
+          message: err.response,
+        };
+      } else {
+        return {
+          type: "error",
+          message: err.code,
+        };
+      }
     });
 }
 function fetchPageAndGetCookie(username, password) {

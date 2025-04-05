@@ -1,7 +1,7 @@
 const fs = require("fs");
-
+const path = require("path");
 // 读取日志文件
-const logFilePath = "./query.log";
+const logFilePath = path.join(__dirname, "/log/query.log");
 const logData = fs.readFileSync(logFilePath, "utf-8").split("\n");
 
 // 匹配日志条目的正则表达式

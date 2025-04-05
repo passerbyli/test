@@ -7,8 +7,7 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      // component: HomeView,
-      component: () => import("../views/DataLineageView.vue"),
+      component: HomeView,
       meta: {
         title: "首页",
       },
@@ -21,15 +20,16 @@ const router = createRouter({
       },
       children: [
         {
-          path: "dataScriptAnalysis",
+          path: "/dataScriptAnalysis",
           name: "dataScriptAnalysis",
           component: () => import("../views/DataScriptAnalysisView.vue"),
           meta: {
             title: "数据脚本分析",
           },
+          children: [],
         },
         {
-          path: "dataLineage",
+          path: "/dataLineage",
           name: "dataLineage",
           component: () => import("../views/DataLineageView.vue"),
           meta: {
@@ -44,6 +44,39 @@ const router = createRouter({
       component: () => import("../views/MyExportView.vue"),
       meta: {
         title: "我的导出",
+      },
+    },
+    {
+      path: "/test",
+      name: "test",
+      component: () => import("../views/TestView.vue"),
+      meta: {
+        title: "test",
+      },
+      children: [],
+    },
+    {
+      path: "/test1",
+      name: "test1",
+      component: () => import("../views/Test2View.vue"),
+      meta: {
+        title: "test1",
+      },
+    },
+    {
+      path: "/test2",
+      name: "test2",
+      component: () => import("../views/Test3View.vue"),
+      meta: {
+        title: "test2",
+      },
+    },
+    {
+      path: "/test4",
+      name: "test4",
+      component: () => import("../views/Test4View.vue"),
+      meta: {
+        title: "test4",
       },
     },
     {

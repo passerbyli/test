@@ -186,3 +186,12 @@ function filterColumns(data, columns) {
 }
 
 module.exports = { readExcel };
+
+const inputFilePath = path.join(__dirname, "a_test.xlsx"); // 输入文件路径
+
+let res = readExcel("xlsx", inputFilePath, {
+  useActiveSheet: true,
+  //   sheetIndex: 0,
+  //   columns: ["标题"],
+});
+console.log(res);

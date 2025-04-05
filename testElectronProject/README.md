@@ -29,3 +29,8 @@ npm run build
 ```
 
 ~/Library/Application Support/vue-project
+
+anntv/g6@4.7.8
+
+      "!**/node_modules/sqlstring/**",
+      "!node_modules/chokidar/**"

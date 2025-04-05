@@ -1,4 +1,9 @@
 // 随机生成 100 内的随机数
+/**
+ * 脱敏规则
+ * @returns
+ */
+
 function getRandomAmount() {
   return Math.floor(Math.random() * 100) + 1;
 }

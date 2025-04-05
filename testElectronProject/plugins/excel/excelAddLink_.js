@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const XLSX = require("sheetjs-style");
+const xlsx = require("sheetjs-style");
 
 // 模拟数据（可替换为实际数据源）
 const mockData = [
@@ -12,7 +12,7 @@ const mockData = [
 function processExcel(inputFilePath, outputFilePath) {
   try {
     // 读取原始 Excel 文件
-    const workbook = XLSX.readFile(inputFilePath);
+    const workbook = xlsx.readFile(inputFilePath);
 
     // 获取“明细”页签
     const detailSheetName = "明细";
@@ -21,7 +21,7 @@ function processExcel(inputFilePath, outputFilePath) {
       throw new Error("未找到“明细”页签");
     }
 
-    const detailData = XLSX.utils.sheet_to_json(detailSheet, { header: 1 });
+    const detailData = xlsx.utils.sheet_to_json(detailSheet, { header: 1 });
 
     // 获取标题列索引
     const headerRow = detailData[0];
@@ -43,6 +43,7 @@ function processExcel(inputFilePath, outputFilePath) {
     // 遍历“明细”数据，生成 Sheet 页并添加链接
     for (let i = 1; i < detailData.length; i++) {
       const row = detailData[i];
+      console.log(row);
       const title = row[titleColumnIndex];
       if (!title) continue;
 
@@ -74,7 +75,7 @@ function processExcel(inputFilePath, outputFilePath) {
         });
 
         // 将新的 sheet 页加入工作簿
-        workbook.Sheets[title] = XLSX.utils.aoa_to_sheet(newSheetData);
+        workbook.Sheets[title] = xlsx.utils.aoa_to_sheet(newSheetData);
       }
 
       // 更新“明细”页中的链接列
@@ -83,8 +84,8 @@ function processExcel(inputFilePath, outputFilePath) {
     }
 
     // 将“明细”页更新后的数据写回
-    const updatedDetailSheet = XLSX.utils.aoa_to_sheet(detailData);
-    workbook.Sheets[detailSheetName] = updatedDetailSheet;
+    const updatedDetailSheet = xlsx.utils.aoa_to_sheet(detailData);
+    // workbook.Sheets[detailSheetName] = updatedDetailSheet;
 
     // 保存新的 Excel 文件
     const timestamp = new Date().toISOString().replace(/[:\-T\.]/g, "");
@@ -92,7 +93,7 @@ function processExcel(inputFilePath, outputFilePath) {
       __dirname,
       `output_${timestamp}.xlsx`
     );
-    XLSX.writeFile(workbook, outputFileWithTimestamp);
+    xlsx.writeFile(workbook, outputFileWithTimestamp);
     console.log(`处理完成，文件已保存至：${outputFileWithTimestamp}`);
   } catch (error) {
     console.error("处理 Excel 文件时发生错误：", error.message);
@@ -100,5 +101,5 @@ function processExcel(inputFilePath, outputFilePath) {
 }
 
 // 示例使用
-const inputFilePath = path.join(__dirname, "input1.xlsx"); // 输入文件路径
-processExcel(inputFilePath);
+// const inputFilePath = path.join(__dirname, "a_test.xlsx"); // 输入文件路径
+// processExcel(inputFilePath);
