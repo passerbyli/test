@@ -1,6 +1,15 @@
 const { app, BrowserWindow, ipcMain, Menu, MenuItem, Notification } = require('electron')
 const path = require('node:path')
 const { ipcHandle } = require('./server/ipcHandle')
+const consoleLogUtil = require('./server/utils/consoleLogUtil')
+const { getUserDataProperty } = require('./server/utils/storeUtil')
+const Constants = require('./constant/constants')
+
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+
+if (isDev) {
+  // require('electron-reload')(__dirname)
+}
 
 function createWindow() {
   const iconPath = path.join(__dirname, 'public/favicon.png')
@@ -34,9 +43,11 @@ function createWindow() {
     Menu.setApplicationMenu(menu)
   }
 
-  win.loadURL('http://localhost:5173') // 如果你用 Vue CLI
-  console.log('Current user:', process.env.USER)
-  // win.loadFile(path.join(__dirname, 'pages/index.html'))
+  if (isDev) {
+    win.loadURL('http://localhost:5173') // Vite 默认端口
+  } else {
+    win.loadFile(path.join(__dirname, 'pages/index.html'))
+  }
   win.webContents.openDevTools()
 }
 
@@ -62,6 +73,31 @@ ipcMain.on('toMain', async (e, args) => {
 app.whenReady().then(function () {
   app.setAppUserModelId('testElectronProject')
   createWindow()
+
+  if (!Notification.isSupported()) {
+    consoleLogUtil.log('Notifications are not supported')
+    return
+  }
+
+  const notification = new Notification({
+    title: '定时通知',
+    body: '这是一个定时提醒！',
+  })
+  notification.show()
+
+  // console.log("-----1:", Notification.requestPermission());
+  // Notification.requestPermission().then((permission) => {
+  //   console.log("-----2:", Notification.isSupported());
+  //   if (permission === "granted") {
+  //     consoleLogUtil.log("Notifications are granted");
+  //   } else {
+  //     consoleLogUtil.log("Notifications are denied");
+  //   }
+  // });
+
+  // 查询是否启用自动更新，未查到时，默认自动更新
+  const options = getUserDataProperty(Constants.StoreKeys.OPTIONS_KEY) || {}
+  const enableAutoUpdate = options.enableAutoUpdate
 })
 
 // Quit when all windows are closed.

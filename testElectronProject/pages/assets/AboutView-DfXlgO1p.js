@@ -1,1 +1,0 @@
-import{_ as e,d as t,c as o,i as s}from"./index-C6GkaOyR.js";const n=t({setup(){}}),c={id:"about"};function a(r,_,i,p,d,u){return s(),o("div",c," about ")}const m=e(n,[["render",a]]);export{m as default};

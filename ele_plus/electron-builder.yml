@@ -1,0 +1,51 @@
+appId: com.example.eleplus
+productName: ElePlus
+copyright: Copyright © 2025 YourName
+
+# files:
+#   - constant/**/*
+#   - server/**/*
+#   - plugins/**/*
+#   - dist/**/*
+#   - main.js
+#   - preload.js
+#   - node_modules/**/*
+#   - package.json
+#   - '!**/node_modules/.bin'
+#   - '!**/node_modules/*/test'
+#   - '!**/node_modules/*/docs'
+
+extraResources:
+  - from: assets
+    to: assets
+    filter:
+      - '**/*'
+
+directories:
+  output: dist
+
+asar: true
+
+mac:
+  target:
+    - dmg
+    - zip
+  icon: public/icon.icns
+  artifactName: '${productName}-${version}-mac-${arch}.${ext}'
+
+win:
+  target:
+    - nsis
+  icon: public/icon.ico
+  artifactName: '${productName}-${version}-win.${ext}'
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+
+linux:
+  target: AppImage
+
+publish: null

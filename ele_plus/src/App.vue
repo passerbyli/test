@@ -1,10 +1,13 @@
 <template>
   <div class="common-layout">
     <el-container>
-      <el-header>
+      <el-header class="cus_header">
         <div class="header-lf"></div>
         <div class="header-ri">
           <div class="tool-bar-ri">
+            <el-avatar :size="30" src="https://empty" @error="errorHandler">
+              <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png" />
+            </el-avatar>
             <div v-if="isLogin">
               <span class="username"></span>
               <el-button @click="openLoginWin()">注销</el-button>
@@ -12,9 +15,13 @@
             <div v-else>
               <el-button @click="openLoginWin()">登录</el-button>
             </div>
-            <el-button :icon="SemiSelect" size="large" circle></el-button>
-            <router-link to="/setting"><el-button :icon="Setting" size="large" circle /></router-link>
-
+            <el-icon>
+              <SemiSelect />
+            </el-icon>
+            <router-link to="/setting">
+              <el-icon>
+                <Setting />
+              </el-icon></router-link>
           </div>
         </div>
       </el-header>
@@ -29,9 +36,10 @@
           <el-main>
             <RouterView />
           </el-main>
-          <el-footer class="classic-footer">Footer</el-footer>
         </el-container>
       </el-container>
+
+      <el-footer class="cus_footer classic-footer">Footer</el-footer>
     </el-container>
     <el-dialog v-model="dialogVisible" title="登录" draggable>
       <el-form :model="form" label-width="auto">
@@ -51,41 +59,40 @@
       </template>
     </el-dialog>
   </div>
-
 </template>
 <script setup>
-import { Setting, SemiSelect } from "@element-plus/icons-vue"
+import { Setting, SemiSelect } from '@element-plus/icons-vue'
 import { computed, ref, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 
-import MenuItem from "./MenuItem.vue"; // 递归组件
+import MenuItem from './MenuItem.vue' // 递归组件
 
 onMounted(() => {
   if (window.ipc) {
     window.ipc.receive('fromMain', (data) => {
       if (data && data.event) {
         if (data.event === 'console') {
-          console.log('%c助手：', 'color:#fff;font-size:14px', data.data);
+          console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
         }
       }
     })
   }
 })
 
-const router = useRouter();
-const route = useRoute();
+const router = useRouter()
+const route = useRoute()
 // 获取当前激活的菜单项
-const activeMenu = computed(() => route.path);
+const activeMenu = computed(() => route.path)
 
 // 过滤出有 meta.title 的路由作为菜单显示
 const routes = computed(() =>
-  router.options.routes.filter((r) => r.meta?.title || (r.children && r.children.length))
-);
+  router.options.routes.filter((r) => r.meta?.title || (r.children && r.children.length)),
+)
 
 const isLogin = ref(false)
 const dialogVisible = ref(false)
 const loginReqError = ref(false)
-const loginMsg = ref("")
+const loginMsg = ref('')
 
 const openLoginWin = () => {
   dialogVisible.value = true
@@ -93,30 +100,31 @@ const openLoginWin = () => {
 
 const login = () => {
   if (window.ipc) {
-    window.ipc.sendInvoke('toMain', {
-      event: 'login',
-      params: {
-        username: form.value.username,
-        password: form.value.password
-      }
-    }).then((res) => {
-      if (res.type == 'error') {
-        loginReqError.value = true
-        loginMsg.value = res.message
-      } else {
-        isLogin.value = true
-        dialogVisible.value = false
-      }
-      console.log(res)
-    })
+    window.ipc
+      .sendInvoke('toMain', {
+        event: 'login',
+        params: {
+          username: form.value.username,
+          password: form.value.password,
+        },
+      })
+      .then((res) => {
+        if (res.type == 'error') {
+          loginReqError.value = true
+          loginMsg.value = res.message
+        } else {
+          isLogin.value = true
+          dialogVisible.value = false
+        }
+        console.log(res)
+      })
   }
 }
 
 const form = ref({
   username: 'admin',
-  password: '123456'
+  password: '123456',
 })
-
 </script>
 <style scoped>
 .common-layout {
@@ -134,7 +142,7 @@ const form = ref({
 
 .classic-content {
   display: flex;
-  height: calc(100% - 30px);
+  height: calc(100% - 30px - 55px);
 }
 
 .classic-main {
@@ -169,5 +177,18 @@ const form = ref({
   align-items: center;
   justify-content: center;
   padding-right: 25px;
+}
+
+
+.cus_footer,
+.cus_header {
+  background: var(--color-background-base);
+}
+</style>
+<style>
+.el-menu-item.is-active {
+  background: var(--color-background-base) !important;
+  color: #fff;
+
 }
 </style>

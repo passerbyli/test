@@ -1,99 +1,94 @@
-const { app } = require("electron");
-const path = require("node:path");
-const fs = require("node:fs");
+const { app } = require('electron')
+const path = require('node:path')
+const fs = require('node:fs')
 
-const consoleUtil = require("./consoleLogUtil");
+const consoleUtil = require('./consoleLogUtil')
 
 const defaultConfigData = {
   settings: {
     dataBase: {
-      host: "",
-      user: "",
-      password: "",
-      database: "",
+      host: '',
+      user: '',
+      password: '',
+      database: '',
       port: 3306,
-      timezone: "+08:00",
+      timezone: '+08:00',
     },
     pm: {
       reminder: false,
-      iteration: "迭代",
+      iteration: '迭代',
     },
     config: {
-      basePath: "",
+      basePath: '',
     },
   },
-};
+}
 
 /**
  * 深度合并 defaultObj 和 newObj，保留尽可能多的字段
  */
 function mergeJson(defaultObj, newObj) {
-  const result = { ...defaultObj };
+  const result = { ...defaultObj }
 
   for (const key in newObj) {
-    if (
-      newObj[key] !== null &&
-      typeof newObj[key] === "object" &&
-      !Array.isArray(newObj[key])
-    ) {
-      result[key] = mergeJson(defaultObj[key] || {}, newObj[key]);
+    if (newObj[key] !== null && typeof newObj[key] === 'object' && !Array.isArray(newObj[key])) {
+      result[key] = mergeJson(defaultObj[key] || {}, newObj[key])
     } else {
-      result[key] = newObj[key];
+      result[key] = newObj[key]
     }
   }
 
   return {
     ...result,
-    ...Object.fromEntries(
-      Object.entries(newObj).filter(([key]) => !(key in defaultObj))
-    ),
-  };
+    ...Object.fromEntries(Object.entries(newObj).filter(([key]) => !(key in defaultObj))),
+  }
 }
 
 function getUserData() {
-  const dataPath = path.join(app.getPath("userData"), "data.json");
+  const dataPath = path.join(app.getPath('userData'), 'data.json')
   if (!fs.existsSync(dataPath)) {
     fs.writeFileSync(dataPath, JSON.stringify(defaultConfigData), {
-      encoding: "utf-8",
-    });
+      encoding: 'utf-8',
+    })
   }
-  return mergeJson(
-    defaultConfigData,
-    JSON.parse(fs.readFileSync(dataPath, { encoding: "utf-8" }))
-  );
+  return mergeJson(defaultConfigData, JSON.parse(fs.readFileSync(dataPath, { encoding: 'utf-8' })))
 }
 
 function setUserData(params) {
-  const dataPath = path.join(app.getPath("userData"), "data.json");
+  const dataPath = path.join(app.getPath('userData'), 'data.json')
   fs.writeFileSync(dataPath, JSON.stringify(params, null, 2), {
-    encoding: "utf-8",
-  });
+    encoding: 'utf-8',
+  })
 }
 
 function setUserDataStr(strParams) {
-  const dataPath = path.join(app.getPath("userData"), "data.json");
-  fs.writeFileSync(dataPath, strParams, { encoding: "utf-8" });
+  const dataPath = path.join(app.getPath('userData'), 'data.json')
+  fs.writeFileSync(dataPath, strParams, { encoding: 'utf-8' })
 }
 
 function setUserDataProperty(key, value) {
-  const data = getUserData();
-  data[key] = value;
-  setUserData(data);
+  const data = getUserData()
+  data[key] = value
+  setUserData(data)
 }
 
+/**
+ * 支持按照path获取值
+ * @param {*} path
+ * @returns
+ */
 function getUserDataProperty(path) {
-  const keys = path.split(".");
-  let current = getUserData();
-
+  const keys = path.split('.')
+  let current = getUserData()
   for (const key of keys) {
-    if (current && typeof current === "object" && key in current) {
-      current = current[key];
+    if (current && typeof current === 'object' && key in current) {
+      current = current[key]
     } else {
-      return undefined;
+      return undefined
     }
   }
-  console.log(current);
-  return current;
+  console.log(current)
+  return current
 }
 
 /**
@@ -102,39 +97,46 @@ function getUserDataProperty(path) {
  * @param {string} path - 多层级路径，例如 "settings.database.host"
  * @param {*} value - 要设置的值
  */
-function setValueByPath(obj, path, value) {
-  const keys = path.split(".");
-  let current = obj;
+function setValueByPath(path, value) {
+  let config = getUserData()
+  const keys = path.split('.')
+  let current = config
 
   for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
+    const key = keys[i]
 
     // 如果是最后一层，设置值
     if (i === keys.length - 1) {
-      current[key] = value;
+      current[key] = value
     } else {
       // 中间层若不存在则创建对象
-      if (!(key in current) || typeof current[key] !== "object") {
-        current[key] = {};
+      if (!(key in current) || typeof current[key] !== 'object') {
+        current[key] = {}
       }
-      current = current[key];
+      current = current[key]
     }
   }
+  setUserData(config)
 }
 
 function setUserDataJsonProperty(key, json) {
-  let obj;
+  let obj
   try {
-    obj = JSON.parse(json);
+    obj = JSON.parse(json)
   } catch (error) {}
   if (obj) {
-    const data = getUserData();
-    data[key] = obj;
-    setUserData(data);
+    const data = getUserData()
+    data[key] = obj
+    setUserData(data)
   }
 }
 
+function getBasePath() {
+  return getUserDataProperty('settings.config.basePath')
+}
+
 module.exports = {
+  getBasePath,
   getUserData,
   setUserData,
   setUserDataStr,
@@ -142,4 +144,4 @@ module.exports = {
   setUserDataProperty,
   setUserDataJsonProperty,
   setValueByPath,
-};
+}

@@ -1,4 +1,4 @@
-const { getUserDataProperty, setUserDataJsonProperty } = require('./utils/storeUtil')
+const { getUserDataProperty, setUserDataJsonProperty, getBasePath } = require('./utils/storeUtil')
 
 const { shell, app, dialog } = require('electron')
 const path = require('node:path')
@@ -44,12 +44,97 @@ async function ipcHandle(e, args) {
     })
     data = canceled ? null : filePaths // 返回绝对路径
   } else if (event == 'data-lineage-analysis') {
-    data = await main(params)
+    data = await main(
+      params,
+      path.join(getUserDataProperty('settings.config.basePath'), 'export/test'),
+    )
+  } else if (event === 'read-log') {
+    try {
+      const filePath = getLogPath(params)
+      if (fs.existsSync(filePath)) {
+        const content = fs.readFileSync(filePath, 'utf-8')
+        return { success: true, content }
+      } else {
+        return { success: false, message: '日志文件不存在' }
+      }
+    } catch (err) {
+      return { success: false, message: err.message }
+    }
+  } else if (event === 'read-log-table') {
+    const logPath = path.join(getBasePath(), 'logs', `request_${params}.log`)
+    if (!fs.existsSync(logPath)) {
+      return { success: false, message: '日志文件不存在' }
+    }
+
+    const raw = fs.readFileSync(logPath, 'utf-8')
+    const blocks = raw.split(/\n(?=\[\d{4}-\d{2}-\d{2}T)/g)
+    const data = []
+
+    for (const block of blocks) {
+      const lines = block.trim().split('\n')
+      const metaLine = lines[0] || ''
+      const typeMatch = metaLine.match(/\] (.+?)(?: \[(.+?)\])?$/)
+      const timeMatch = metaLine.match(/^\[(.+?)\]/)
+
+      const type = typeMatch?.[1] || ''
+      const tag = typeMatch?.[2] || ''
+      const time = timeMatch?.[1] || ''
+      let method = '',
+        url = '',
+        status = '',
+        duration = '',
+        error = ''
+      let params = '',
+        requestData = '',
+        responseData = ''
+
+      for (let line of lines) {
+        line = line.trim()
+        if (line.startsWith('URL:')) {
+          const parts = line.replace('URL:', '').trim().split(' ')
+          method = parts[0]
+          url = parts[1]
+        } else if (line.startsWith('Params:')) {
+          params = line.replace('Params:', '').trim()
+        } else if (line.startsWith('Data:')) {
+          requestData = line.replace('Data:', '').trim()
+        } else if (line.startsWith('Response:')) {
+          responseData = line.replace('Response:', '').trim()
+        } else if (line.startsWith('Status:')) {
+          status = line.replace('Status:', '').trim()
+        } else if (line.startsWith('Duration:')) {
+          duration = line.replace('Duration:', '').trim()
+        } else if (line.startsWith('Error:')) {
+          error = line.replace('Error:', '').trim()
+        }
+      }
+
+      data.push({
+        time,
+        type,
+        tag,
+        method,
+        url,
+        status,
+        duration,
+        error,
+        params,
+        requestData,
+        responseData,
+      })
+    }
+
+    return { success: true, data }
   }
   console.log('ipcHandle', event, params)
   return data
 }
-
+// 获取日志目录
+const getLogPath = (dateStr) => {
+  const fileName = `request_${dateStr}.log`
+  const logDir = path.join(getBasePath(), 'logs')
+  return path.join(logDir, fileName)
+}
 async function openDirectory(type) {
   let settingConfig = await getUserDataProperty('settings')
   let folderPath = path.join(app.getPath('userData'))
@@ -59,6 +144,7 @@ async function openDirectory(type) {
   } else if (type === 'export') {
     folderPath = path.join(settingConfig.config.basePath, 'export')
   }
+
   if (!fs.existsSync(folderPath)) {
     fs.mkdir(folderPath, { recursive: true }, (error) => {
       if (error) {
@@ -68,6 +154,7 @@ async function openDirectory(type) {
       }
     })
   }
+
   shell
     .openPath(folderPath)
     .then(() => {

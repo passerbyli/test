@@ -31,12 +31,13 @@ import { defineComponent, onMounted, toRefs, reactive } from 'vue'
 export default defineComponent({
   name: 'HomeView',
   components: {
-    FolderOpened
+    FolderOpened,
   },
   setup(props, context) {
     onMounted(() => {
       if (window.ipc) {
         window.ipc.sendInvoke('toMain', { event: 'getMessage' }).then((res) => {
+          console.log(res)
         })
       }
     })
@@ -45,12 +46,12 @@ export default defineComponent({
         window.ipc.sendInvoke('toMain', { event: 'openDirectory', params: type }, (res) => {
           console.log(res)
         })
-      }
+      },
     })
 
     return {
-      ...toRefs(dataMap)
+      ...toRefs(dataMap),
     }
-  }
+  },
 })
 </script>

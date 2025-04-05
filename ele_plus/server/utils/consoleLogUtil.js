@@ -1,38 +1,38 @@
-const { BrowserWindow } = require("electron");
+const { BrowserWindow } = require('electron')
 
 function log(...msg) {
   try {
-    const windows = BrowserWindow.getAllWindows();
+    const windows = BrowserWindow.getAllWindows()
     if (!windows) {
-      return;
+      return
     }
-    let currentWindow;
+    let currentWindow
     for (let i = 0; i < windows.length; i++) {
-      const win = windows[i];
+      const win = windows[i]
       if (win) {
-        console.log(win.title);
+        console.log(win.title)
       }
-      if (win && win.title == "京东夺宝岛助手") {
-        currentWindow = win;
-        break;
+      if (win && win.title == '京东夺宝岛助手') {
+        currentWindow = win
+        break
       }
     }
     if (currentWindow) {
       // 获取参数
       const params = msg.map((arg) => {
-        if (typeof arg === "string") {
-          return arg;
+        if (typeof arg === 'string') {
+          return arg
         } else {
-          return JSON.stringify(arg);
+          return JSON.stringify(arg)
         }
-      });
+      })
 
-      const str = params.join(" ");
+      const str = params.join(' ')
       currentWindow.webContents &&
-        currentWindow.webContents.send("fromMain", {
-          event: "console",
+        currentWindow.webContents.send('fromMain', {
+          event: 'console',
           data: str,
-        });
+        })
     }
   } catch (error) {
     // arm中主进程打印日志可能抛异常，先注释
@@ -41,6 +41,6 @@ function log(...msg) {
 }
 
 function error(...msg) {
-  log(msg);
+  log(msg)
 }
-module.exports = { log, error };
+module.exports = { log, error }
