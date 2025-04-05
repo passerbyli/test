@@ -221,15 +221,6 @@ async function main(filePath, outputPath) {
     const databaseType = detectDatabaseType(sqlContent)
     const { procedures, functionNames, sourceTables, targetTables } = parseSql(sqlContent)
 
-    // console.log(`📄 文件: ${fileName}`)
-    // console.log(`   ├ 数据库类型: ${databaseType}`)
-    // console.log(`   ├ 源表: ${sourceTables.map((t) => t.table).join(', ')}`)
-    // console.log(`   ├ 目标表: ${targetTables.map((t) => t.table).join(', ')}`)
-    // console.log(
-    //   `   └ 存储过程/函数: ${[...procedures, ...functionNames].map((p) => p.name).join(', ')}`,
-    // )
-    // console.log('--------------------------------------------------')
-
     result.push({
       file,
       scriptIndex: index + 1,
@@ -255,7 +246,7 @@ async function main(filePath, outputPath) {
     fs.writeFileSync(_outputPath, JSON.stringify(result, null, 2), 'utf-8')
   }
 
-  return result
+  return { result: result, filePath: _outputPath }
 }
 
 // 默认执行（分析 ./sql 目录）

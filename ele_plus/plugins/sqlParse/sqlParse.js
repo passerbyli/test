@@ -255,12 +255,6 @@ async function main(filePath) {
 
     const { procedures, functionNames, sourceTables, targetTables } = parseSql(sqlContent)
 
-    console.group('数据库类型检测结果:' + fileName)
-    console.log(`File: ${file}`)
-    console.log(`Database Type: ${databaseType}`)
-    console.log('------------------------')
-    console.groupEnd()
-
     // 如果有有效数据，则加入最终结果
     if (procedures.length || functionNames.length || sourceTables.length || targetTables.length) {
       result.push({

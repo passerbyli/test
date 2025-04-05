@@ -5,11 +5,8 @@
         <div class="header-lf"></div>
         <div class="header-ri">
           <div class="tool-bar-ri">
-            <el-avatar :size="30" src="https://empty" @error="errorHandler">
-              <img src="https://cube.elemecdn.com/e/fd/0fc7d20532fdaf769a25683617711png.png" />
-            </el-avatar>
             <div v-if="isLogin">
-              <span class="username"></span>
+              <span class="username">{{ username }}1</span>
               <el-button @click="openLoginWin()">注销</el-button>
             </div>
             <div v-else>
@@ -98,6 +95,8 @@ const openLoginWin = () => {
   dialogVisible.value = true
 }
 
+const username = ref('')
+
 const login = () => {
   if (window.ipc) {
     window.ipc
@@ -114,6 +113,7 @@ const login = () => {
           loginMsg.value = res.message
         } else {
           isLogin.value = true
+          username.value = res.data.user.username
           dialogVisible.value = false
         }
         console.log(res)

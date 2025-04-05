@@ -28,7 +28,6 @@ function formatJSON(data) {
 
 function logToFileAndConsole(type, lines = [], tag = '') {
   //   if (!ENABLE_LOG) return
-  console.log('11100', getLogFilePath())
   const time = new Date().toISOString()
   const tagText = tag ? ` [${tag}]` : ''
   const title = `[${time}] ${type}${tagText}`

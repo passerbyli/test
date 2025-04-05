@@ -17,7 +17,7 @@ function mainSendToRender(event, data) {
       if (win.title) {
         console.log('000000000000:', win.title)
       }
-      if (win && win.title == '京东夺宝岛助手') {
+      if (win && win.title == 'Vite_App_____TEST') {
         // 精确匹配窗口标题
         currentWindow = win
         break // 找到第一个匹配窗口即停止

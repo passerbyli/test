@@ -87,7 +87,6 @@ function getUserDataProperty(path) {
       return undefined
     }
   }
-  console.log(current)
   return current
 }
 

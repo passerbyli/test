@@ -2,6 +2,7 @@
   <el-button @click="selectFolder">选择文件夹</el-button>
   <p>绝对路径：{{ path }}</p>
   <el-button type="" v-if="path" @click="analysisBtn">分析</el-button>
+  <p v-if="outputPath">{{ outputPath }}</p>
   <div id="table-graph" class="w-full h-full"></div>
 </template>
 
@@ -112,6 +113,7 @@ export default defineComponent({
       graph.render()
     })
     const path = ref('/Users/lihaomin/projects/GitHub/test/scripts/sqlParse/data')
+    const outputPath = ref('')
     const selectFolder = async () => {
       if (window.ipc) {
         await window.ipc
@@ -135,12 +137,18 @@ export default defineComponent({
           })
           .then((result) => {
             if (result) {
+              if (result.filePath) {
+                outputPath.value = result.filePath
+              } else {
+                outputPath.value = ''
+              }
               console.log(result)
             }
           })
       },
       selectFolder,
       path,
+      outputPath,
     })
 
     return {

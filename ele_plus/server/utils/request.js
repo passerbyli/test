@@ -18,7 +18,10 @@ async function login(username, password) {
       if (response.status !== 200) {
         return false
       } else {
-        setValueByPath('prod.cookies', JSON.stringify(response.headers['set-cookie']))
+        setValueByPath('prod', {
+          username: username,
+          cookies: response.headers['set-cookie'],
+        })
       }
       return data
     })
@@ -86,14 +89,10 @@ function fetchPageAndGetCookie(username, password) {
 
 async function getMessage() {
   let cookieStr = getUserDataProperty('prod.cookies')
-  let cookie = []
-  try {
-    cookie = JSON.parse(cookieStr)
-  } catch (error) {}
   return myAxios
     .get('http://localhost:3000/messages', {
       headers: {
-        Cookie: cookie,
+        Cookie: cookieStr,
       },
       tag: 'xxajiso',
     })

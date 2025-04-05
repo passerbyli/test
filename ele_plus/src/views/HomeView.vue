@@ -43,7 +43,7 @@ export default defineComponent({
     })
     const dataMap = reactive({
       open(type) {
-        window.ipc.sendInvoke('toMain', { event: 'openDirectory', params: type }, (res) => {
+        window.ipc.sendInvoke('toMain', { event: 'openDirectory', params: { type: type } }, (res) => {
           console.log(res)
         })
       },

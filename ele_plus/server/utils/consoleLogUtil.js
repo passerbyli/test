@@ -10,9 +10,9 @@ function log(...msg) {
     for (let i = 0; i < windows.length; i++) {
       const win = windows[i]
       if (win) {
-        console.log(win.title)
+        console.log('======', win.title)
       }
-      if (win && win.title == '京东夺宝岛助手') {
+      if (win && win.title == 'Vite_App_____TEST') {
         currentWindow = win
         break
       }

@@ -21,7 +21,7 @@ async function ipcHandle(e, args) {
   } else if (event === 'setUserDataJsonProperty') {
     setUserDataJsonProperty(params.key, params.value)
   } else if (event === 'openDirectory') {
-    data = await openDirectory(params)
+    data = await openDirectory(params.path, params.type)
   } else if (event === 'getDataBases') {
     data = await db.getDatabases()
   } else if (event === 'getTables') {
@@ -135,16 +135,38 @@ const getLogPath = (dateStr) => {
   const logDir = path.join(getBasePath(), 'logs')
   return path.join(logDir, fileName)
 }
-async function openDirectory(type) {
+
+/**
+ * 如果是文件则返回其所在目录；如果是目录则原样返回；不存在则返回 null
+ * @param {string} targetPath
+ * @returns {string|null}
+ */
+function getDirectoryFromPath(targetPath) {
+  if (!fs.existsSync(targetPath)) return null
+
+  const stat = fs.statSync(targetPath)
+
+  if (stat.isFile()) {
+    return path.dirname(targetPath)
+  } else if (stat.isDirectory()) {
+    return targetPath
+  } else {
+    return null
+  }
+}
+
+async function openDirectory(dirPath, type) {
   let settingConfig = await getUserDataProperty('settings')
-  let folderPath = path.join(app.getPath('userData'))
+  let folderPath = dirPath
   if (type === 'config') {
+    folderPath = path.join(app.getPath('userData'))
   } else if (type === 'log') {
     folderPath = path.join(settingConfig.config.basePath, 'log')
   } else if (type === 'export') {
     folderPath = path.join(settingConfig.config.basePath, 'export')
   }
 
+  folderPath = getDirectoryFromPath(folderPath)
   if (!fs.existsSync(folderPath)) {
     fs.mkdir(folderPath, { recursive: true }, (error) => {
       if (error) {
