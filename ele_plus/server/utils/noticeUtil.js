@@ -1,18 +1,13 @@
 const { getUserDataProperty } = require('./storeUtil')
-const http = require('http')
-const Constants = require('../../constant/constants')
-const path = require('path')
 
-const https = require('https')
 const consoleUtil = require('./consoleLogUtil')
 const { Notification } = require('electron')
 const noticeTitle = '测试'
 
 function sendNotice(msg) {
-  const userDataOptions = getUserDataProperty(Constants.StoreKeys.OPTIONS_KEY)
-  const { enableDesktopNotification } = userDataOptions || {}
+  const reminder = getUserDataProperty('settings.pm.reminder')
 
-  if (enableDesktopNotification || undefined === enableDesktopNotification) {
+  if (reminder) {
     new Notification({
       title: noticeTitle,
       body: msg,

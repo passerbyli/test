@@ -1,15 +1,13 @@
-const { ipcRenderer } = require('electron')
-const axios = require('axios')
-const https = require('https')
 const http = require('http')
 const fs = require('fs')
 const { setValueByPath, getUserDataProperty } = require('./storeUtil')
 const consoleUtil = require('./consoleLogUtil')
 const myAxios = require('./myAxios')
+const constants = require('../../constant/constants')
 
-async function login(username, password) {
+async function login(username, password, role) {
   return myAxios
-    .post('http://localhost:3000/login', {
+    .post(constants.API.prod.login, {
       username,
       password,
     })
@@ -18,15 +16,19 @@ async function login(username, password) {
       if (response.status !== 200) {
         return false
       } else {
-        setValueByPath('prod', {
+        consoleUtil.log('登录成功')
+        setValueByPath('auth', {
           username: username,
+          password: password,
+          role: role,
           cookies: response.headers['set-cookie'],
+          isLogin: true,
+          exception: false,
         })
       }
       return data
     })
     .catch((err) => {
-      console.log('====xxx:', err)
       if (err.response) {
         return {
           type: 'error',
@@ -40,6 +42,28 @@ async function login(username, password) {
       }
     })
 }
+
+async function getUserInfo() {
+  let cookieStr = getUserDataProperty('auth')
+  return myAxios
+    .get(constants.API.prod.checkLogin, {
+      headers: {
+        Cookie: cookieStr.cookies,
+      },
+      tag: 'xxajiso',
+    })
+    .then((response) => {
+      response.data.data.role = cookieStr.role
+      return response.data
+    })
+    .catch((err) => {
+      return {
+        type: 'error',
+        message: err?.response?.data,
+      }
+    })
+}
+
 function fetchPageAndGetCookie(username, password) {
   const options = {
     hostname: 'localhost', // 修改为目标网站的主机名
@@ -109,6 +133,7 @@ async function getMessage() {
 }
 
 module.exports = {
+  getUserInfo,
   getMessage,
   fetchPageAndGetCookie,
   login,

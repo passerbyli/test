@@ -2,8 +2,6 @@ const { app } = require('electron')
 const path = require('node:path')
 const fs = require('node:fs')
 
-const consoleUtil = require('./consoleLogUtil')
-
 const defaultConfigData = {
   settings: {
     dataBase: {
@@ -18,9 +16,21 @@ const defaultConfigData = {
       reminder: false,
       iteration: '迭代',
     },
+    platform: {
+      beta: { username: '', password: '', cookie: [] },
+      prod: { username: '', password: '', cookie: [] },
+    },
     config: {
       basePath: '',
     },
+  },
+  auth: {
+    username: '',
+    password: '',
+    role: '开发',
+    cookie: [],
+    isLogin: false,
+    exception: false,
   },
 }
 
@@ -42,6 +52,10 @@ function mergeJson(defaultObj, newObj) {
     ...result,
     ...Object.fromEntries(Object.entries(newObj).filter(([key]) => !(key in defaultObj))),
   }
+}
+
+function getIsLogin() {
+  return getUserDataProperty('auth.isLogin')
 }
 
 function getUserData() {
@@ -135,6 +149,7 @@ function getBasePath() {
 }
 
 module.exports = {
+  getIsLogin,
   getBasePath,
   getUserData,
   setUserData,

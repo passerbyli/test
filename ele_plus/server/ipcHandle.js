@@ -5,9 +5,11 @@ const path = require('node:path')
 const fs = require('node:fs')
 const db = require('./utils/db')
 // const { getToBid } = require('./index')
-const { login, getMessage } = require('./utils/request')
+const { login, getMessage, getUserInfo } = require('./utils/request')
 const consoleUtil = require('./utils/consoleLogUtil')
 const { main } = require('../plugins/sqlParse/sqlParse2')
+const { CronJob } = require('../plugins/cron/cronUtil')
+const { mainSendToRender } = require('./utils/mainProcessMsgHandle')
 
 async function ipcHandle(e, args) {
   if (!args || !args.event) {
@@ -16,7 +18,9 @@ async function ipcHandle(e, args) {
   const event = args.event
   const params = args.params
   let data
-  if (event === 'getUserDataProperty') {
+  if (event == 'init') {
+    data = await authLogin()
+  } else if (event === 'getUserDataProperty') {
     data = getUserDataProperty(params)
   } else if (event === 'setUserDataJsonProperty') {
     setUserDataJsonProperty(params.key, params.value)
@@ -33,7 +37,15 @@ async function ipcHandle(e, args) {
   } else if (event === 'getProcedureDefinition') {
     data = await db.getProcedureDefinition(params.database, params.procName)
   } else if (event === 'login') {
-    data = await login(params.username, params.password)
+    const userStat = await login(params.username, params.password, params.role)
+    if (userStat.type != 'error') {
+      data = await getUserInfo()
+      job()
+    } else {
+      data = userStat.message.data
+    }
+  } else if (event === 'getUserInfo') {
+    data = await getUserInfo()
   } else if (event === 'startBid') {
     // getToBid(params)
   } else if (event == 'getMessage') {
@@ -124,11 +136,43 @@ async function ipcHandle(e, args) {
       })
     }
 
-    return { success: true, data }
+    return { success: true, data: data }
   }
   console.log('ipcHandle', event, params)
   return data
 }
+
+async function authLogin() {
+  let userInfo = {}
+  const authInfo = getUserDataProperty('auth')
+  if (authInfo.username && authInfo.password) {
+    await login(authInfo.username, authInfo.password, authInfo.role)
+    userInfo = await getUserInfo()
+    await job()
+  }
+
+  return userInfo.data
+}
+
+const jobTask = new CronJob('MyJob')
+function job() {
+  jobTask.setExpression('*/3 * * * * *')
+  jobTask.setCallback(() => {
+    console.log('定时任务触发', new Date().toLocaleTimeString())
+    getUserInfo()
+
+    let auth = getUserDataProperty('auth')
+    if (auth.exception) {
+      jobTask.stop()
+      mainSendToRender('openLoginWin')
+    }
+    if (!auth.exception && !auth.isLogin) {
+      authLogin()
+    }
+  })
+  jobTask.start()
+}
+
 // 获取日志目录
 const getLogPath = (dateStr) => {
   const fileName = `request_${dateStr}.log`

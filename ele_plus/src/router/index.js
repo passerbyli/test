@@ -97,14 +97,6 @@ const router = createRouter({
       },
     },
     {
-      path: '/log',
-      name: 'log',
-      component: () => import('../views/LogView.vue'),
-      meta: {
-        title: 'log',
-      },
-    },
-    {
       path: '/log2',
       name: 'log2',
       component: () => import('../views/LogTableView.vue'),

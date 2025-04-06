@@ -4,22 +4,18 @@
       <el-header class="cus_header">
         <div class="header-lf"></div>
         <div class="header-ri">
-          <div class="tool-bar-ri">
+          <el-space class="tool-bar-ri" size="20">
             <div v-if="isLogin">
-              <span class="username">{{ username }}1</span>
-              <el-button @click="openLoginWin()">注销</el-button>
+              <span class="username">[{{ userinfo?.role }}]{{ userinfo?.username }}</span>
+              <el-button type="primary" plain @click="openLoginWin()">注销</el-button>
             </div>
             <div v-else>
-              <el-button @click="openLoginWin()">登录</el-button>
+              <el-button type="primary" plain @click="openLoginWin()">登录</el-button>
             </div>
-            <el-icon>
-              <SemiSelect />
-            </el-icon>
             <router-link to="/setting">
-              <el-icon>
-                <Setting />
-              </el-icon></router-link>
-          </div>
+              <el-button type="primary" plain>设置</el-button>
+            </router-link>
+          </el-space>
         </div>
       </el-header>
       <el-container class="classic-content">
@@ -40,6 +36,14 @@
     </el-container>
     <el-dialog v-model="dialogVisible" title="登录" draggable>
       <el-form :model="form" label-width="auto">
+        <el-form-item label="角色">
+          <el-select v-model="form.role" placeholder="请选择">
+            <el-option label="开发" value="开发" />
+            <el-option label="测试" value="测试" />
+            <el-option label="SM" value="SM" />
+          </el-select>
+
+        </el-form-item>
         <el-form-item label="用户名">
           <el-input v-model="form.username" placeholder="请输入用户名" />
         </el-form-item>
@@ -58,7 +62,6 @@
   </div>
 </template>
 <script setup>
-import { Setting, SemiSelect } from '@element-plus/icons-vue'
 import { computed, ref, onMounted } from 'vue'
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 
@@ -70,9 +73,31 @@ onMounted(() => {
       if (data && data.event) {
         if (data.event === 'console') {
           console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
+        } else if (data.event == 'openLoginWin') {
+          dialogVisible.value = true
+          userinfo.value = {}
+          isLogin.value = false
         }
       }
     })
+    window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
+      isLogin.value = true
+      userinfo.value = res
+    })
+    // setInterval(() => {
+    //   window.ipc.sendInvoke("toMain", { event: "getUserInfo" }).then(res => {
+    //     if (res.type == 'error') {
+    //       loginReqError.value = true
+    //       loginMsg.value = res.message
+    //     } else {
+    //       console.log(res.data)
+    //       isLogin.value = true
+    //       userinfo.value = res.data
+    //       dialogVisible.value = false
+    //     }
+    //   })
+    // }, 3000000)
+
   }
 })
 
@@ -90,12 +115,21 @@ const isLogin = ref(false)
 const dialogVisible = ref(false)
 const loginReqError = ref(false)
 const loginMsg = ref('')
+const userinfo = ref({
+  role: '',
+  username: ''
+})
+
+const form = ref({
+  username: 'admin',
+  password: '12345666',
+  role: '开发'
+})
 
 const openLoginWin = () => {
   dialogVisible.value = true
 }
 
-const username = ref('')
 
 const login = () => {
   if (window.ipc) {
@@ -105,80 +139,81 @@ const login = () => {
         params: {
           username: form.value.username,
           password: form.value.password,
+          role: form.value.role
         },
       })
       .then((res) => {
+        console.log('====', res)
         if (res.type == 'error') {
+          loginReqError.value = true
+          loginMsg.value = res.message
+        } else if (res.message == '用户名或密码错误') {
           loginReqError.value = true
           loginMsg.value = res.message
         } else {
           isLogin.value = true
-          username.value = res.data.user.username
+          userinfo.value = res.data
           dialogVisible.value = false
         }
-        console.log(res)
       })
   }
 }
 
-const form = ref({
-  username: 'admin',
-  password: '123456',
-})
+
 </script>
-<style scoped>
+<style lang="scss" scoped>
 .common-layout {
   position: relative;
   height: 100%;
   width: 100%;
   padding: 0;
   margin: 0;
+
 }
 
 .el-container {
   width: 100%;
   height: 100%;
-}
 
-.classic-content {
-  display: flex;
-  height: calc(100% - 30px - 55px);
-}
+  .el-header {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    padding: 0 15px 0 0;
 
-.classic-main {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
+    .header-lf {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+
+    .tool-bar-ri {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 25px;
+    }
+  }
+
+  .classic-content {
+    display: flex;
+    height: calc(100% - 40px - 50px);
+  }
+
+  .classic-main {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .classic-footer {
   height: 30px;
 }
-
-.el-container .el-header {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 55px;
-  padding: 0 15px 0 0;
-}
-
-.el-container .el-header .header-lf {
-  display: flex;
-  align-items: center;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-.tool-bar-ri {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-right: 25px;
-}
-
 
 .cus_footer,
 .cus_header {

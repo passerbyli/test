@@ -2,11 +2,14 @@ const fs = require('fs')
 const path = require('path')
 const axios = require('axios')
 const https = require('https')
-const { getBasePath } = require('./storeUtil')
-// const chalk = require('chalk') // 彩色输出
-
-// 是否启用日志（可通过配置文件、env 或传参控制）
-const ENABLE_LOG = process.env.ENABLE_API_LOG !== 'false'
+const {
+  getBasePath,
+  getUserDataProperty,
+  setUserDataJsonProperty,
+  setValueByPath,
+} = require('./storeUtil')
+const { mainSendToRender } = require('./mainProcessMsgHandle')
+const constants = require('../../constant/constants')
 
 function getTodayStr() {
   return new Date().toISOString().split('T')[0]
@@ -27,21 +30,12 @@ function formatJSON(data) {
 }
 
 function logToFileAndConsole(type, lines = [], tag = '') {
-  //   if (!ENABLE_LOG) return
   const time = new Date().toISOString()
   const tagText = tag ? ` [${tag}]` : ''
   const title = `[${time}] ${type}${tagText}`
   const content = [title, ...lines.map((line) => `  ${line}`)].join('\n')
 
   fs.appendFileSync(getLogFilePath(), '\n' + content + '\n', 'utf-8')
-
-  // const color = type.includes('Request')
-  //   ? chalk.cyan
-  //   : type.includes('Response')
-  //     ? chalk.green
-  //     : chalk.red
-
-  // console.log(color(content))
 }
 
 // 创建 axios 实例
@@ -49,6 +43,10 @@ const myAxios = axios.create({
   httpsAgent: new https.Agent({ rejectUnauthorized: false }),
   timeout: 10000,
 })
+
+function xxx() {
+  myAxios.post(constants.API.prod.login, {}).then((res) => {})
+}
 
 // 请求拦截器
 myAxios.interceptors.request.use(
@@ -106,12 +104,27 @@ myAxios.interceptors.response.use(
       `Error: ${error.message}`,
     ]
 
+    if (error.status == 401) {
+      if (error.response.data.message === '未登录，请先登录') {
+        setValueByPath('auth.isLogin', false)
+        xxx()
+      }
+    }
     if (error.response) {
       lines.splice(1, 0, `Status: ${error.response.status}`)
       lines.push(`Error Data: ${formatJSON(error.response.data)}`)
       logToFileAndConsole('× Response Error', lines, tag)
     } else {
       logToFileAndConsole('× Network Error', lines, tag)
+    }
+
+    console.log(error.request.status)
+    if (error.request && error.response.status === 401) {
+      if (error.response.data.message === '用户名或密码错误') {
+        mainSendToRender('openLoginWin')
+        setValueByPath('auth.exception', true)
+      }
+      setValueByPath('auth.isLogin', false)
     }
 
     return Promise.reject(error)

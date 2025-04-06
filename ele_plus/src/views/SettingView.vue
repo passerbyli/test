@@ -59,7 +59,26 @@
       </el-row>
       <el-divider />
       <h2>平台</h2>
-      <el-row gutter="20">
+      <el-row gutter="50">
+        <el-col :span="11">
+          <h4>测试环境</h4>
+          <el-form-item label="账号">
+            <el-input v-model="form.platform.beta.username" />
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="form.platform.beta.password" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="2"></el-col>
+        <el-col :span="11">
+          <h4>生产环境</h4>
+          <el-form-item label="账号">
+            <el-input v-model="form.platform.prod.username" />
+          </el-form-item>
+          <el-form-item label="密码">
+            <el-input v-model="form.platform.prod.password" />
+          </el-form-item>
+        </el-col>
 
       </el-row>
       <el-divider />
@@ -110,6 +129,10 @@ export default defineComponent({
           reminder: false,
           iteration: '迭代',
         },
+        platform: {
+          beta: { username: '', password: "", cookie: [] },
+          prod: { username: '', password: "", cookie: [] }
+        },
         config: {
           basePath: '',
         },
@@ -123,7 +146,6 @@ export default defineComponent({
             })
             .then((result) => {
               if (result) {
-                console.log(result)
                 dataMap.form.config.basePath = result[0]
               }
             })

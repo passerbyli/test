@@ -1,15 +1,18 @@
-const { app, BrowserWindow, ipcMain, Menu, MenuItem, Notification } = require('electron')
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Menu,
+  MenuItem,
+  Notification,
+  shell,
+  dialog,
+} = require('electron')
 const path = require('node:path')
 const { ipcHandle } = require('./server/ipcHandle')
 const consoleLogUtil = require('./server/utils/consoleLogUtil')
-const { getUserDataProperty } = require('./server/utils/storeUtil')
-const Constants = require('./constant/constants')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
-
-if (isDev) {
-  // require('electron-reload')(__dirname)
-}
 
 function createWindow() {
   const iconPath = path.join(__dirname, 'public/favicon.png')
@@ -31,9 +34,27 @@ function createWindow() {
   if (helpMenuItem) {
     helpMenuItem.submenu.append(
       new MenuItem({
-        label: 'test',
+        label: '搜索',
         click: () => {
-          console.log('test')
+          shell.openExternal('https://baidu.com')
+        },
+      }),
+    )
+
+    helpMenuItem.submenu.append(
+      new MenuItem({
+        label: '关于',
+        click: () => {
+          const version = app.getVersion()
+          const message = `Version: ${version}\r\nAuthor: hogan \r\nLicense: AGPL-3.0`
+
+          dialog.showMessageBox({
+            icon: iconPath,
+            title: 'electronTest',
+            message: message,
+            buttons: ['OK'],
+            type: 'none',
+          })
         },
       }),
     )
@@ -79,11 +100,11 @@ app.whenReady().then(function () {
     return
   }
 
-  const notification = new Notification({
-    title: '定时通知',
-    body: '这是一个定时提醒！',
-  })
-  notification.show()
+  // const notification = new Notification({
+  //   title: '定时通知',
+  //   body: '这是一个定时提醒！',
+  // })
+  // notification.show()
 
   // console.log("-----1:", Notification.requestPermission());
   // Notification.requestPermission().then((permission) => {
@@ -94,10 +115,6 @@ app.whenReady().then(function () {
   //     consoleLogUtil.log("Notifications are denied");
   //   }
   // });
-
-  // 查询是否启用自动更新，未查到时，默认自动更新
-  const options = getUserDataProperty(Constants.StoreKeys.OPTIONS_KEY) || {}
-  const enableAutoUpdate = options.enableAutoUpdate
 })
 
 // Quit when all windows are closed.

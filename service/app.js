@@ -11,8 +11,8 @@ app.use(
   session({
     secret: 'your_secret_key', // 用于加密session
     resave: false, // 每次请求是否强制保存session
-    saveUninitialized: false, // 是否保存未初始化的session
-    cookie: { maxAge: 60 * 60 * 1000 }, // session有效时间：1小时
+    saveUninitialized: true, // 是否保存未初始化的session
+    cookie: { maxAge: 1 * 10 * 1000 }, // session有效时间：1小时
   })
 )
 
@@ -82,6 +82,14 @@ function authenticateSession(req, res, next) {
     res.status(401).json({ message: '未登录，请先登录' })
   }
 }
+
+// userinfo
+app.get('/userinfo', authenticateSession, (req, res) => {
+  let userinfo = readJsonFile('./userinfo.json')
+  userinfo.data.username = userinfo.data.username + Math.floor(Math.random() * 100)
+  console.log('userinfo', userinfo)
+  res.json(userinfo)
+})
 
 // 信息列表接口（需认证）
 app.get('/messages', authenticateSession, (req, res) => {
