@@ -1,0 +1,318 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>SQL 血缘图示例</title>
+    <script src="https://gw.alipayobjects.com/os/lib/antv/g6/4.8.16/dist/g6.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: sans-serif;
+      }
+      #toolbar {
+        height: 40px;
+        background: #f5f5f5;
+        border-bottom: 1px solid #ddd;
+        padding: 5px 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 1;
+      }
+      #container {
+        width: 100vw;
+        height: calc(100vh - 40px);
+      }
+      #legend {
+        position: absolute;
+        top: 50px;
+        right: 20px;
+        background: #fff;
+        border: 1px solid #ddd;
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        line-height: 1.8;
+        z-index: 2;
+      }
+      #sqlModal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 20px;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        display: none;
+        z-index: 999;
+      }
+      #sqlModal pre {
+        background: #f0f0f0;
+        padding: 10px;
+        overflow: auto;
+        max-height: 300px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="toolbar">
+      <button onclick="graph.fitView()">适应画布</button>
+      <button onclick="graph.zoom(1.1)">放大</button>
+      <button onclick="graph.zoom(0.9)">缩小</button>
+      <button onclick="graph.zoomTo(1)">1:1</button>
+      <button onclick="graph.refresh()">刷新</button>
+    </div>
+    <div id="container"></div>
+    <div id="legend">
+      <strong>图例：</strong><br />
+      <span style="color: #1890ff">●</span> 平台A - 存储过程<br />
+      <span style="color: #52c41a">●</span> 平台B - SQL脚本<br />
+      <span style="color: #faad14">●</span> Spark集成<br />
+      <hr />
+      <strong>实体类型：</strong><br />
+      <span style="color: #5b8ff9">■</span> 表（Table）<br />
+      <span style="color: #f6bd16">■</span> 接口（Interface）<br />
+      <span style="color: #d3c6ea">■</span> 外部系统（System）
+    </div>
+    <div id="sqlModal">
+      <h4 id="sqlTitle">详情</h4>
+      <pre id="sqlContent">无内容</pre>
+      <button onclick="document.getElementById('sqlModal').style.display='none'">关闭</button>
+    </div>
+
+    <script>
+      const sqlMap = {
+        'ads.table1': 'SELECT id, name, area_id FROM dws.dws_table1 JOIN dws.dws_table2 ...',
+        'ads.table2': 'SELECT id, price FROM dws.dws_table3 JOIN dws.dws_table4 ...',
+        'dws.dws_table1': 'CALL proc_dws_1();',
+        'dws.dws_table3': 'CALL proc_dws_3();',
+        'ods.ods_order1': 'SPARK SQL: Load data from 系统A...',
+      }
+
+      const edgeSqlMap = {
+        'dws.dws_table1->ads.table1': '平台B 执行 SQL 脚本A: SELECT * FROM ...',
+        'dmd.dmd_table1->dws.dws_table1': '平台A 执行存储过程B: CALL proc_dws_1()',
+        '系统A->ods.ods_order1': 'Spark集成：由系统A定时导入ODS',
+      }
+
+      const nodeTypeMap = {
+        接口: '#F6BD16',
+        表: '#5B8FF9',
+        系统: '#D3C6EA',
+      }
+
+      const getNodeType = (id) => {
+        if (id.startsWith('接口')) return '接口'
+        if (id.startsWith('系统')) return '系统'
+        return '表'
+      }
+
+      const getNodeStyle = (type) => ({ fill: nodeTypeMap[type] })
+
+      const nodes = [
+        {
+          id: '接口A',
+          label: '接口A',
+          style: getNodeStyle('接口'),
+          fields: [],
+        },
+        {
+          id: 'ads.table1',
+          label: 'ads.table1',
+          style: getNodeStyle('表'),
+          fields: ['id', 'name', 'area_id'],
+        },
+        {
+          id: 'ads.table2',
+          label: 'ads.table2',
+          style: getNodeStyle('表'),
+          fields: ['id', 'price'],
+        },
+        { id: 'dim.area', label: 'dim.area', style: getNodeStyle('表'), fields: [] },
+        { id: 'dws.dws_table1', label: 'dws.dws_table1', style: getNodeStyle('表'), fields: [] },
+        { id: 'dws.dws_table2', label: 'dws.dws_table2', style: getNodeStyle('表'), fields: [] },
+        { id: 'dws.dws_table3', label: 'dws.dws_table3', style: getNodeStyle('表'), fields: [] },
+        { id: 'dws.dws_table4', label: 'dws.dws_table4', style: getNodeStyle('表'), fields: [] },
+        { id: 'dmd.dmd_table1', label: 'dmd.dmd_table1', style: getNodeStyle('表'), fields: [] },
+        { id: 'dmd.dmd_table2', label: 'dmd.dmd_table2', style: getNodeStyle('表'), fields: [] },
+        { id: 'dmd.dmd_table3', label: 'dmd.dmd_table3', style: getNodeStyle('表'), fields: [] },
+        { id: 'dmd.dmd_table4', label: 'dmd.dmd_table4', style: getNodeStyle('表'), fields: [] },
+        { id: 'ods.ods_order1', label: 'ods.ods_order1', style: getNodeStyle('表'), fields: [] },
+        { id: '系统A', label: '系统A', style: getNodeStyle('系统'), fields: [] },
+      ]
+
+      const edges = [
+        { source: 'ads.table1', target: '接口A' },
+        { source: 'ads.table2', target: '接口A' },
+        { source: 'dim.area', target: '接口A' },
+        {
+          source: 'dws.dws_table1',
+          target: 'ads.table1',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dws.dws_table2',
+          target: 'ads.table1',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dws.dws_table3',
+          target: 'ads.table2',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dws.dws_table4',
+          target: 'ads.table2',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dmd.dmd_table1',
+          target: 'dws.dws_table1',
+          label: '平台A - 存储过程',
+          style: { stroke: '#1890ff' },
+        },
+        {
+          source: 'dmd.dmd_table2',
+          target: 'dws.dws_table1',
+          label: '平台A - 存储过程',
+          style: { stroke: '#1890ff' },
+        },
+        {
+          source: 'dmd.dmd_table1',
+          target: 'dws.dws_table2',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dmd.dmd_table2',
+          target: 'dws.dws_table2',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dmd.dmd_table3',
+          target: 'dws.dws_table3',
+          label: '平台A - 存储过程',
+          style: { stroke: '#1890ff' },
+        },
+        {
+          source: 'dmd.dmd_table4',
+          target: 'dws.dws_table3',
+          label: '平台A - 存储过程',
+          style: { stroke: '#1890ff' },
+        },
+        {
+          source: 'dmd.dmd_table3',
+          target: 'dws.dws_table4',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'dmd.dmd_table4',
+          target: 'dws.dws_table4',
+          label: '平台B - SQL脚本',
+          style: { stroke: '#52c41a' },
+        },
+        {
+          source: 'ods.ods_order1',
+          target: 'dws.dws_table1',
+          label: '平台A - 存储过程',
+          style: { stroke: '#1890ff' },
+        },
+        {
+          source: '系统A',
+          target: 'ods.ods_order1',
+          label: 'Spark集成',
+          style: { stroke: '#faad14' },
+        },
+      ]
+
+      const graph = new G6.Graph({
+        container: 'container',
+        width: window.innerWidth,
+        height: window.innerHeight - 40,
+        layout: {
+          type: 'dagre',
+          rankdir: 'LR',
+          nodesep: 30,
+          ranksep: 100,
+        },
+        defaultNode: {
+          type: 'rect',
+          size: [160, 40],
+          style: {
+            radius: 8,
+            stroke: '#ccc',
+          },
+          labelCfg: {
+            style: {
+              fontSize: 12,
+              fill: '#000',
+            },
+          },
+        },
+        defaultEdge: {
+          type: 'quadratic',
+          labelCfg: {
+            autoRotate: true,
+            style: {
+              fontSize: 10,
+              fill: '#555',
+              background: {
+                fill: '#fff',
+                stroke: '#ccc',
+                padding: [2, 4],
+                radius: 4,
+              },
+            },
+          },
+          style: {
+            stroke: '#aaa',
+            endArrow: true,
+          },
+        },
+        modes: {
+          default: ['drag-canvas', 'zoom-canvas', 'drag-node'],
+        },
+      })
+
+      graph.data({ nodes, edges })
+      graph.render()
+
+      graph.on('node:click', (e) => {
+        const model = e.item.getModel()
+        const fields = model.fields?.length ? `字段：\n- ` + model.fields.join('\n- ') : ''
+        const sql = sqlMap[model.id] || '暂无 SQL 脚本信息'
+        document.getElementById('sqlTitle').innerText = model.label
+        document.getElementById('sqlContent').innerText = fields + '\n\nSQL内容：\n' + sql
+        document.getElementById('sqlModal').style.display = 'block'
+      })
+
+      graph.on('edge:click', (e) => {
+        const model = e.item.getModel()
+        const key = model.source + '->' + model.target
+        const detail = edgeSqlMap[key] || model.label || '暂无详细信息'
+        document.getElementById('sqlTitle').innerText = `${model.source} → ${model.target}`
+        document.getElementById('sqlContent').innerText = detail
+        document.getElementById('sqlModal').style.display = 'block'
+      })
+      graph.get('canvas').set('localRefresh', false)
+      window.addEventListener('resize', () => {
+        graph.changeSize(window.innerWidth, window.innerHeight - 40)
+      })
+    </script>
+  </body>
+</html>

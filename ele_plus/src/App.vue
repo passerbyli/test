@@ -1,21 +1,24 @@
 <template>
   <div class="common-layout">
     <el-container>
-      <el-header class="cus_header">
-        <div class="header-lf"></div>
-        <div class="header-ri">
-          <el-space class="tool-bar-ri" size="20">
-            <div v-if="isLogin">
-              <span class="username">[{{ userinfo?.role }}]{{ userinfo?.username }}</span>
-              <el-button type="primary" plain @click="openLoginWin()">注销</el-button>
-            </div>
-            <div v-else>
-              <el-button type="primary" plain @click="openLoginWin()">登录</el-button>
-            </div>
-            <router-link to="/setting">
-              <el-button type="primary" plain>设置</el-button>
-            </router-link>
-          </el-space>
+      <el-header class="cus_header header-flex">
+        <div class=" header-lf">
+        </div>
+        <div class="operate-setting">
+          <div v-if="isLogin">
+            <span class="username">[{{ userinfo?.role }}]{{ userinfo?.username }}</span>
+            <el-button type="primary" plain @click="openLoginWin()">注销</el-button>
+          </div>
+          <div v-else>
+            <el-button type="primary" plain @click="openLoginWin()">登录</el-button>
+          </div>
+
+          <el-tooltip class="box-item" content="设置" placement="top">
+            <el-icon class="sys-setting" @click="redirectSetting">
+              <Setting />
+            </el-icon>
+          </el-tooltip>
+
         </div>
       </el-header>
       <el-container class="classic-content">
@@ -34,7 +37,8 @@
 
       <el-footer class="cus_footer classic-footer">Footer</el-footer>
     </el-container>
-    <el-dialog v-model="dialogVisible" title="登录" draggable>
+    <el-dialog v-model="dialogVisible" title="登录" draggable show-close='false' close-on-press-escape="false"
+      close-on-click-modal="false">
       <el-form :model="form" label-width="auto">
         <el-form-item label="角色">
           <el-select v-model="form.role" placeholder="请选择">
@@ -62,10 +66,14 @@
   </div>
 </template>
 <script setup>
-import { computed, ref, onMounted } from 'vue'
+import { Setting, Avatar, CaretBottom } from '@element-plus/icons-vue'
+import { computed, ref, onMounted, unref } from 'vue'
 import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
 
 import MenuItem from './MenuItem.vue' // 递归组件
+
+const buttonRef = ref()
+const popoverRef = ref()
 
 onMounted(() => {
   if (window.ipc) {
@@ -100,6 +108,15 @@ onMounted(() => {
 
   }
 })
+const { push } = useRouter()
+const redirectSetting = () => {
+  push(`/setting`)
+}
+
+const openPopover = () => {
+  console.log('djaiodjaiso')
+  unref(popoverRef).popperRef?.delayHide?.()
+}
 
 const router = useRouter()
 const route = useRoute()
@@ -168,39 +185,16 @@ const login = () => {
   width: 100%;
   padding: 0;
   margin: 0;
-
 }
 
 .el-container {
   width: 100%;
   height: 100%;
 
-  .el-header {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 40px;
-    padding: 0 15px 0 0;
-
-    .header-lf {
-      display: flex;
-      align-items: center;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-
-    .tool-bar-ri {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-right: 25px;
-    }
-  }
 
   .classic-content {
     display: flex;
-    height: calc(100% - 40px - 50px);
+    height: calc(100% - 50px - 40px);
   }
 
   .classic-main {
@@ -211,19 +205,46 @@ const login = () => {
   }
 }
 
-.classic-footer {
-  height: 30px;
+.header-flex {
+  margin-bottom: 0.5px;
+  display: flex;
+  align-items: center;
+  height: 40px;
+  background-color: var(--color-background-base);
+  padding: 0 24px;
+
+  .operate-setting {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+
+    &:focus {
+      outline: none;
+    }
+  }
 }
 
-.cus_footer,
-.cus_header {
-  background: var(--color-background-base);
+.sys-setting {
+  margin: 0 10px 0 0;
+  padding: 5px;
+  height: 28px;
+  width: 28px;
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #fff;
+}
+
+.classic-footer {
+  height: 40px;
 }
 </style>
-<style>
+<style lang="scss">
 .el-menu-item.is-active {
   background: var(--color-background-base) !important;
   color: #fff;
-
 }
 </style>
