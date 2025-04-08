@@ -1,4 +1,9 @@
-const { getUserDataProperty, setUserDataJsonProperty, getBasePath } = require('./utils/storeUtil')
+const {
+  getUserDataProperty,
+  setUserDataJsonProperty,
+  getBasePath,
+  setValueByPath,
+} = require('./utils/storeUtil')
 
 const { shell, app, dialog } = require('electron')
 const path = require('node:path')
@@ -42,7 +47,7 @@ async function ipcHandle(e, args) {
       data = await getUserInfo()
       job()
     } else {
-      data = userStat.message.data
+      data = userStat?.message?.data
     }
   } else if (event === 'getUserInfo') {
     data = await getUserInfo()
@@ -137,6 +142,9 @@ async function ipcHandle(e, args) {
     }
 
     return { success: true, data: data }
+  } else if (event === 'changeRole') {
+    data = await setValueByPath('auth.role', params)
+    // window.ipc.send()
   }
   console.log('ipcHandle', event, params)
   return data

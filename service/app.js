@@ -12,7 +12,7 @@ app.use(
     secret: 'your_secret_key', // 用于加密session
     resave: false, // 每次请求是否强制保存session
     saveUninitialized: true, // 是否保存未初始化的session
-    cookie: { maxAge: 1 * 10 * 1000 }, // session有效时间：1小时
+    cookie: { maxAge: 60 * 60 * 1000 }, // session有效时间：1小时
   })
 )
 

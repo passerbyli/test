@@ -17,8 +17,8 @@ const defaultConfigData = {
       iteration: '迭代',
     },
     platform: {
-      beta: { username: '', password: '', cookie: [] },
-      prod: { username: '', password: '', cookie: [] },
+      beta: { username: '', password: '', cookies: [] },
+      prod: { username: '', password: '', cookies: [] },
     },
     config: {
       basePath: '',
@@ -28,7 +28,7 @@ const defaultConfigData = {
     username: '',
     password: '',
     role: '开发',
-    cookie: [],
+    cookies: [],
     isLogin: false,
     exception: false,
   },

@@ -19,4 +19,5 @@ contextBridge.exposeInMainWorld('ipc', {
       return ipcRenderer.invoke(channel, data)
     }
   },
+  refreshWindow: () => ipcRenderer.invoke('refresh-window'),
 })

@@ -13,11 +13,11 @@ const { ipcHandle } = require('./server/ipcHandle')
 const consoleLogUtil = require('./server/utils/consoleLogUtil')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
-
+let win = null
 function createWindow() {
   const iconPath = path.join(__dirname, 'public/favicon.png')
   // 创建浏览器窗口
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 1440,
     height: 800,
     webPreferences: {
@@ -72,6 +72,11 @@ function createWindow() {
   win.webContents.openDevTools()
 }
 
+ipcMain.handle('refresh-window', () => {
+  console.log('----0000----')
+  win.reload()
+})
+
 // ipcRenderer.invoke 处理
 ipcMain.handle('toMain', async (e, args) => {
   return await ipcHandle(e, args)
@@ -82,6 +87,7 @@ ipcMain.on('toMain', async (e, args) => {
   if (!args || !args.event) {
     return
   }
+
   const data = await ipcHandle(e, args)
   const webContents = e.sender
   const win = BrowserWindow.fromWebContents(webContents)

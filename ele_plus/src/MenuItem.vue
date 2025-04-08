@@ -3,12 +3,7 @@
     <template #title>
       <span>{{ item.meta?.title }}</span>
     </template>
-    <MenuItem
-      v-for="child in item.children"
-      :key="child.path"
-      :item="child"
-      :base-path="fullPath"
-    />
+    <MenuItem v-for="child in item.children" :key="child.path" :item="child" :base-path="fullPath" />
   </el-sub-menu>
   <el-menu-item v-else :index="fullPath">
     {{ item.meta?.title }}

@@ -118,7 +118,7 @@ myAxios.interceptors.response.use(
       logToFileAndConsole('× Network Error', lines, tag)
     }
 
-    console.log(error.request.status)
+    console.log(error.request.status, '-=-=-=-')
     if (error.request && error.response.status === 401) {
       if (error.response.data.message === '用户名或密码错误') {
         mainSendToRender('openLoginWin')

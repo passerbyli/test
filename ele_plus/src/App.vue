@@ -5,19 +5,25 @@
         <div class=" header-lf">
         </div>
         <div class="operate-setting">
-          <div v-if="isLogin">
-            <span class="username">[{{ userinfo?.role }}]{{ userinfo?.username }}</span>
-            <el-button type="primary" plain @click="openLoginWin()">注销</el-button>
-          </div>
-          <div v-else>
-            <el-button type="primary" plain @click="openLoginWin()">登录</el-button>
-          </div>
-
           <el-tooltip class="box-item" content="设置" placement="top">
             <el-icon class="sys-setting" @click="redirectSetting">
               <Setting />
             </el-icon>
           </el-tooltip>
+          <div v-if="isLogin" class="sys-user">
+            <div class="username"> {{ userinfo?.username }}</div>
+            <el-select class="item-box" v-model="form.role" @change="changeRole" placeholder="请选择">
+              <el-option label="开发" value="开发" />
+              <el-option label="测试" value="测试" />
+              <el-option label="SM" value="SM" />
+            </el-select>
+            <el-button plain @click="openLoginWin()">注销</el-button>
+          </div>
+          <div v-else>
+            <el-button plain @click="openLoginWin()">登录</el-button>
+          </div>
+
+
 
         </div>
       </el-header>
@@ -25,7 +31,7 @@
         <el-aside width="200px">
           <el-menu :default-active="activeMenu" class="el-menu-vertical" background-color="#fff" text-color="#333"
             active-text-color="#409EFF" router>
-            <MenuItem v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
+            <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
           </el-menu>
         </el-aside>
         <el-container class="classic-main">
@@ -41,11 +47,7 @@
       close-on-click-modal="false">
       <el-form :model="form" label-width="auto">
         <el-form-item label="角色">
-          <el-select v-model="form.role" placeholder="请选择">
-            <el-option label="开发" value="开发" />
-            <el-option label="测试" value="测试" />
-            <el-option label="SM" value="SM" />
-          </el-select>
+
 
         </el-form-item>
         <el-form-item label="用户名">
@@ -67,12 +69,11 @@
 </template>
 <script setup>
 import { Setting, Avatar, CaretBottom } from '@element-plus/icons-vue'
-import { computed, ref, onMounted, unref } from 'vue'
-import { RouterLink, RouterView, useRouter, useRoute } from 'vue-router'
+import { computed, ref, onMounted } from 'vue'
+import { RouterView, useRouter, useRoute } from 'vue-router'
 
 import MenuItem from './MenuItem.vue' // 递归组件
 
-const buttonRef = ref()
 const popoverRef = ref()
 
 onMounted(() => {
@@ -113,10 +114,6 @@ const redirectSetting = () => {
   push(`/setting`)
 }
 
-const openPopover = () => {
-  console.log('djaiodjaiso')
-  unref(popoverRef).popperRef?.delayHide?.()
-}
 
 const router = useRouter()
 const route = useRoute()
@@ -139,7 +136,7 @@ const userinfo = ref({
 
 const form = ref({
   username: 'admin',
-  password: '12345666',
+  password: '123456',
   role: '开发'
 })
 
@@ -147,6 +144,14 @@ const openLoginWin = () => {
   dialogVisible.value = true
 }
 
+const changeRole = (item) => {
+  window.ipc.sendInvoke('toMain', {
+    event: 'changeRole',
+    params: item
+  }).then(res => {
+    window.ipc?.refreshWindow()
+  })
+}
 
 const login = () => {
   if (window.ipc) {
@@ -221,6 +226,21 @@ const login = () => {
     &:focus {
       outline: none;
     }
+  }
+}
+
+.sys-user {
+  display: flex;
+  align-items: center;
+
+  .username {
+    margin-right: 10px;
+    color: #fff;
+  }
+
+  .item-box {
+    width: 100px;
+    margin-right: 10px;
   }
 }
 

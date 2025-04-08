@@ -112,7 +112,8 @@ function fetchPageAndGetCookie(username, password) {
 }
 
 async function getMessage() {
-  let cookieStr = getUserDataProperty('prod.cookies')
+  let cookieStr = getUserDataProperty('auth.cookies')
+  console.log('djaiosdjaiojdasoi', cookieStr)
   return myAxios
     .get('http://localhost:3000/messages', {
       headers: {
@@ -124,7 +125,7 @@ async function getMessage() {
       return response.data
     })
     .catch((err) => {
-      consoleUtil.error('getMessage:', err?.response?.data)
+      consoleUtil.error('============getMessage:', err?.response?.data)
       return {
         type: 'error',
         message: err?.response?.data,
