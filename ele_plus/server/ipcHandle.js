@@ -15,6 +15,24 @@ const consoleUtil = require('./utils/consoleLogUtil')
 const { main } = require('../plugins/sqlParse/sqlParse2')
 const { CronJob } = require('../plugins/cron/cronUtil')
 const { mainSendToRender } = require('./utils/mainProcessMsgHandle')
+const { createDBClient } = require('../plugins/dbService')
+
+const store = require('../store')
+
+let dbclient = null
+let datas = store.getValue('config', 'datasources')
+
+function getDataBases(db) {
+  let aa = {}
+
+  datas.forEach((it) => {
+    if (it.name === db) {
+      aa = it
+    }
+  })
+  console.log(aa)
+  return aa
+}
 
 async function ipcHandle(e, args) {
   if (!args || !args.event) {
@@ -23,7 +41,9 @@ async function ipcHandle(e, args) {
   const event = args.event
   const params = args.params
   let data
-  if (event == 'init') {
+  if (event === 'getDataSources') {
+    data = datas
+  } else if (event == 'init') {
     data = await authLogin()
   } else if (event === 'getUserDataProperty') {
     data = getUserDataProperty(params)
@@ -32,15 +52,30 @@ async function ipcHandle(e, args) {
   } else if (event === 'openDirectory') {
     data = await openDirectory(params.path, params.type)
   } else if (event === 'getDataBases') {
-    data = await db.getDatabases()
+    // dbclient = await createDBClient({
+    //   name: 'pgsql_name',
+    //   dbType: 'pgsql',
+    //   host: 'localhost',
+    //   user: 'postgres',
+    //   password: 'admin2312',
+    //   database: 'lihaomin',
+    //   port: 5432,
+    //   timezone: '+00:00',
+    // })
+    dbclient = await createDBClient(getDataBases(params))
+    data = await dbclient.getSchemas()
   } else if (event === 'getTables') {
-    data = await db.getTables(params.database)
+    data = await dbclient.getTables(params.database)
   } else if (event === 'getTableData') {
-    data = await db.getTableData(params.database, params.table)
+    // data = await dbclient.getTableData(params.database, params.table)
+  } else if (event === 'getTableDetail') {
+    data = await dbclient.getTableStruct(params.database, params.table)
   } else if (event === 'getRoutines') {
-    data = await db.getRoutines(params.database)
+    data = await dbclient.getProcedures(params.database)
   } else if (event === 'getProcedureDefinition') {
-    data = await db.getProcedureDefinition(params.database, params.procName)
+    data = await dbclient.getProcedureDetail(params.database, params.procName)
+  } else if (event === 'getProcedureInout') {
+    data = await dbclient.getProcedureParams(params.database, params.procName)
   } else if (event === 'login') {
     const userStat = await login(params.username, params.password, params.role)
     if (userStat.type != 'error') {
@@ -146,7 +181,7 @@ async function ipcHandle(e, args) {
     data = await setValueByPath('auth.role', params)
     // window.ipc.send()
   }
-  console.log('ipcHandle', event, params)
+  // console.log('ipcHandle', event, params)
   return data
 }
 

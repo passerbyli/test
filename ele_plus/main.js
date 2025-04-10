@@ -99,6 +99,7 @@ ipcMain.on('toMain', async (e, args) => {
 // 部分 API 在 ready 事件触发后才能使用。
 app.whenReady().then(function () {
   app.setAppUserModelId('testElectronProject')
+
   createWindow()
 
   if (!Notification.isSupported()) {

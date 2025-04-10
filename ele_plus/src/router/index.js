@@ -7,7 +7,9 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      // component: HomeView,
+
+      component: () => import('../views/Test5View.vue'),
       meta: {
         title: '首页',
       },
@@ -19,6 +21,15 @@ const router = createRouter({
         title: '数据治理',
       },
       children: [
+        {
+          path: '/dataBase',
+          name: 'dataBase',
+          component: () => import('../views/DataBaseView.vue'),
+          meta: {
+            title: '数据库',
+          },
+          children: [],
+        },
         {
           path: '/dataScriptAnalysis',
           name: 'dataScriptAnalysis',

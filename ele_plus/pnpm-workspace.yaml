@@ -1,0 +1,8 @@
+onlyBuiltDependencies:
+  - electron
+  - electron-winstaller
+
+ignoredBuiltDependencies:
+  - esbuild
+  - puppeteer-core
+  - vue-demi
