@@ -1,9 +1,6 @@
 <template>
   <div id="field-graph" class="w-full h-full relative">
-    <div
-      v-if="selectedNode"
-      class="absolute top-4 left-4 bg-white border rounded shadow p-4 z-10 max-w-md"
-    >
+    <div v-if="selectedNode" class="absolute top-4 left-4 bg-white border rounded shadow p-4 z-10 max-w-md">
       1
       <h3 class="font-bold text-lg mb-2">表：{{ selectedNode.id }}</h3>
       <pre class="text-sm whitespace-pre-wrap cursor-pointer">
@@ -17,11 +14,7 @@
       <button class="mt-2 text-blue-500 hover:underline" @click="selectedNode = null">关闭</button>
     </div>
     <div id="field-graph-canvas" class="w-full h-full"></div>
-    <div
-      v-if="tooltip.visible"
-      :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }"
-      class="g6-tooltip"
-    >
+    <div v-if="tooltip.visible" :style="{ top: tooltip.y + 'px', left: tooltip.x + 'px' }" class="g6-tooltip">
       <div class="font-bold">字段：{{ tooltip.field }}</div>
       <div class="text-xs text-gray-500">属于表：{{ tooltip.table }}</div>
     </div>
@@ -155,6 +148,64 @@ onMounted(() => {
       },
     },
   })
+
+
+
+  const data2 = {
+    nodes: [
+      {
+        id: '1',
+        dataType: '1——接口',
+        name: 'API1'
+      },
+
+      {
+        id: '2',
+        dataType: '2-存储过程',
+        name: 'poc1'
+      },
+
+      {
+        id: '3',
+        dataType: '表',
+        name: '3-table1',
+        params: {
+          type: "数据表"
+        }
+      },
+      {
+        id: '4',
+        dataType: '表',
+        name: '4-table2_dim',
+        params: {
+          type: "维表"
+        }
+      },
+      {
+        id: '5',
+        dataType: 'ETL',
+        name: '5-etl1',
+        params: {
+
+        }
+      }, {
+        id: '6',
+        dataType: '表',
+        name: '6-table3',
+        params: {
+
+        }
+      },
+    ],
+    edges: [
+      { source: '2', target: '1' },
+      { source: '3', target: '2' },
+      { source: '4', target: '2' },
+      { source: '5', target: '4' },
+      { source: '6', target: '5' }
+    ],
+  };
+
 
   graph.data(data)
   graph.render()
