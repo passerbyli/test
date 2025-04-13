@@ -1,6 +1,3 @@
--- 启用 UUID 函数支持
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 -- 数据源表
 CREATE TABLE
     data_source (

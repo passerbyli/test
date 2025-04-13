@@ -1,0 +1,223 @@
+[
+  {
+    "file": "/Users/lihaomin/projects/GitHub/test/scripts/sqlParse/data/etl_user_orders.sql",
+    "scriptIndex": 1,
+    "databaseType": "Oracle",
+    "procedures": [
+      {
+        "type": "PROCEDURE",
+        "schema": "ct_cms",
+        "name": "etl_user_orders"
+      }
+    ],
+    "functionNames": [],
+    "sourceTables": [
+      {
+        "schema": "ct_cms",
+        "table": "orders",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "schema": "public",
+        "table": "tmp_raw_orders",
+        "isTemporary": true,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "schema": "ct_cms",
+        "table": "users",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "schema": "public",
+        "table": "user_stats",
+        "isTemporary": true,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "schema": "public",
+        "table": "latest_orders",
+        "isTemporary": true,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "schema": "ct_cms",
+        "table": "user_orders_wide_a",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      }
+    ],
+    "targetTables": [
+      {
+        "schema": "ct_cms",
+        "table": "user_orders_wide_a",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "schema": "ct_cms",
+        "table": "user_orders_wide",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      }
+    ],
+    "isSwitchTable": true,
+    "nodes": [
+      {
+        "id": "ct_cms.etl_user_orders",
+        "label": "ct_cms.etl_user_orders",
+        "type": "procedure"
+      },
+      {
+        "id": "ct_cms.orders",
+        "label": "ct_cms.orders",
+        "type": "table",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "id": "public.tmp_raw_orders",
+        "label": "public.tmp_raw_orders",
+        "type": "table",
+        "isTemporary": true,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "id": "ct_cms.users",
+        "label": "ct_cms.users",
+        "type": "table",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "id": "public.user_stats",
+        "label": "public.user_stats",
+        "type": "table",
+        "isTemporary": true,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "id": "public.latest_orders",
+        "label": "public.latest_orders",
+        "type": "table",
+        "isTemporary": true,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      },
+      {
+        "id": "ct_cms.user_orders_wide_a",
+        "label": "ct_cms.user_orders_wide_a",
+        "type": "table",
+        "isTemporary": false,
+        "isSourceInput": false,
+        "isFinalOutput": false
+      }
+    ],
+    "edges": [
+      {
+        "source": "ct_cms.orders",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.tmp_raw_orders",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.tmp_raw_orders",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.users",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.users",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.user_stats",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.latest_orders",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.user_orders_wide_a",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.orders",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.tmp_raw_orders",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.tmp_raw_orders",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.users",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.users",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.user_stats",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "public.latest_orders",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.user_orders_wide_a",
+        "target": "ct_cms.user_orders_wide",
+        "label": "dataflow"
+      },
+      {
+        "source": "ct_cms.etl_user_orders",
+        "target": "ct_cms.user_orders_wide_a",
+        "label": "procedure"
+      },
+      {
+        "source": "ct_cms.etl_user_orders",
+        "target": "ct_cms.user_orders_wide",
+        "label": "procedure"
+      }
+    ]
+  }
+]

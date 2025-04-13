@@ -1,0 +1,22 @@
+MERGE (:Schema {name:'dm', description:'dm'})
+MERGE (t:Table {name:'dm.dm.table_ods_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dwd_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_ods_0', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dim_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dim_2', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dim_3', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_2', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_3', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_ads_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dwd_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dwd_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_dws_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_ads_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_ads_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.table_ads_1', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.api_01', description:'', layer:'null', type:'null'});
+MERGE (t:Table {name:'dm.dm.api_02', description:'', layer:'null', type:'null'});

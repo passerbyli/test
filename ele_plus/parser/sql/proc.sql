@@ -28,9 +28,8 @@ BEGIN
         FROM tmp_raw_orders
         ORDER BY user_id, order_time DESC
     )
-    truncate table ct_cms.user_orders_wide_a;
     -- 阶段3：写入目标Schema的物理表
-    INSERT INTO ct_cms.user_orders_wide_a 
+    INSERT INTO ct_cms.user_orders_wide 
     SELECT 
         u.user_id,
         u.username,
@@ -41,9 +40,6 @@ BEGIN
     LEFT JOIN user_stats s USING (user_id)
     LEFT JOIN latest_orders l USING (user_id)
     WHERE u.created_at <= target_date;
-
-
-public.p_rename_table('ct_cms','user_orders_wide_a','ct_cms','user_orders_wide')
 
     -- 清理临时表（ON COMMIT DROP自动处理）
 EXCEPTION WHEN others THEN
