@@ -9,7 +9,9 @@ const router = createRouter({
       name: 'home',
       // component: HomeView,
 
-      component: () => import('../views/vue3.vue'),
+      // component: () => import('../views/vue3.vue'),
+      component: () => import('../views/Test1View.vue'),
+      // component: () => import('../views/Test0View.vue'),
       meta: {
         title: '首页',
       },

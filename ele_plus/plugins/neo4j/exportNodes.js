@@ -8,17 +8,17 @@ async function exportNodes() {
   const schemas = await query('SELECT * FROM ads_dl.metadata_schema')
   schemas.forEach((item) => {
     cypherList.push(
-      `MERGE (:Schema {name:'${item.name}', description:'${item.description || ''}'})`,
+      `merge (s:dl_Schema {name:'${item.name}', description:'${item.description || ''}'})`,
     )
   })
 
   const tables = await query('SELECT * FROM ads_dl.metadata_table')
   tables.forEach((item) => {
     cypherList.push(
-      `MERGE (t:Table {name:'${item.schema_name}.${item.name}', description:'${item.description || ''}', layer:'${item.layer}', type:'${item.type}'});`,
+      `merge (n:dl_Table {name:'${item.name.replace('.', '_')}', description:'${item.description || ''}', layer:'${item.layer}', type:'${item.type}'})`,
     )
     // cypherList.push(
-    //   `MATCH (t:Table {name:'${item.schema_name}.${item.name}'}), (s:Schema {name:'${item.schema_name}'}) MERGE (t)-[:BELONGS_TO]->(s);`,
+    //   `MATCH (t:dl_Table {name:'${item.name.replace('.', '_')}'}), (s:dl_Schema {name:'${item.schema_name}'}) MERGE (t)-[:BELONGS_TO]->(s);`,
     // )
   })
 

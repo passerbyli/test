@@ -1,0 +1,285 @@
+{
+  "nodes": [
+    {
+      "id": "ods_table1",
+      "label": "ods_table1",
+      "alias": "ODS层表1",
+      "schema": "ods",
+      "comboId": "ods",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "ods_table2",
+      "label": "ods_table2",
+      "alias": "ODS层表2",
+      "schema": "ods",
+      "comboId": "ods",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "dwd_table1",
+      "label": "dwd_table1",
+      "alias": "DWD层表1",
+      "schema": "dwd",
+      "comboId": "dwd",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "dwd_table2",
+      "label": "dwd_table2",
+      "alias": "DWD层表2",
+      "schema": "dwd",
+      "comboId": "dwd",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "dws_table1",
+      "label": "dws_table1",
+      "alias": "DWS层表1",
+      "schema": "dws",
+      "comboId": "dws",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "dws_table2",
+      "label": "dws_table2",
+      "alias": "DWS层表2",
+      "schema": "dws",
+      "comboId": "dws",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "ads_table1",
+      "label": "ads_table1",
+      "alias": "ADS层表1",
+      "schema": "ads",
+      "comboId": "ads",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "ads_table2",
+      "label": "ads_table2",
+      "alias": "ADS层表2",
+      "schema": "ads",
+      "comboId": "ads",
+      "type": "table",
+      "fields": [
+        {
+          "name": "id",
+          "type": "varchar",
+          "length": 32,
+          "primaryKey": true
+        },
+        {
+          "name": "name",
+          "type": "varchar",
+          "length": 128,
+          "primaryKey": false
+        }
+      ]
+    },
+    {
+      "id": "api_get_ads_table2",
+      "label": "api_get_ads_table2",
+      "alias": "查询接口",
+      "comboId": "ads",
+      "type": "api",
+      "inputParams": [
+        "id"
+      ],
+      "outputParams": [
+        "id",
+        "name"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "api_get_ads_table2",
+      "target": "ads_table2",
+      "label": "QUERY"
+    },
+    {
+      "source": "ods_table1",
+      "target": "dwd_table1",
+      "label": "proc_ods_table1_to_dwd_table1",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "source": "ods_table1.id",
+      "target": "dwd_table1.id",
+      "label": ""
+    },
+    {
+      "source": "ods_table2",
+      "target": "dwd_table2",
+      "label": "proc_ods_table2_to_dwd_table2",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "source": "ods_table2.id",
+      "target": "dwd_table2.id",
+      "label": ""
+    },
+    {
+      "source": "dwd_table1",
+      "target": "dws_table1",
+      "label": "proc_dwd_table1_to_dws_table1",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "source": "dwd_table1.id",
+      "target": "dws_table1.id",
+      "label": ""
+    },
+    {
+      "source": "dwd_table2",
+      "target": "dws_table2",
+      "label": "proc_dwd_table2_to_dws_table2",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "source": "dwd_table2.id",
+      "target": "dws_table2.id",
+      "label": ""
+    },
+    {
+      "source": "dws_table1",
+      "target": "ads_table1",
+      "label": "proc_dws_table1_to_ads_table1",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "source": "dws_table1.id",
+      "target": "ads_table1.id",
+      "label": ""
+    },
+    {
+      "source": "dws_table2",
+      "target": "ads_table2",
+      "label": "proc_dws_table2_to_ads_table2",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "source": "dws_table2.id",
+      "target": "ads_table2.id",
+      "label": ""
+    }
+  ],
+  "combos": [
+    {
+      "id": "ods",
+      "label": "ODS层"
+    },
+    {
+      "id": "dwd",
+      "label": "DWD层"
+    },
+    {
+      "id": "dws",
+      "label": "DWS层"
+    },
+    {
+      "id": "ads",
+      "label": "ADS层"
+    }
+  ]
+}
