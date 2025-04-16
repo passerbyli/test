@@ -2,8 +2,11 @@
   <div class="common-layout">
     <el-container>
       <el-header class="cus_header header-flex">
-        <div class=" header-lf">
+        <div class="header-lf">
         </div>
+        <el-menu mode="horizontal" :default-active="activeMenu" class="cus-menu-horizontal" router>
+          <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
+        </el-menu>
         <div class="operate-setting">
           <el-tooltip class="box-item" content="设置" placement="top">
             <el-icon class="sys-setting" @click="redirectSetting">
@@ -28,8 +31,8 @@
         </div>
       </el-header>
       <el-container class="classic-content">
-        <el-aside width="200px">
-          <el-menu :default-active="activeMenu" class="el-menu-vertical" background-color="#fff" text-color="#333"
+        <el-aside width="200px" style="display: none;">
+          <el-menu :default-active="activeMenu" class="cus-menu-vertical" background-color="#fff" text-color="#333"
             active-text-color="#409EFF" router>
             <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
           </el-menu>
@@ -211,12 +214,15 @@ const login = () => {
 }
 
 .header-flex {
-  margin-bottom: 0.5px;
   display: flex;
   align-items: center;
   height: 40px;
   background-color: var(--color-background-base);
-  padding: 0 24px;
+
+  .header-lf {
+    width: 180px;
+  }
+
 
   .operate-setting {
     margin-left: auto;
@@ -263,8 +269,24 @@ const login = () => {
 }
 </style>
 <style lang="scss">
-.el-menu-item.is-active {
+.cus-menu-vertical .el-menu-item.is-active {
   background: var(--color-background-base) !important;
   color: #fff;
+}
+
+.cus-menu-horizontal {
+  height: 40px;
+  min-width: 570px;
+  color: #fff;
+  background: var(--color-background-base);
+
+}
+
+.cus-menu-horizontal.el-menu--horizontal>.el-menu-item.is-active {
+  color: #fff !important;
+}
+
+.cus-menu-horizontal.el-menu--horizontal>.el-sub-menu.is-active .el-sub-menu__title {
+  color: #fff !important;
 }
 </style>

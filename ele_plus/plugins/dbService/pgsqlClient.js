@@ -112,6 +112,16 @@ AND p.proname = $2;
     return res.rows
   }
 
+  async getDBQuery(sql) {
+    console.log('924924203')
+    const res = await this.client.query(
+      `${sql}
+    `,
+      [],
+    )
+    return res.rows
+  }
+
   async close() {
     if (this.client) {
       await this.client.end()

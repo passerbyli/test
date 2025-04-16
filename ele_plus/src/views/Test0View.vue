@@ -53,22 +53,6 @@ const graphData = {
             id: 'dwd_user_info',
             label: 'DWD用户信息宽表',
             alias: 'DWD用户信息宽表',
-            comboId: 'dwd',
-            schema: 'dwd',
-            fields: [
-                {
-                    name: 'user_id', type: 'varchar', length: 32, primaryKey: true
-                },
-                {
-                    name: 'gender', type: 'varchar', length: 2, primaryKey: false
-                }
-            ]
-        },
-        {
-            id: 'dwd_user_info2',
-            label: 'DWD用户信息宽表2',
-            alias: 'DWD用户信息宽表2',
-            comboId: 'dwd',
             schema: 'dwd',
             fields: [
                 {
@@ -83,7 +67,6 @@ const graphData = {
             id: 'dws_user_summary',
             label: 'DWS用户汇总表',
             alias: 'DWS用户汇总表',
-            comboId: 'dws',
             schema: 'dws',
             fields: [
                 {
@@ -183,12 +166,6 @@ onMounted(() => {
                 height,
                 pixelRatio: 1,
                 layout: { type: 'dagre', rankdir: 'LR', nodesep: 0, ranksep: 80, sortByCombo: true },
-                combos: [
-                    { id: 'ods', label: 'ODS 层' },
-                    { id: 'dwd', label: 'DWD 层' },
-                    { id: 'dws', label: 'DWS 层' },
-                    { id: 'ads', label: 'ADS 层' }
-                ],
                 modes: { default: ['drag-canvas', 'zoom-canvas', 'drag-node', 'collapse-expand'] },
                 defaultNode: {
                     type: 'custom-node'

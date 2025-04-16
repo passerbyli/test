@@ -38,10 +38,16 @@ async function ipcHandle(e, args) {
   if (!args || !args.event) {
     return
   }
+  if (dbclient == null) {
+    dbclient = await createDBClient(getDataBases('pgsql_name'))
+  }
+
   const event = args.event
   const params = args.params
   let data
-  if (event === 'getDataSources') {
+  if (event === 'getDBQuery') {
+    data = await dbclient.getDBQuery(params.sql)
+  } else if (event === 'getDataSources') {
     data = datas
   } else if (event == 'init') {
     data = await authLogin()
@@ -62,7 +68,6 @@ async function ipcHandle(e, args) {
     //   port: 5432,
     //   timezone: '+00:00',
     // })
-    dbclient = await createDBClient(getDataBases(params))
     data = await dbclient.getSchemas()
   } else if (event === 'getTables') {
     data = await dbclient.getTables(params.database)

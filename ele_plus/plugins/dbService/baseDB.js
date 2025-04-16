@@ -21,6 +21,8 @@ class BaseDB {
   async getProcedureDetail(schema, procedure) {
     throw new Error('getProcedureDetail not implemented')
   }
+
+  async getDBQuery() {}
 }
 
 module.exports = BaseDB

@@ -13,6 +13,7 @@ const router = createRouter({
       // component: () => import('../views/Test1View.vue'),
       // component: () => import('../views/Test0View.vue'),
       component: () => import('../views/tree.vue'),
+      // component: () => import('../views/BloodRelationship.vue'),
       meta: {
         title: '首页',
       },
@@ -53,14 +54,6 @@ const router = createRouter({
       ],
     },
     {
-      path: '/myExport',
-      name: 'myExport',
-      component: () => import('../views/MyExportView.vue'),
-      meta: {
-        title: '我的导出',
-      },
-    },
-    {
       path: '/test',
       name: 'test',
       meta: {
@@ -68,9 +61,17 @@ const router = createRouter({
       },
       children: [
         {
+          path: '/test0',
+          name: 'test0',
+          component: () => import('../views/Test0View.vue'),
+          meta: {
+            title: 'test0',
+          },
+        },
+        {
           path: '/test1',
           name: 'test1',
-          component: () => import('../views/TestView.vue'),
+          component: () => import('../views/Test1View.vue'),
           meta: {
             title: 'test1',
           },
@@ -94,11 +95,67 @@ const router = createRouter({
         {
           path: '/test4',
           name: 'test4',
-          component: () => import('../views/TestView.vue'),
+          component: () => import('../views/Test4View.vue'),
           meta: {
             title: 'test4',
           },
         },
+        {
+          path: '/test5',
+          name: 'test5',
+          component: () => import('../views/Test5View.vue'),
+          meta: {
+            title: 'test5',
+          },
+        },
+        {
+          path: '/test6',
+          name: 'test6',
+          component: () => import('../views/Test6View.vue'),
+          meta: {
+            title: 'test6',
+          },
+        },
+        {
+          path: '/test7',
+          name: 'test7',
+          component: () => import('../views/Test7View.vue'),
+          meta: {
+            title: 'test7',
+          },
+        },
+        {
+          path: '/test8',
+          name: 'test8',
+          component: () => import('../views/Test8View.vue'),
+          meta: {
+            title: 'test8',
+          },
+        },
+        // {
+        //   path: '/test4',
+        //   name: 'test4',
+        //   component: () => import('../views/Test7View.vue'),
+        //   meta: {
+        //     title: 'test4',
+        //   },
+        // },
+        // {
+        //   path: '/test4',
+        //   name: 'test4',
+        //   component: () => import('../views/Test7View.vue'),
+        //   meta: {
+        //     title: 'test4',
+        //   },
+        // },
+        // {
+        //   path: '/test4',
+        //   name: 'test4',
+        //   component: () => import('../views/Test7View.vue'),
+        //   meta: {
+        //     title: 'test4',
+        //   },
+        // },
       ],
     },
 

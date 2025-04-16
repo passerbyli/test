@@ -136,7 +136,10 @@ onMounted(() => {
             const color = entityTypeColor[cfg.entityType] || '#ccc'
 
             const keyShape = group.addShape('rect', {
-                attrs: { x: -80, y: -30, width: 160, height: 60, fill: color, stroke: '#ccc', radius: 8 }
+                attrs: {
+                    x: -80, y: -30, width: 160, height: 60,
+                    fill: color, stroke: '#ccc', radius: 8
+                }
             })
 
             // 显示标签
