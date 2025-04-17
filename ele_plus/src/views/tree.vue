@@ -13,6 +13,7 @@
                         <pre>{{ JSON.stringify(selectedNode, null, 2) }}</pre>
                     </el-tab-pane>
                     <el-tab-pane label="血缘图" name="second" style="height: 500px; width: 100%;">
+                        <!-- {{ graphData }} -->
                         <blood-relationship :graph-data="graphData" />
                     </el-tab-pane>
                 </el-tabs>
@@ -32,12 +33,12 @@ import BloodRelationship from './BloodRelationship.vue'
 const filterText = ref('')
 const treeRef = ref()
 const selectedNode = ref(null)
-const handleClick = () => {
-
+const handleClick = (tab, event) => {
+    console.log('当前点击的 tab name:', tab, event)
 }
 let treeData = ref([])
 let activeName = ref('second')
-let graphData = {
+let graphData = ref({
     nodes: [
         {
             id: 'ods_user',
@@ -107,7 +108,7 @@ let graphData = {
             source: 'dws_user_summary', target: 'ads_user_behavior', label: 'proc_user_behavior_export', schedule: '0 4 * * *'
         }
     ]
-}
+})
 onMounted(() => {
     if (window.ipc) {
         window.ipc.sendInvoke('toMain', { event: 'getDBQuery', params: { sql: 'select * from ads_dl.metadata_table' } }).then(tables => {
@@ -161,6 +162,12 @@ const filterMethod = (value, data) => {
 const handleNodeClick = (node) => {
     if (node.type === 'table' || node.type === 'procedure') {
         selectedNode.value = node
+
+        if (window.ipc) {
+            window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: node.label } }).then(tables => {
+                graphData.value = tables
+            })
+        }
     }
 }
 </script>

@@ -33,7 +33,7 @@ const edgeDialogVisible = ref(false)
 const selectedNodeFields = ref([])
 const selectedEdgeInfo = ref({})
 
-const graphData = {
+let graphData = {
     nodes: [
         {
             id: 'ods_user',
@@ -105,6 +105,242 @@ const graphData = {
     ]
 }
 
+graphData = {
+    "nodes": [
+        {
+            "name": "dm.table_ods_0",
+            "id": "dm.table_ods_0",
+            "label": "dm.table_ods_0",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dwd_1",
+            "id": "dm.table_dwd_1",
+            "label": "dm.table_dwd_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_ods_1",
+            "id": "dm.table_ods_1",
+            "label": "dm.table_ods_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dwd_1",
+            "id": "dm.table_dwd_1",
+            "label": "dm.table_dwd_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dim_3",
+            "id": "dm.table_dim_3",
+            "label": "dm.table_dim_3",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_1",
+            "id": "dm.table_dws_1",
+            "label": "dm.table_dws_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dim_2",
+            "id": "dm.table_dim_2",
+            "label": "dm.table_dim_2",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_1",
+            "id": "dm.table_dws_1",
+            "label": "dm.table_dws_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dim_1",
+            "id": "dm.table_dim_1",
+            "label": "dm.table_dim_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_1",
+            "id": "dm.table_dws_1",
+            "label": "dm.table_dws_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dwd_1",
+            "id": "dm.table_dwd_1",
+            "label": "dm.table_dwd_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_1",
+            "id": "dm.table_dws_1",
+            "label": "dm.table_dws_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_3",
+            "id": "dm.table_dws_3",
+            "label": "dm.table_dws_3",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_ads_1",
+            "id": "dm.table_ads_1",
+            "label": "dm.table_ads_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_2",
+            "id": "dm.table_dws_2",
+            "label": "dm.table_dws_2",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_ads_1",
+            "id": "dm.table_ads_1",
+            "label": "dm.table_ads_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_1",
+            "id": "dm.table_dws_1",
+            "label": "dm.table_dws_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_ads_1",
+            "id": "dm.table_ads_1",
+            "label": "dm.table_ads_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_ads_1",
+            "id": "dm.table_ads_1",
+            "label": "dm.table_ads_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.api_01",
+            "id": "dm.api_01",
+            "label": "dm.api_01",
+            "type": "Table"
+        }
+    ],
+    "edges": [
+        {
+            "name": "sql_1",
+            "source": "dm.table_ods_0",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_dwd_1"
+        },
+        {
+            "name": "sql_5",
+            "source": "dm.table_ods_1",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_dwd_1"
+        },
+        {
+            "name": "sql_6",
+            "source": "dm.table_dim_3",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_dws_1"
+        },
+        {
+            "name": "sql_2",
+            "source": "dm.table_dim_2",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_dws_1"
+        },
+        {
+            "name": "sql_3",
+            "source": "dm.table_dim_1",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_dws_1"
+        },
+        {
+            "name": "sql_4",
+            "source": "dm.table_dwd_1",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_dws_1"
+        },
+        {
+            "name": "sql_8",
+            "source": "dm.table_dws_3",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_ads_1"
+        },
+        {
+            "name": "sql_8",
+            "source": "dm.table_dws_2",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_ads_1"
+        },
+        {
+            "name": "sql_7",
+            "source": "dm.table_dws_1",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_ads_1"
+        },
+        {
+            "name": "sql_9",
+            "source": "dm.table_ads_1",
+            "label": "LINEAGE_TO",
+            "target": "dm.api_01"
+        }
+    ]
+}
+
+
+graphData = {
+    "nodes": [
+        {
+            "name": "dm.table_dws_1",
+            "id": "dm.table_dws_1",
+            "label": "dm.table_dws_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_ads_1",
+            "id": "dm.table_ads_1",
+            "label": "dm.table_ads_1",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_2",
+            "id": "dm.table_dws_2",
+            "label": "dm.table_dws_2",
+            "type": "Table"
+        },
+        {
+            "name": "dm.table_dws_3",
+            "id": "dm.table_dws_3",
+            "label": "dm.table_dws_3",
+            "type": "Table"
+        }
+    ],
+    "edges": [
+        {
+            "name": "sql_7",
+            "source": "dm.table_dws_1",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_ads_1"
+        },
+        {
+            "name": "sql_8",
+            "source": "dm.table_dws_2",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_ads_1"
+        },
+        {
+            "name": "sql_8",
+            "source": "dm.table_dws_3",
+            "label": "LINEAGE_TO",
+            "target": "dm.table_ads_1"
+        }
+    ]
+}
 let graph = null
 
 onMounted(() => {

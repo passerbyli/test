@@ -57,10 +57,11 @@ let graph = null
 
 
 watch(() => props.graphData, () => {
+    console.log(props.graphData)
     nextTick(() => refreshGraph())
-}, {
-    deep: true,
-    immediate: true
+    // }, {
+    //     // deep: true,
+    //     // immediate: true
 })
 
 const toggleNode = (type) => {

@@ -24,3 +24,29 @@ MATCH (target:dl_Table {name: 'dm_api_01'})
 MATCH path = (upstream)-[*]->(target)
 RETURN path
 ```
+
+# new
+
+### 根据表名dm.table_ads_1开始双向溯源，限制5跳
+
+```
+MATCH path = (start:Table {id: 'dm.table_ads_1'})-[*1..5]-(other:Table)
+RETURN path
+```
+
+### 以dm.table_ads_1为起点，向下2跳
+
+```
+MATCH p=(a:Table {id: 'dm.table_ads_1'})-[r:LINEAGE_TO*1..2]->(b:Table)
+RETURN a, b, r
+```
+
+### 以dm.table_ads_1为起点，向上2跳
+
+从 a → ... → b 的路径中，b 是你目标表 dm.table_ads_1，即“向上”查找它的来源表。
+
+```
+MATCH p=(a:Table)-[r:LINEAGE_TO*1..2]->(b:Table)
+WHERE b.id = 'dm.table_ads_1'
+RETURN a, b, r
+```

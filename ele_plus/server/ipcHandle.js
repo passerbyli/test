@@ -10,7 +10,7 @@ const path = require('node:path')
 const fs = require('node:fs')
 const db = require('./utils/db')
 // const { getToBid } = require('./index')
-const { login, getMessage, getUserInfo } = require('./utils/request')
+const { login, getMessage, getUserInfo, queryKg } = require('./utils/request')
 const consoleUtil = require('./utils/consoleLogUtil')
 const { main } = require('../plugins/sqlParse/sqlParse2')
 const { CronJob } = require('../plugins/cron/cronUtil')
@@ -45,7 +45,9 @@ async function ipcHandle(e, args) {
   const event = args.event
   const params = args.params
   let data
-  if (event === 'getDBQuery') {
+  if (event == 'kg') {
+    data = await queryKg(params)
+  } else if (event === 'getDBQuery') {
     data = await dbclient.getDBQuery(params.sql)
   } else if (event === 'getDataSources') {
     data = datas

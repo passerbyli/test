@@ -133,7 +133,29 @@ async function getMessage() {
     })
 }
 
+async function queryKg(params) {
+  let cookieStr = getUserDataProperty('auth.cookies')
+  return myAxios
+    .get(`http://127.0.0.1:8081/sync/g6/both?tableId=${params.name}&level=1`, {
+      headers: {
+        Cookie: cookieStr,
+      },
+      tag: 'xxajiso',
+    })
+    .then((response) => {
+      return response.data
+    })
+    .catch((err) => {
+      consoleUtil.error('============getMessage:', err?.response?.data)
+      return {
+        type: 'error',
+        message: err?.response?.data,
+      }
+    })
+}
+
 module.exports = {
+  queryKg,
   getUserInfo,
   getMessage,
   fetchPageAndGetCookie,
