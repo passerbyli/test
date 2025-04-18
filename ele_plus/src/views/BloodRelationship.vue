@@ -193,7 +193,11 @@ const refreshGraph = () => {
 
     graph = new G6.Graph({
         container: 'container',
-        layout: { type: 'dagre', rankdir: 'LR', nodesep: 0, ranksep: 80, sortByCombo: true },
+        layout: {
+            type: 'dagre', rankdir: 'LR', nodesep: 20,
+            ranksep: 140
+            , sortByCombo: true
+        },
         combos: [
             { id: 'ods', label: 'ODS 层' },
             { id: 'dwd', label: 'DWD 层' },
@@ -255,6 +259,7 @@ const refreshGraph = () => {
     })
 
     graph.data(props.graphData)
+
     graph.render()
     graph.fitView()
 

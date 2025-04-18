@@ -1,5 +1,5 @@
 WITH
-    aaa - table AS (
+    aaa_table AS (
         SELECT
             user_id,
             COUNT(*) AS order_count
@@ -38,7 +38,7 @@ SELECT
     l.last_order
 FROM
     ct_cms.users u
-    LEFT JOIN aaa - table s USING (user_id)
+    LEFT JOIN aaa_table s USING (user_id)
     LEFT JOIN bbb_table l USING (user_id)
     LEFT JOIN ccc_table t USING (user_id)
 WHERE

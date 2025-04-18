@@ -13,6 +13,22 @@
                         <pre>{{ JSON.stringify(selectedNode, null, 2) }}</pre>
                     </el-tab-pane>
                     <el-tab-pane label="血缘图" name="second" style="height: 500px; width: 100%;">
+                        {{ direction }}
+                        <el-radio-group v-model="direction" size="small" @change="changeDirection">
+                            <el-radio-button label="both" value="both" />
+                            <el-radio-button label="upstream" value="upstream" />
+                            <el-radio-button label="downstream" value="downstream" />
+                            <el-radio-button label="lineageClosed" value="lineageClosed" />
+                        </el-radio-group>
+                        {{ level }}
+                        <el-radio-group v-model="level" size="small" @change="changeLevel">
+                            <el-radio-button label="1" value="1" />
+                            <el-radio-button label="2" value="2" />
+                            <el-radio-button label="3" value="3" />
+                            <el-radio-button label="4" value="4" />
+                            <el-radio-button label="5" value="5" />
+                            <el-radio-button label="6" value="6" />
+                        </el-radio-group>
                         <!-- {{ graphData }} -->
                         <blood-relationship :graph-data="graphData" />
                     </el-tab-pane>
@@ -150,6 +166,8 @@ const defaultProps = {
     label: 'label'
 }
 
+const direction = ref('both')
+const level = ref('1')
 const filterNode = (value) => {
     treeRef.value.filter(value)
 }
@@ -159,12 +177,80 @@ const filterMethod = (value, data) => {
     return data.label.toLowerCase().includes(value.toLowerCase())
 }
 
+const changeDirection = () => {
+    if (window.ipc) {
+        window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: selectedNode.value.label, level: level.value, direction: direction.value } }).then(tables => {
+            console.log(tables)
+            tables.edges.forEach(it => {
+                it.schedule = 'xx'
+                it.alias = 'qqq'
+            })
+            let _nodes = []
+            tables.nodes.forEach((it) => {
+                _nodes.push({
+                    id: it.id,
+                    label: it.label,
+                    alias: it.alias,
+                    schema: it.schema,
+                    fields: []
+                })
+            })
+            tables.nodes = _nodes
+
+            graphData.value = tables
+        })
+    }
+}
+
+const changeLevel = (val) => {
+    console.log(val)
+    if (window.ipc) {
+        window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: selectedNode.value.label, level: level.value, direction: direction.value } }).then(tables => {
+            console.log(tables)
+            tables.edges.forEach(it => {
+                it.schedule = 'xx'
+                it.alias = 'qqq'
+            })
+            let _nodes = []
+            tables.nodes.forEach((it) => {
+                _nodes.push({
+                    id: it.id,
+                    label: it.label,
+                    alias: it.alias,
+                    schema: it.schema,
+                    fields: []
+                })
+            })
+            tables.nodes = _nodes
+
+            graphData.value = tables
+        })
+    }
+}
+
 const handleNodeClick = (node) => {
     if (node.type === 'table' || node.type === 'procedure') {
         selectedNode.value = node
 
         if (window.ipc) {
-            window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: node.label } }).then(tables => {
+            window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: node.label, level: level.value, direction: direction.value } }).then(tables => {
+                console.log(tables)
+                tables.edges.forEach(it => {
+                    it.schedule = 'xx'
+                    it.alias = 'qqq'
+                })
+                let _nodes = []
+                tables.nodes.forEach((it) => {
+                    _nodes.push({
+                        id: it.id,
+                        label: it.label,
+                        alias: it.alias,
+                        schema: it.schema,
+                        fields: []
+                    })
+                })
+                tables.nodes = _nodes
+
                 graphData.value = tables
             })
         }

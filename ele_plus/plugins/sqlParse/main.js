@@ -1,24 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const { parseSql } = require('./sqlParse1')
-
-/**
- * 检测 SQL 语句的数据库类型
- * @param {string} sqlContent - SQL 语句内容
- * @returns {string} - 数据库类型
- */
-function detectDatabaseType(sqlContent) {
-  if (/ENGINE\s*=\s*InnoDB|AUTO_INCREMENT|DELIMITER/i.test(sqlContent)) {
-    return 'MySQL'
-  } else if (/IDENTITY|GO|NVARCHAR/i.test(sqlContent)) {
-    return 'SQL Server'
-  } else if (/BEGIN|END|VARCHAR2|PL\/SQL/i.test(sqlContent)) {
-    return 'Oracle'
-  } else if (/SERIAL|BIGSERIAL|RETURNING/i.test(sqlContent)) {
-    return 'PostgreSQL'
-  }
-  return 'Unknown'
-}
+// const { parseSql } = require('./sqlParseAst')
 
 /**
  * 获取所有SQL文件
@@ -48,11 +31,18 @@ async function main(filePath, outputPath) {
   const result = []
 
   sqlFiles.forEach((file, index) => {
-    const fileName = path.basename(file)
     const sqlContent = fs.readFileSync(file, 'utf8')
-    const databaseType = detectDatabaseType(sqlContent)
-    const { procedures, functionNames, sourceTables, targetTables, isSwitchTable, nodes, edges } =
-      parseSql(sqlContent)
+    const {
+      databaseType,
+      procedures,
+      functionNames,
+      sourceTables,
+      targetTables,
+      isSwitchTable,
+      nodes,
+      edges,
+      columnEdges,
+    } = parseSql(sqlContent)
 
     result.push({
       file,
@@ -65,6 +55,7 @@ async function main(filePath, outputPath) {
       isSwitchTable,
       nodes,
       edges,
+      columnEdges,
     })
   })
 

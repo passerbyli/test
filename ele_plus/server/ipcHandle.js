@@ -12,7 +12,7 @@ const db = require('./utils/db')
 // const { getToBid } = require('./index')
 const { login, getMessage, getUserInfo, queryKg } = require('./utils/request')
 const consoleUtil = require('./utils/consoleLogUtil')
-const { main } = require('../plugins/sqlParse/sqlParse2')
+const { main } = require('../plugins/sqlParse/sqlParse')
 const { CronJob } = require('../plugins/cron/cronUtil')
 const { mainSendToRender } = require('./utils/mainProcessMsgHandle')
 const { createDBClient } = require('../plugins/dbService')
@@ -45,7 +45,14 @@ async function ipcHandle(e, args) {
   const event = args.event
   const params = args.params
   let data
-  if (event == 'kg') {
+  if (event == 'readG6Data') {
+    data = await JSON.parse(
+      fs.readFileSync(
+        '/Users/lihaomin/projects/GitHub/test/ele_plus/plugins/sqlParse/sql_analysis_result.json',
+        'utf-8',
+      ),
+    )
+  } else if (event == 'kg') {
     data = await queryKg(params)
   } else if (event === 'getDBQuery') {
     data = await dbclient.getDBQuery(params.sql)
