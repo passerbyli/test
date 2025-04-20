@@ -8,10 +8,6 @@
             <el-button size="small" @click="graph?.zoomTo(1)">1:1</el-button>
             <el-button size="small" @click="refreshGraph()">刷新</el-button>
         </div>
-        <div class="legend">
-            <div @click="toggleNode('table')"><span class="legend-icon table"></span> 表</div>
-            <div @click="toggleNode('api')"><span class="legend-icon api"></span> 接口</div>
-        </div>
         <div id="container" class="graph-container"></div>
 
         <el-dialog v-model="dialogVisible" title="字段信息" width="500px">
@@ -59,23 +55,8 @@ let graph = null
 watch(() => props.graphData, () => {
     console.log(props.graphData)
     nextTick(() => refreshGraph())
-    // }, {
-    //     // deep: true,
-    //     // immediate: true
 })
 
-const toggleNode = (type) => {
-    if (graph) {
-        const nodes = graph.getNodes()
-        nodes.forEach((node) => {
-            const model = node.getModel()
-            if (model.type === type) {
-                const visible = node.get('visible')
-                graph.changeItemVisibility(node, !visible)
-            }
-        })
-    }
-}
 
 
 const legendData = [...new Set(props.graphData?.nodes?.map(node => node.type))]?.map(type => ({
@@ -109,12 +90,9 @@ const refreshGraph = () => {
         'cubic-horizontal',
         {
             afterDraw(cfg, group) {
-                // get the first shape in the group, it is the edge's path here=
                 const shape = group.get('children')[0];
-                // the start position of the edge's path
                 const startPoint = shape.getPoint(0);
 
-                // add red circle shape
                 const circle = group.addShape('circle', {
                     attrs: {
                         x: startPoint.x,
@@ -122,43 +100,41 @@ const refreshGraph = () => {
                         fill: '#1890ff',
                         r: 3,
                     },
-                    // must be assigned in G6 3.3 and later versions. it can be any string you want, but should be unique in a custom item type
                     name: 'circle-shape',
                 });
 
-                // animation for the red circle
                 circle.animate(
                     (ratio) => {
-                        // the operations in each frame. Ratio ranges from 0 to 1 indicating the prograss of the animation. Returns the modified configurations
-                        // get the position on the edge according to the ratio
                         const tmpPoint = shape.getPoint(ratio);
-                        // returns the modified configurations here, x and y here
                         return {
                             x: tmpPoint.x,
                             y: tmpPoint.y,
                         };
                     },
                     {
-                        repeat: true, // Whether executes the animation repeatly
-                        duration: 3000, // the duration for executing once
+                        repeat: true,
+                        duration: 3000,
                     },
                 );
             },
         },
-        'cubic', // extend the built-in edge 'cubic'
+        'cubic',
     );
 
     G6.registerNode('custom-node', {
         draw(cfg, group) {
+            if (cfg.active) {
+                console.log('xxxx')
+            }
             const rect = group.addShape('rect', {
                 attrs: {
                     x: -110,
                     y: -30,
                     width: 220,
                     height: 60,
-                    stroke: '#2B6CF6',
+                    stroke: cfg.active ? '#f00' : '#2B6CF6',
                     radius: 8,
-                    fill: '#F0F5FF'
+                    fill: cfg.active ? '#f00' : '#F0F5FF'
                 },
                 name: 'rect-shape'
             })
@@ -204,18 +180,7 @@ const refreshGraph = () => {
             { id: 'dws', label: 'DWS 层' },
             { id: 'ads', label: 'ADS 层' }
         ],
-        plugins: [
-            // new G6.ToolBar({}),
-            new G6.Legend({
-                data: legendData,
-                align: 'top',
-                layout: 'horizontal',
-                position: 'top',
-                trigger: 'click'
-            }),
-            new G6.Minimap({
-                size: [150, 100],
-            })],
+        plugins: [],
         width,
         height,
         modes: { default: ['drag-canvas', 'zoom-canvas', 'drag-node', 'collapse-expand'] },
@@ -241,14 +206,6 @@ const refreshGraph = () => {
         if (target.get('name') === 'icon-img') {
             selectedNodeFields.value = model.fields || []
             dialogVisible.value = true
-        } else {
-            // if (model.children) {
-            //     graph.updateItem(item, { children: null })
-            // } else if (model.fields) {
-            //     const children = model.fields.map(f => ({ id: `${model.id}.${f.name}`, label: f.name, parent: model.id }))
-            //     graph.addData({ nodes: children })
-            //     graph.layout()
-            // }
         }
     })
 
@@ -267,14 +224,7 @@ const refreshGraph = () => {
     window.addEventListener('resize', () => {
         graph?.changeSize(window.innerWidth, window.innerHeight - 50)
     })
-    // // 根据图例过滤数据
-    // const displayNodes = nodes.filter((n) => legendType.value[n.entityType])
-    // const displayEdges = edges.filter(
-    //     (e) => displayNodes.find((n) => n.id === e.source) && displayNodes.find((n) => n.id === e.target)
-    // )
 
-    // graph.changeData({ nodes: displayNodes, edges: displayEdges })
-    graph.fitView()
 }
 onBeforeUnmount(() => {
     graph?.destroy()
@@ -301,34 +251,5 @@ onBeforeUnmount(() => {
 .graph-container {
     width: 100%;
     height: calc(100% - 40px);
-}
-
-.legend {
-    position: absolute;
-    top: 50px;
-    right: 20px;
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 10px;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 1.8;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.legend-icon {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-.legend-icon.table {
-    background: #2B6CF6;
-}
-
-.legend-icon.api {
-    background: #F6C12B;
 }
 </style>

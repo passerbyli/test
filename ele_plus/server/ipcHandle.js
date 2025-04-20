@@ -10,7 +10,7 @@ const path = require('node:path')
 const fs = require('node:fs')
 const db = require('./utils/db')
 // const { getToBid } = require('./index')
-const { login, getMessage, getUserInfo, queryKg } = require('./utils/request')
+const { getMessage, getUserInfo, queryKg } = require('./utils/request')
 const consoleUtil = require('./utils/consoleLogUtil')
 const { main } = require('../plugins/sqlParse/sqlParse')
 const { CronJob } = require('../plugins/cron/cronUtil')
@@ -18,6 +18,7 @@ const { mainSendToRender } = require('./utils/mainProcessMsgHandle')
 const { createDBClient } = require('../plugins/dbService')
 
 const store = require('../store')
+const { loginHeader } = require('./handlers/authHandler')
 
 let dbclient = null
 let datas = store.getValue('config', 'datasources')
@@ -91,7 +92,7 @@ async function ipcHandle(e, args) {
   } else if (event === 'getProcedureInout') {
     data = await dbclient.getProcedureParams(params.database, params.procName)
   } else if (event === 'login') {
-    const userStat = await login(params.username, params.password, params.role)
+    const userStat = await loginHeader(params)
     if (userStat.type != 'error') {
       data = await getUserInfo()
       job()
@@ -203,7 +204,7 @@ async function authLogin() {
   let userInfo = {}
   const authInfo = getUserDataProperty('auth')
   if (authInfo.username && authInfo.password) {
-    await login(authInfo.username, authInfo.password, authInfo.role)
+    await loginHeader(authInfo.username, authInfo.password, authInfo.role)
     userInfo = await getUserInfo()
     await job()
   }

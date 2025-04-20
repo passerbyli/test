@@ -1,10 +1,12 @@
 <template>
     <div class="schema-tree-layout">
-        <div class="left-panel">
+        <div class="left-panel" :style="{ width: leftWidth + 'px' }" ref="leftPanelRef">
             <el-input v-model="filterText" placeholder="搜索表或存储过程..." @input="filterNode" />
             <el-tree :data="treeData" :props="defaultProps" node-key="id" :filter-node-method="filterMethod"
                 ref="treeRef" @node-click="handleNodeClick" highlight-current />
         </div>
+        <!-- 拖动条 -->
+        <div class="resizer" @mousedown="startDragging"></div>
         <div class="right-panel">
             <div v-if="selectedNode">
                 <h3>{{ selectedNode.label }}</h3>
@@ -13,12 +15,12 @@
                         <pre>{{ JSON.stringify(selectedNode, null, 2) }}</pre>
                     </el-tab-pane>
                     <el-tab-pane label="血缘图" name="second" style="height: 500px; width: 100%;">
+                        <el-switch v-model="closed" @change="changeClosed" />
                         {{ direction }}
                         <el-radio-group v-model="direction" size="small" @change="changeDirection">
                             <el-radio-button label="both" value="both" />
-                            <el-radio-button label="upstream" value="upstream" />
-                            <el-radio-button label="downstream" value="downstream" />
-                            <el-radio-button label="lineageClosed" value="lineageClosed" />
+                            <el-radio-button label="up" value="up" />
+                            <el-radio-button label="down" value="down" />
                         </el-radio-group>
                         {{ level }}
                         <el-radio-group v-model="level" size="small" @change="changeLevel">
@@ -42,13 +44,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ElInput, ElTree } from 'element-plus'
 import BloodRelationship from './BloodRelationship.vue'
+const leftPanelRef = ref()
+const leftWidth = ref(240) // 初始宽度
 
+const isDragging = ref(false)
 const filterText = ref('')
 const treeRef = ref()
-const selectedNode = ref(null)
+const selectedNode = ref({ label: 'xx' })
 const handleClick = (tab, event) => {
     console.log('当前点击的 tab name:', tab, event)
 }
@@ -57,6 +62,7 @@ let activeName = ref('second')
 let graphData = ref({
     nodes: [
         {
+            nodeType: 'ods',
             id: 'ods_user',
             label: 'ODS原始用户表',
             alias: 'ODS原始用户表',
@@ -126,6 +132,8 @@ let graphData = ref({
     ]
 })
 onMounted(() => {
+    document.addEventListener('mousemove', handleDragging)
+    document.addEventListener('mouseup', stopDragging)
     if (window.ipc) {
         window.ipc.sendInvoke('toMain', { event: 'getDBQuery', params: { sql: 'select * from ads_dl.metadata_table' } }).then(tables => {
             let schemas = []
@@ -161,6 +169,27 @@ onMounted(() => {
     }
 })
 
+onBeforeUnmount(() => {
+    document.removeEventListener('mousemove', handleDragging)
+    document.removeEventListener('mouseup', stopDragging)
+})
+
+const startDragging = (e) => {
+    isDragging.value = true
+    e.preventDefault()
+}
+
+const handleDragging = (e) => {
+    if (!isDragging.value) return
+    const minWidth = 150
+    const maxWidth = 600
+    const newWidth = Math.min(Math.max(e.clientX, minWidth), maxWidth)
+    leftWidth.value = newWidth
+}
+
+const stopDragging = () => {
+    isDragging.value = false
+}
 const defaultProps = {
     children: 'children',
     label: 'label'
@@ -168,6 +197,7 @@ const defaultProps = {
 
 const direction = ref('both')
 const level = ref('1')
+const closed = ref(true)
 const filterNode = (value) => {
     treeRef.value.filter(value)
 }
@@ -177,9 +207,16 @@ const filterMethod = (value, data) => {
     return data.label.toLowerCase().includes(value.toLowerCase())
 }
 
-const changeDirection = () => {
+const changeClosed = () => {
     if (window.ipc) {
-        window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: selectedNode.value.label, level: level.value, direction: direction.value } }).then(tables => {
+        window.ipc.sendInvoke('toMain', {
+            event: 'kg', params: {
+                name: selectedNode.value.label,
+                level: level.value,
+                direction: direction.value,
+                closed: closed.value
+            }
+        }).then(tables => {
             console.log(tables)
             tables.edges.forEach(it => {
                 it.schedule = 'xx'
@@ -188,6 +225,40 @@ const changeDirection = () => {
             let _nodes = []
             tables.nodes.forEach((it) => {
                 _nodes.push({
+                    active: it.label == selectedNode.value.label,
+                    id: it.id,
+                    label: it.label,
+                    alias: it.alias,
+                    schema: it.schema,
+                    fields: []
+                })
+            })
+            tables.nodes = _nodes
+
+            graphData.value = tables
+        })
+    }
+}
+
+const changeDirection = () => {
+    if (window.ipc) {
+        window.ipc.sendInvoke('toMain', {
+            event: 'kg', params: {
+                name: selectedNode.value.label,
+                level: level.value,
+                direction: direction.value,
+                closed: closed.value
+            }
+        }).then(tables => {
+            console.log(tables)
+            tables.edges.forEach(it => {
+                it.schedule = 'xx'
+                it.alias = 'qqq'
+            })
+            let _nodes = []
+            tables.nodes.forEach((it) => {
+                _nodes.push({
+                    active: it.label == selectedNode.value.label,
                     id: it.id,
                     label: it.label,
                     alias: it.alias,
@@ -205,7 +276,15 @@ const changeDirection = () => {
 const changeLevel = (val) => {
     console.log(val)
     if (window.ipc) {
-        window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: selectedNode.value.label, level: level.value, direction: direction.value } }).then(tables => {
+        window.ipc.sendInvoke('toMain', {
+            event: 'kg', params: {
+
+                name: selectedNode.value.label,
+                level: level.value,
+                direction: direction.value,
+                closed: closed.value
+            }
+        }).then(tables => {
             console.log(tables)
             tables.edges.forEach(it => {
                 it.schedule = 'xx'
@@ -214,6 +293,7 @@ const changeLevel = (val) => {
             let _nodes = []
             tables.nodes.forEach((it) => {
                 _nodes.push({
+                    active: it.label == selectedNode.value.label,
                     id: it.id,
                     label: it.label,
                     alias: it.alias,
@@ -226,6 +306,8 @@ const changeLevel = (val) => {
             graphData.value = tables
         })
     }
+
+
 }
 
 const handleNodeClick = (node) => {
@@ -233,15 +315,23 @@ const handleNodeClick = (node) => {
         selectedNode.value = node
 
         if (window.ipc) {
-            window.ipc.sendInvoke('toMain', { event: 'kg', params: { name: node.label, level: level.value, direction: direction.value } }).then(tables => {
+            window.ipc.sendInvoke('toMain', {
+                event: 'kg', params: {
+                    name: selectedNode.value.label,
+                    level: level.value,
+                    direction: direction.value,
+                    closed: closed.value
+                }
+            }).then(tables => {
                 console.log(tables)
-                tables.edges.forEach(it => {
+                tables?.edges.forEach(it => {
                     it.schedule = 'xx'
                     it.alias = 'qqq'
                 })
                 let _nodes = []
-                tables.nodes.forEach((it) => {
+                tables?.nodes.forEach((it) => {
                     _nodes.push({
+                        active: it.label == selectedNode.value.label,
                         id: it.id,
                         label: it.label,
                         alias: it.alias,
@@ -262,13 +352,21 @@ const handleNodeClick = (node) => {
 .schema-tree-layout {
     display: flex;
     height: 100vh;
+    position: relative;
 }
 
 .left-panel {
-    width: 220px;
+    background: #fafafa;
     padding: 10px;
     border-right: 1px solid #eee;
     overflow-y: auto;
+}
+
+.resizer {
+    width: 5px;
+    cursor: col-resize;
+    background-color: #ddd;
+    z-index: 10;
 }
 
 .right-panel {

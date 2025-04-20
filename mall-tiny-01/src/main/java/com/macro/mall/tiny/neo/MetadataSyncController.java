@@ -49,12 +49,6 @@ public class MetadataSyncController {
         return "字段同步完成";
     }
 
-    @PostMapping("/query")
-    public List<Map<String, Object>> query(@RequestBody Map<String, String> body) {
-        String cypher = body.get("cypher");
-        return neo4jWriter.query(cypher, new HashMap<String, Object>());
-    }
-
     /**
      * 通用 Cypher 查询接口
      *

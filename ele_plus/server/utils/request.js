@@ -5,44 +5,6 @@ const consoleUtil = require('./consoleLogUtil')
 const myAxios = require('./myAxios')
 const constants = require('../../constant/constants')
 
-async function login(username, password, role) {
-  return myAxios
-    .post(constants.API.prod.login, {
-      username,
-      password,
-    })
-    .then((response) => {
-      let data = response.data
-      if (response.status !== 200) {
-        return false
-      } else {
-        consoleUtil.log('登录成功')
-        setValueByPath('auth', {
-          username: username,
-          password: password,
-          role: role,
-          cookies: response.headers['set-cookie'],
-          isLogin: true,
-          exception: false,
-        })
-      }
-      return data
-    })
-    .catch((err) => {
-      if (err.response) {
-        return {
-          type: 'error',
-          message: err.response,
-        }
-      } else {
-        return {
-          type: 'error',
-          message: err.code,
-        }
-      }
-    })
-}
-
 async function getUserInfo() {
   let cookieStr = getUserDataProperty('auth')
   return myAxios
@@ -134,6 +96,7 @@ async function getMessage() {
 }
 
 async function queryKg(params) {
+  console.log(params)
   let cookieStr = getUserDataProperty('auth.cookies')
   let url = 'http://127.0.0.1:8081/sync/g6/lineageClosed'
   if (params.direction === 'downstream') {
@@ -143,14 +106,33 @@ async function queryKg(params) {
   } else if (params.direction === '') {
     url = 'http://127.0.0.1:8081/sync/g6/both'
   }
+
+  url = 'http://127.0.0.1:8081/test/g6/resolve'
   return myAxios
-    .get(`${url}?tableId=${params.name}&level=${params.level}`, {
-      headers: {
-        Cookie: cookieStr,
+    .post(
+      `${url}`,
+      {
+        tableId: params.name,
+        level: parseInt(params.level),
+        direction: params.direction,
+        closed: params.closed,
+        nodeFilter: {
+          // layer: ['ods', 'ads'],
+          layer: ['dim'],
+        },
+        relFilter: {
+          // sqlName: ['sql_10', 'sql_debug'],
+        },
       },
-      tag: 'xxajiso',
-    })
+      {
+        headers: {
+          Cookie: cookieStr,
+        },
+        tag: 'xxajiso',
+      },
+    )
     .then((response) => {
+      console.log(response)
       return response.data
     })
     .catch((err) => {
@@ -167,5 +149,4 @@ module.exports = {
   getUserInfo,
   getMessage,
   fetchPageAndGetCookie,
-  login,
 }

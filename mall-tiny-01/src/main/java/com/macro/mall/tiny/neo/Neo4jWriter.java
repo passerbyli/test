@@ -116,6 +116,8 @@ public class Neo4jWriter {
      */
     public List<Map<String, Object>> query(String cypher, Map<String, Object> params) {
         List<Map<String, Object>> resultList = new ArrayList<>();
+        System.out.println("Running Cypher: " + cypher);
+        System.out.println("With params: " + params);
         try (Session session = driver.session()) {
             session.readTransaction(tx -> {
                 Result result = tx.run(cypher, params);

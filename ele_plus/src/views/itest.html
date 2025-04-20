@@ -1,0 +1,68 @@
+<div id="container"></div>
+<script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-4.8.16/dist/g6.min.js"></script>
+<script>
+  const legend = new G6.Legend({
+    type: 'category',
+    data: [
+      {
+        id: 'table',
+        label: '表',
+        shape: 'circle',
+        style: {
+          fill: '#C6E5FF',
+          stroke: '#5B8FF9',
+        },
+      },
+      {
+        id: 'view',
+        label: '视图',
+        shape: 'circle',
+        style: {
+          fill: '#FFD591',
+          stroke: '#FA8C16',
+        },
+      },
+      {
+        id: 'procedure',
+        label: '存储过程',
+        shape: 'circle',
+        style: {
+          fill: '#B7EB8F',
+          stroke: '#52C41A',
+        },
+      },
+    ],
+    layout: 'vertical', // ❗️这里尽量避免 horizontal 尝试
+    position: 'top-left',
+    padding: 12,
+    title: '实体类型',
+    titleConfig: {
+      position: 'center',
+      offsetY: -10,
+    },
+  })
+
+  const graph = new G6.Graph({
+    container: 'container',
+    width: 800,
+    height: 600,
+    plugins: [legend],
+    layout: {
+      type: 'dagre',
+    },
+    defaultNode: {
+      type: 'circle',
+      size: 40,
+    },
+    data: {
+      nodes: [
+        { id: '1', label: 'A表', nodeType: 'table' },
+        { id: '2', label: 'B视图', nodeType: 'view' },
+        { id: '3', label: 'C过程', nodeType: 'procedure' },
+      ],
+      edges: [],
+    },
+  })
+
+  graph.render()
+</script>
