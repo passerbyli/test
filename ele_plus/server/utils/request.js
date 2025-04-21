@@ -98,14 +98,6 @@ async function getMessage() {
 async function queryKg(params) {
   console.log(params)
   let cookieStr = getUserDataProperty('auth.cookies')
-  let url = 'http://127.0.0.1:8081/sync/g6/lineageClosed'
-  if (params.direction === 'downstream') {
-    url = 'http://127.0.0.1:8081/sync/g6/downstream'
-  } else if (params.direction === 'upstream') {
-    url = 'http://127.0.0.1:8081/sync/g6/upstream'
-  } else if (params.direction === '') {
-    url = 'http://127.0.0.1:8081/sync/g6/both'
-  }
 
   url = 'http://127.0.0.1:8081/test/g6/resolve'
   return myAxios

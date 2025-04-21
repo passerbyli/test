@@ -204,7 +204,8 @@ const refreshGraph = () => {
         const { item, target } = evt
         const model = item.getModel()
         if (target.get('name') === 'icon-img') {
-            selectedNodeFields.value = model.fields || []
+
+            selectedNodeFields.value = model.fields ? JSON.parse(model.fields) : []
             dialogVisible.value = true
         }
     })

@@ -3,7 +3,7 @@
         <div class="left-panel" :style="{ width: leftWidth + 'px' }" ref="leftPanelRef">
             <el-input v-model="filterText" placeholder="搜索表或存储过程..." @input="filterNode" />
             <el-tree :data="treeData" :props="defaultProps" node-key="id" :filter-node-method="filterMethod"
-                ref="treeRef" @node-click="handleNodeClick" highlight-current />
+                ref="treeRef" @node-click="handleNodeClick" highlight-current :default-expand-all="true" />
         </div>
         <!-- 拖动条 -->
         <div class="resizer" @mousedown="startDragging"></div>
@@ -336,7 +336,7 @@ const handleNodeClick = (node) => {
                         label: it.label,
                         alias: it.alias,
                         schema: it.schema,
-                        fields: []
+                        fields: it.fields
                     })
                 })
                 tables.nodes = _nodes

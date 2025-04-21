@@ -1,5 +1,8 @@
 package com.macro.mall.tiny.neo;
 
+import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.neo4j.driver.Value;
 import org.neo4j.driver.types.Node;
 import org.neo4j.driver.types.Path;
 import org.neo4j.driver.types.Relationship;
@@ -194,6 +197,30 @@ private Map<String, Object> buildG6FromPathList(List<Map<String, Object>> raw) {
                         String label = node.labels().iterator().next();
                         nodeMap.put("type", label);         // 保留原 label 作为类型
                         nodeMap.put("nodeType", normalizeNodeType(label)); // 新增字段，前端 legend 分类用
+
+
+                        Value fieldsValue = node.get("fields");
+                        System.out.println("字段类型: " + fieldsValue.type().name());
+                        if (fieldsValue != null && !fieldsValue.isNull()) {
+//                            if (fieldsValue.type().name().equals("LIST")) {
+//                                nodeMap.put("fields", fieldsValue.asList());
+//                            } else {
+//                                String fieldsStr = fieldsValue.asString();
+//                                // 尝试将字符串解析为 JSON 数组
+//                                try {
+//                                    List<String> fieldsList = JSON.parseArray(fieldsStr, String.class);
+//                                    nodeMap.put("fields", fieldsList);
+//                                } catch (Exception e) {
+//                                    // 解析失败，保留原始字符串或设为空列表
+//                                    System.out.println("字段解析失败: " + fieldsStr);
+//                                    nodeMap.put("fields", Collections.emptyList());
+//                                }
+//                            }
+                            nodeMap.put("fields",fieldsValue.asString() );
+                        } else {
+//                            nodeMap.put("fields", "");
+                        }
+
                         nodes.add(nodeMap);
                         nodeIdToBusinessId.put(node.id(), id);
                     }
