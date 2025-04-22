@@ -21,7 +21,9 @@
 
         <el-dialog v-model="edgeDialogVisible" title="关系信息" width="400px">
             <el-descriptions :column="1" border>
-                <el-descriptions-item label="存储过程">{{ selectedEdgeInfo.procedure }}</el-descriptions-item>
+                <el-descriptions-item label="ID">{{ selectedEdgeInfo.id }}</el-descriptions-item>
+                <el-descriptions-item label="名称">{{ selectedEdgeInfo.name }}</el-descriptions-item>
+                <el-descriptions-item label="存储过程">{{ selectedEdgeInfo.label }}</el-descriptions-item>
                 <el-descriptions-item label="执行周期">{{ selectedEdgeInfo.schedule }}</el-descriptions-item>
             </el-descriptions>
         </el-dialog>
@@ -170,9 +172,12 @@ const refreshGraph = () => {
     graph = new G6.Graph({
         container: 'container',
         layout: {
-            type: 'dagre', rankdir: 'LR', nodesep: 20,
-            ranksep: 140
-            , sortByCombo: true
+            type: 'dagre', //层次布局
+            rankdir: 'LR',
+            nodesep: 50,//节点间距
+            ranksep: 140,//层间距
+            controlPoints: true,
+            sortByCombo: true//同一层节点是否根据每个节点数据中的 comboId 进行排序，以防止 combo 重叠
         },
         combos: [
             { id: 'ods', label: 'ODS 层' },
@@ -212,7 +217,8 @@ const refreshGraph = () => {
 
     graph.on('edge:click', (evt) => {
         const model = evt.item.getModel()
-        selectedEdgeInfo.value = { procedure: model.label, schedule: model.schedule }
+        console.log(model)
+        selectedEdgeInfo.value = model
         edgeDialogVisible.value = true
     })
 
