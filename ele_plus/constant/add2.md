@@ -350,3 +350,7 @@
 | 用户 ➜ Gateway   | D        | 接口被刷爆         | IP限流部分存在 | Token未限流               | 多维限流策略（Token/IP/接口）    | 高       |
 | Gateway ➜ 微服务 | E        | 权限字段未正确透传 | Token透传      | 接口未验证角色            | 网关鉴权+微服务权限重检          | 高       |
 | 微服务 ➜ DB/API  | P        | 查询字段未脱敏     | 部分字段脱敏   | 响应结构动态映射          | 字段脱敏规则统一拦截器处理       | 高       |
+
+electron-store
+better-sqlite3
+lowdb
