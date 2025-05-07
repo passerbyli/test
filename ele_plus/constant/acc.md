@@ -76,19 +76,20 @@ DMZ区（半可信区） 统一认证系统、API网关
 
 ⸻
 
-📋 你的系统最终版【STRIDE-per-Element】表（完整版）
+## STRIDE-per-Element 威胁模型表
 
-元素 类型 S（伪造身份） T（篡改） R（抵赖） I（泄露） D（拒绝服务） E（提升权限） 备注
-用户（User） External Interactor ✔️ ✔️ 伪造用户身份；否认请求发起
-统一认证系统（Authentication Service） Process ✔️ ✔️ ✔️ ✔️ ✔️ ✔️ 身份认证篡改、敏感信息泄露、认证系统被打挂
-API网关（API Gateway） Process ✔️ ✔️ ✔️ ✔️ ✔️ ✔️ Token伪造、参数篡改、认证抵赖、信息泄露
-微服务层（Microservices） Process ✔️ ✔️ ✔️ ✔️ ✔️ ✔️ 接口伪造、数据篡改、日志抵赖、数据泄漏、接口刷挂、接口越权
-数据仓库A/B/C（Data Warehouse A/B/C） Data Store ✔️ ✔️ ✔️ 数据被非法篡改、数据泄露、查询爆破
-Redis缓存（Redis Cluster） Data Store ✔️ ✔️ ✔️ 缓存被污染、缓存泄露、缓存打挂
-配置中心（Config Center） Data Store ✔️ ✔️ ✔️ 配置篡改、敏感配置泄露、配置服务DoS
-注册中心（Consul） Process ✔️ ✔️ ✔️ ✔️ ✔️ ✔️ 注册信息伪造、篡改、注册信息泄露、Consul被刷挂
-SOA认证服务（SOA Authentication Service） Process ✔️ ✔️ ✔️ ✔️ ✔️ ✔️ 调用认证篡改、token伪造、信息泄露、服务打挂
-外部API市场服务（Third Party API Service） Data Store ✔️ ✔️ ✔️ 返回数据被篡改、数据泄露、限流DoS
+| 元素                   | 类型                | S（Spoofing）伪造身份 | T（Tampering）篡改 | R（Repudiation）抵赖 | I（Information Disclosure）信息泄露 | D（Denial of Service）拒绝服务 | E（Elevation of Privilege）权限提升 | 说明                                     |
+| :--------------------- | :------------------ | :-------------------: | :----------------: | :------------------: | :---------------------------------: | :----------------------------: | :---------------------------------: | :--------------------------------------- |
+| **用户（User）**       | External Interactor |          ✔️           |                    |          ✔️          |                                     |                                |                                     | 可伪造身份、否认请求                     |
+| **统一认证系统**       | Process             |          ✔️           |         ✔️         |          ✔️          |                 ✔️                  |               ✔️               |                 ✔️                  | 认证过程受多重威胁，需确保完整性         |
+| **API网关**            | Process             |          ✔️           |         ✔️         |          ✔️          |                 ✔️                  |               ✔️               |                 ✔️                  | 入侵流量核心关口，需认证、限流、日志记录 |
+| **微服务层**           | Process             |          ✔️           |         ✔️         |          ✔️          |                 ✔️                  |               ✔️               |                 ✔️                  | 核心业务逻辑集中点，存在多类复合风险     |
+| **数据仓库A/B/C**      | Data Store          |                       |         ✔️         |                      |                 ✔️                  |               ✔️               |                                     | 数据集中存储点，需防泄露与篡改           |
+| **Redis缓存**          | Data Store          |                       |         ✔️         |                      |                 ✔️                  |               ✔️               |                                     | 缓存可能暴露敏感数据、受污染或被打满     |
+| **配置中心**           | Data Store          |                       |         ✔️         |                      |                 ✔️                  |               ✔️               |                                     | 配置泄露或被篡改会波及全局系统行为       |
+| **注册中心（Consul）** | Process             |          ✔️           |         ✔️         |          ✔️          |                 ✔️                  |               ✔️               |                 ✔️                  | 注册服务被伪造、污染、爆破等问题频发     |
+| **SOA认证服务**        | Process             |          ✔️           |         ✔️         |          ✔️          |                 ✔️                  |               ✔️               |                 ✔️                  | 外部访问授权点，需防止 token 被盗或滥用  |
+| **外部API市场服务**    | Data Store          |                       |         ✔️         |                      |                 ✔️                  |               ✔️               |                                     | 返回数据需校验、API易受限流和污染影响    |
 
 ⸻
 

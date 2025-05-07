@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "username": "",
+    "password": "",
+    "role": "",
+    "cookie": ""
+  },
+  "notify": false,
+  "outpurDir": ""
+}

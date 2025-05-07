@@ -1,0 +1,18 @@
+{
+    "database": {
+        "host": "",
+        "port": 3306,
+        "username": "",
+        "password": ""
+    },
+    "beta": {
+        "username": "",
+        "password": "",
+        "cookies": []
+    },
+    "prod": {
+        "username": "",
+        "password": "",
+        "cookies": []
+    }
+}

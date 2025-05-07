@@ -1,29 +1,33 @@
-# ele_plus
+# 1. 全局
 
-This template should help get you started developing with Vue 3 in Vite.
+登录，注销，长期在线，定时通知。
 
-## Recommended IDE Setup
+# 2. 模块
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 2.2 分析云
 
-## Customize configuration
+### 2.2.1 解析报告
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### 2.2.2 生成执行sql
 
-## Project Setup
+> 分析云元数据mysql
 
-```sh
-pnpm install
-```
+### 2.2.3 图片地址替换
 
-### Compile and Hot-Reload for Development
+> 测试/生产帐号
 
-```sh
-pnpm dev
-```
+## 数据治理
 
-### Compile and Minify for Production
+### 数据血缘
 
-```sh
-pnpm build
-```
+### 数据资产
+
+### 接口
+
+## 云龙
+
+> 当前登录人信息
+
+1. US
+2. Task
+3. bug

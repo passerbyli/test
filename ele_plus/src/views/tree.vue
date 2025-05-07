@@ -1,13 +1,11 @@
 <template>
-    <div class="schema-tree-layout">
-        <div class="left-panel" :style="{ width: leftWidth + 'px' }" ref="leftPanelRef">
+    <foldLeft>
+        <template v-slot:left>
             <el-input v-model="filterText" placeholder="搜索表或存储过程..." @input="filterNode" />
             <el-tree :data="treeData" :props="defaultProps" node-key="id" :filter-node-method="filterMethod"
                 ref="treeRef" @node-click="handleNodeClick" highlight-current :default-expand-all="true" />
-        </div>
-        <!-- 拖动条 -->
-        <div class="resizer" @mousedown="startDragging"></div>
-        <div class="right-panel">
+        </template>
+        <template v-slot:main>
             <div v-if="selectedNode">
                 <h3>{{ selectedNode.label }}</h3>
                 <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
@@ -39,18 +37,17 @@
             <div v-else>
                 <p>请选择表或存储过程查看详情</p>
             </div>
-        </div>
-    </div>
+        </template>
+    </foldLeft>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElInput, ElTree } from 'element-plus'
 import BloodRelationship from './BloodRelationship.vue'
-const leftPanelRef = ref()
-const leftWidth = ref(240) // 初始宽度
+import FoldLeft from '../layout/FoldLeft.vue'
 
-const isDragging = ref(false)
+
 const filterText = ref('')
 const treeRef = ref()
 const selectedNode = ref({ label: 'xx' })
@@ -132,8 +129,6 @@ let graphData = ref({
     ]
 })
 onMounted(() => {
-    document.addEventListener('mousemove', handleDragging)
-    document.addEventListener('mouseup', stopDragging)
     if (window.ipc) {
         window.ipc.sendInvoke('toMain', { event: 'getDBQuery', params: { sql: 'select * from ads_dl.metadata_table' } }).then(tables => {
             let schemas = []
@@ -169,27 +164,10 @@ onMounted(() => {
     }
 })
 
-onBeforeUnmount(() => {
-    document.removeEventListener('mousemove', handleDragging)
-    document.removeEventListener('mouseup', stopDragging)
-})
 
-const startDragging = (e) => {
-    isDragging.value = true
-    e.preventDefault()
-}
 
-const handleDragging = (e) => {
-    if (!isDragging.value) return
-    const minWidth = 150
-    const maxWidth = 600
-    const newWidth = Math.min(Math.max(e.clientX, minWidth), maxWidth)
-    leftWidth.value = newWidth
-}
 
-const stopDragging = () => {
-    isDragging.value = false
-}
+
 const defaultProps = {
     children: 'children',
     label: 'label'
@@ -348,30 +326,4 @@ const handleNodeClick = (node) => {
 }
 </script>
 
-<style>
-.schema-tree-layout {
-    display: flex;
-    height: 100vh;
-    position: relative;
-}
-
-.left-panel {
-    background: #fafafa;
-    padding: 10px;
-    border-right: 1px solid #eee;
-    overflow-y: auto;
-}
-
-.resizer {
-    width: 5px;
-    cursor: col-resize;
-    background-color: #ddd;
-    z-index: 10;
-}
-
-.right-panel {
-    flex: 1;
-    padding: 20px;
-    overflow-y: auto;
-}
-</style>
+<style></style>
