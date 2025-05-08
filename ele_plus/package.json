@@ -37,6 +37,7 @@
     "https": "^1.0.0",
     "iconv-lite": "^0.6.3",
     "lodash": "^4.17.21",
+    "lowdb": "^3.0.0",
     "mysql2": "^3.14.0",
     "neo4j-driver": "^4.4.11",
     "node-sql-parser": "^5.3.8",

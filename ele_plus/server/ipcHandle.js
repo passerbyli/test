@@ -289,4 +289,33 @@ async function openDirectory(dirPath, type) {
     })
 }
 
+const mysql = require('mysql2/promise')
+const { Client } = require('pg')
+
+ipcMain.handle('test-connection', async (_, config) => {
+  try {
+    if (config.type === 'pgsql') {
+      const client = new Client(config)
+      await client.connect()
+      await client.end()
+    } else if (config.type === 'mysql') {
+      const conn = await mysql.createConnection(config)
+      await conn.ping()
+      await conn.end()
+    }
+    return { success: true, message: '连接成功' }
+  } catch (e) {
+    return { success: false, message: e.message }
+  }
+})
+import { getConfig, setConfig, initConfig } from './configStore.js'
+
+export async function registerConfigIpcHandlers() {
+  await initConfig()
+
+  ipcMain.handle('config:get', (_, pathStr) => getConfig(pathStr))
+  ipcMain.handle('config:set', async (_, pathStr, value) => {
+    await setConfig(pathStr, value)
+  })
+}
 module.exports = { ipcHandle }

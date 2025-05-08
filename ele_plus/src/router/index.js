@@ -22,7 +22,9 @@ const router = createRouter({
           // component: () => import('../views/vue3.vue'),
           // component: () => import('../views/Test1View.vue'),
           // component: () => import('../views/Test0View.vue'),
-          component: () => import('../views/tree.vue'),
+          component: () => import('../views/DataSourceManager.vue'),
+          // component: () => import('../views/tree.vue'),
+
           // component: () => import('../views/BloodRelationship.vue'),
           meta: {
             title: '首页',

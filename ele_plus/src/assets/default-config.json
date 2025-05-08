@@ -1,0 +1,32 @@
+{
+    "global": {
+        "isLogin": false,
+        "auth": {
+            "username": "",
+            "password": "",
+            "role": "",
+            "cookies": [],
+            "userId": "",
+            "displayName": ""
+        },
+        "theme": "light",
+        "language": "zh_CN",
+        "notify": {
+            "disable": false
+        }
+    },
+    "modules": {
+        "module1": {
+            "accounts": [],
+            "currentEnv": "production",
+            "databases": []
+        },
+        "module2": {
+            "cronJobs": {
+                "cronJob1": "",
+                "cronJob2": ""
+            },
+            "type": "PI"
+        }
+    }
+}
