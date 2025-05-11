@@ -1,0 +1,51 @@
+{
+  "name": "elep",
+  "version": "0.0.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "fix-electron": "node -e \"require('os').platform()==='win32' ? require('child_process').execSync('scripts/fix-electron.bat', {stdio: 'inherit'}) : require('child_process').execSync('bash scripts/fix-electron.sh', {stdio: 'inherit'})\"",
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "start": "chcp 65001 && electron .",
+    "startNode": "nodemon",
+    "startM": "electron .",
+    "startN": "nodemon --exec NODE_ENV=development electron .  --watch ./ --ext .js",
+    "release": "electron-builder --dir --mac --arm64",
+    "release:mac": "electron-builder --mac --arm64 --publish never",
+    "release:win": "electron-builder --win --publish never",
+    "release:all": "electron-builder --mac --win --publish never",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "format": "prettier --write src/"
+  },
+  "dependencies": {
+    "@antv/g6": "^5.0.45",
+    "@element-plus/icons-vue": "^2.3.1",
+    "diff-match-patch": "^1.0.5",
+    "electron-reload": "2.0.0-alpha.1",
+    "element-plus": "^2.9.10",
+    "highlight.js": "^11.11.1",
+    "lowdb": "^7.0.1",
+    "pinia": "^3.0.1",
+    "sass-embedded": "^1.87.0",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.1",
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-vue": "^5.2.3",
+    "@vue/tsconfig": "^0.7.0",
+    "electron": "29",
+    "electron-builder": "24",
+    "nodemon": "^3.1.9",
+    "npm-run-all2": "^7.0.2",
+    "prettier": "3.5.3",
+    "typescript": "~5.8.0",
+    "vite": "^6.2.4",
+    "vite-plugin-vue-devtools": "^7.7.2",
+    "vue-tsc": "^2.2.8"
+  }
+}
