@@ -11,6 +11,22 @@ const {
 const path = require('node:path')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+
+// require('./electron/ipc/configIpc.js')
+
+const { getConfig, updateConfig } = require('./electron/db/configDb2.js')
+
+ipcMain.handle('config:get', () => {
+  console.log('[IPC] config:get')
+  return getConfig()
+})
+
+ipcMain.handle('config:update', (event, data) => {
+  console.log('[IPC] config:update', data)
+  updateConfig(data)
+  return { success: true }
+})
+
 let win = null
 
 function createWindow() {
@@ -34,8 +50,6 @@ function createWindow() {
   }
   win.webContents.openDevTools()
 }
-
-ipcMain.handle('', () => {})
 
 app.whenReady().then(function () {
   createWindow()

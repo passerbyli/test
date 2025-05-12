@@ -32,3 +32,16 @@ const PASSWORD = 'your_password'
 
   console.log('已登录并跳转成功')
 })()
+
+async function b(){
+  const data = await fetch()
+  return data.data
+}
+
+function a(){
+  return b()
+}
+function main(){
+  const data = a()
+  console.log(data)
+}

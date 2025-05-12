@@ -17,7 +17,6 @@
     },
     "modules": {
         "module1": {
-            "accounts": [],
             "currentEnv": "production",
             "databases": []
         },
@@ -27,6 +26,21 @@
                 "cronJob2": ""
             },
             "type": "PI"
+        },
+        "module3": {
+            "accounts": {
+              "beta":  {
+                    "username": "",
+                    "password": "",
+                    "cookies": []
+                },
+                "pord": {
+                    "username": "",
+                    "password": "",
+                    "cookies": []
+                }
+            },
+            "currentEnv": "beta"
         }
     }
 }

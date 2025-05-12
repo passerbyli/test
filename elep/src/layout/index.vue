@@ -81,21 +81,21 @@ const popoverRef = ref()
 
 onMounted(() => {
     if (window.ipc) {
-        window.ipc.receive('fromMain', (data) => {
-            if (data && data.event) {
-                if (data.event === 'console') {
-                    console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
-                } else if (data.event == 'openLoginWin') {
-                    dialogVisible.value = true
-                    userinfo.value = {}
-                    isLogin.value = false
-                }
-            }
-        })
-        window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
-            isLogin.value = true
-            userinfo.value = res
-        })
+        // window.ipc.receive('fromMain', (data) => {
+        //     if (data && data.event) {
+        //         if (data.event === 'console') {
+        //             console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
+        //         } else if (data.event == 'openLoginWin') {
+        //             dialogVisible.value = true
+        //             userinfo.value = {}
+        //             isLogin.value = false
+        //         }
+        //     }
+        // })
+        // window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
+        //     isLogin.value = true
+        //     userinfo.value = res
+        // })
         // setInterval(() => {
         //   window.ipc.sendInvoke("toMain", { event: "getUserInfo" }).then(res => {
         //     if (res.type == 'error') {
