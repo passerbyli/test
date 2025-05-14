@@ -24,6 +24,15 @@ const router = createRouter({
           },
           children: [
             {
+              name: 'dataSource',
+              path: '/dataSource',
+              component: () => import('../views/DataSourceView.vue'),
+              meta: {
+                title: '数据源管理',
+              },
+              children: [],
+            },
+            {
               path: '/tableAssets',
               name: 'tableAssets',
               component: () => import('../views/TableAssets.vue'),
@@ -92,14 +101,6 @@ const router = createRouter({
               component: () => import('../views/DataLineageView.vue'),
               meta: {
                 title: '数据管理',
-              },
-            },
-            {
-              path: '/dataSourceManager',
-              name: 'dataSourceManager',
-              component: () => import('../views/DataSourceManager.vue'),
-              meta: {
-                title: '数据源管理',
               },
             },
           ],
@@ -213,6 +214,10 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+router.beforeEach(async (to, from, next) => {
+  next()
 })
 
 export default router

@@ -1,4 +1,4 @@
-<template>11
+<template>
   <el-card shadow="never">
     <el-tabs v-model="activeTab" tab-position="top">
       <!-- 全局设置 -->

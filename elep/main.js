@@ -12,21 +12,7 @@ const path = require('node:path')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
-// require('./electron/ipc/configIpc.js')
-
-const { getConfig, updateConfig } = require('./electron/db/configDb2.js')
-
-ipcMain.handle('config:get', () => {
-  console.log('[IPC] config:get')
-  return getConfig()
-})
-
-ipcMain.handle('config:update', (event, data) => {
-  console.log('[IPC] config:update', data)
-  updateConfig(data)
-  return { success: true }
-})
-
+const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
 let win = null
 
 function createWindow() {
@@ -52,7 +38,29 @@ function createWindow() {
 }
 
 app.whenReady().then(function () {
+  registerAllIpc(ipcMain)
   createWindow()
+})
+
+ipcMain.handle('refresh-window', () => {
+  console.log('----0000----')
+  win.reload()
+})
+// ipcRenderer.invoke 处理
+ipcMain.handle('toMain', async (e, args) => {
+  return await ipcHandle(e, args)
+})
+
+// ipcRenderer.on 处理
+ipcMain.on('toMain', async (e, args) => {
+  if (!args || !args.event) {
+    return
+  }
+
+  const data = await ipcHandle(e, args)
+  const webContents = e.sender
+  const win = BrowserWindow.fromWebContents(webContents)
+  win.webContents.send('fromMain', { event: args.event, data: data })
 })
 
 app.on('window-all-closed', () => {

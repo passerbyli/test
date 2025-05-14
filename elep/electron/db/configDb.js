@@ -22,6 +22,20 @@ const store = new Store({
         },
         currentEnv: 'beta',
       },
+      module4: {
+        sources: [
+          // 示例数据
+          {
+            name: '主数据库',
+            type: 'PostgreSQL',
+            host: 'localhost',
+            port: 5432,
+            username: 'user',
+            password: 'pass',
+            database: 'mydb',
+          },
+        ],
+      },
     },
   },
 })

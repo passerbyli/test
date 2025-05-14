@@ -4,8 +4,8 @@
             <LayHeader />
         </div>
         <el-container>
-            <el-header class="cus_header header-flex">1
-                <div class="header-lf">
+            <el-header class="cus_header header-flex">
+                <div class="header-lf">小工具
                 </div>
                 <el-menu mode="horizontal" :default-active="activeMenu" class="cus-menu-horizontal" router>
                     <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
@@ -18,11 +18,12 @@
                     </el-tooltip>
                     <div v-if="isLogin" class="sys-user">
                         <div class="username"> {{ userinfo?.username }}</div>
-                        <el-select class="item-box" v-model="form.role" @change="changeRole" placeholder="请选择">
+                        <el-select class="item-box" v-model="form.role" @change="handleChangeRole" placeholder="请选择">
                             <el-option label="开发" value="开发" />
                             <el-option label="测试" value="测试" />
                             <el-option label="SM" value="SM" />
                         </el-select>
+                        <div>{{ form.username }}</div>
                         <el-button plain @click="openLoginWin()">注销</el-button>
                     </div>
                     <div v-else>
@@ -50,7 +51,11 @@
             close-on-click-modal="false">
             <el-form :model="form" label-width="auto">
                 <el-form-item label="角色">
-
+                    <el-select v-model="form.role" placeholder="">
+                        <el-option value="开发">开发</el-option>
+                        <el-option value="测试">测试</el-option>
+                        <el-option value="SM">SM</el-option>
+                    </el-select>
 
                 </el-form-item>
                 <el-form-item label="用户名">
@@ -64,54 +69,63 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="dialogVisible = false">取消</el-button>
-                    <el-button type="primary" @click="login()">登录</el-button>
+                    <el-button type="primary" @click="handleLogin">登录</el-button>
                 </span>
             </template>
         </el-dialog>
     </div>
 </template>
 <script setup>
+import { ElMessage } from 'element-plus'
 import { Setting } from '@element-plus/icons-vue'
-import { defineComponent, h, computed, ref, onMounted } from 'vue'
+import { loadConfig } from '../services/configService.js'
+import { defineComponent, h, computed, ref, onMounted, reactive } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 
+import { defaultForm } from '../services/defaultForm.js'
+import { login, changeRole } from '../services/authService'
 import MenuItem from './MenuItem.vue' // 递归组件
 
-const popoverRef = ref()
 
-onMounted(() => {
+
+let form = reactive(structuredClone(defaultForm))
+
+onMounted(async () => {
+    const config = await loadConfig()
+    Object.assign(form, defaultForm, config.global.auth)
     if (window.ipc) {
-        // window.ipc.receive('fromMain', (data) => {
-        //     if (data && data.event) {
-        //         if (data.event === 'console') {
-        //             console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
-        //         } else if (data.event == 'openLoginWin') {
-        //             dialogVisible.value = true
-        //             userinfo.value = {}
-        //             isLogin.value = false
-        //         }
-        //     }
-        // })
-        // window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
-        //     isLogin.value = true
-        //     userinfo.value = res
-        // })
-        // setInterval(() => {
-        //   window.ipc.sendInvoke("toMain", { event: "getUserInfo" }).then(res => {
-        //     if (res.type == 'error') {
-        //       loginReqError.value = true
-        //       loginMsg.value = res.message
-        //     } else {
-        //       console.log(res.data)
-        //       isLogin.value = true
-        //       userinfo.value = res.data
-        //       dialogVisible.value = false
-        //     }
-        //   })
-        // }, 3000000)
+        window.ipc.receive('fromMain', (data) => {
+            if (data && data.event) {
+                if (data.event === 'console') {
+                    console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
+                } else if (data.event == 'openLoginWin') {
+                    dialogVisible.value = true
+                    userinfo.value = {}
+                    isLogin.value = false
+                }
+            }
+        })
+        window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
+            isLogin.value = true
+            userinfo.value = res
+        })
+        setInterval(() => {
+            window.ipc.sendInvoke("toMain", { event: "getUserInfo" }).then(res => {
+                if (res.type == 'error') {
+                    loginReqError.value = true
+                    loginMsg.value = res.message
+                } else {
+                    console.log(res.data)
+                    isLogin.value = true
+                    userinfo.value = res.data
+                    dialogVisible.value = false
+                }
+            })
+        }, 3000000)
 
     }
 })
+
 const { push } = useRouter()
 const redirectSetting = () => {
     push(`/setting`)
@@ -136,50 +150,35 @@ const userinfo = ref({
     username: ''
 })
 
-const form = ref({
-    username: 'admin',
-    password: '123456',
-    role: '开发'
-})
 
 const openLoginWin = () => {
     dialogVisible.value = true
 }
 
-const changeRole = (item) => {
-    window.ipc.sendInvoke('toMain', {
-        event: 'changeRole',
-        params: item
-    }).then(res => {
+const handleChangeRole = async (item) => {
+    const res = await changeRole(item)
+    if (res) {
         window.ipc?.refreshWindow()
-    })
+    }
 }
 
-const login = () => {
-    if (window.ipc) {
-        window.ipc
-            .sendInvoke('toMain', {
-                event: 'login',
-                params: {
-                    username: form.value.username,
-                    password: form.value.password,
-                    role: form.value.role
-                },
-            })
-            .then((res) => {
-                console.log('====', res)
-                if (res.type == 'error') {
-                    loginReqError.value = true
-                    loginMsg.value = res.message
-                } else if (res.message == '用户名或密码错误') {
-                    loginReqError.value = true
-                    loginMsg.value = res.message
-                } else {
-                    isLogin.value = true
-                    userinfo.value = res.data
-                    dialogVisible.value = false
-                }
-            })
+const handleLogin = async () => {
+    const res = await login(form.username, form.password, form.role)
+    if (res.success) {
+        ElMessage.success('登录成功')
+        if (res.type == 'error') {
+            loginReqError.value = true
+            loginMsg.value = res.message
+        } else if (res.message == '用户名或密码错误') {
+            loginReqError.value = true
+            loginMsg.value = res.message
+        } else {
+            isLogin.value = true
+            userinfo.value = res.data
+            dialogVisible.value = false
+        }
+    } else {
+        ElMessage.error(res.message || '登录失败')
     }
 }
 
