@@ -1,26 +1,41 @@
+const constants = require('../constants.js')
 const { getConfig, updateConfig } = require('../db/configDb2.js')
 
 const consoleUtil = require('../utils/consoleLogUtil.js')
+const myAxios = require('../utils/myAxios.js')
 function registerAuthIpc(ipcMain) {
   ipcMain.handle('auth:login', (_, { username, password, role }) => {
     console.log('[IPC] auth:login')
     const config = getConfig()
     let auth = config.global.auth || {}
 
-    if (true) {
-      // if (username === auth.username && password === auth.password) {
-      auth = { username, password, role }
-      updateConfig({
-        global: {
-          ...config.global,
-          auth: auth,
-          isLogin: true,
-        },
+    return myAxios
+      .post(constants.API.prod.login, {
+        username: username,
+        password: password,
       })
-      return { success: true, type: '', user: auth }
-    } else {
-      return { success: false, message: '用户名或密码错误' }
-    }
+      .then((response) => {
+        console.log(response.headers['set-cookie'])
+        consoleUtil.log('登录成功', response)
+        auth = {
+          username,
+          password,
+          role,
+          cookies: response.headers['set-cookie'],
+        }
+        updateConfig({
+          global: {
+            ...config.global,
+            auth: auth,
+            isLogin: true,
+          },
+        })
+        return { success: true, type: '', user: auth }
+      })
+      .catch((err) => {
+        console.log(err)
+        return { success: false, message: '用户名或密码错误' }
+      })
   })
 
   ipcMain.handle('auth:logout', () => {
