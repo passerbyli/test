@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('authApi', {
   login: (data) => ipcRenderer.invoke('auth:login', data),
   logout: () => ipcRenderer.invoke('auth:logout'),
   changeRole: (data) => ipcRenderer.invoke('auth:changeRole', data),
+  checkLogin: () => ipcRenderer.invoke('auth:checkLogin'),
+  authLogin: () => ipcRenderer.invoke('auth:authLogin'),
 })
 
 contextBridge.exposeInMainWorld('dsApi', {

@@ -1,6 +1,11 @@
 <template>
-    <el-card class="p-4">
-        <h2 class="text-xl font-bold mb-4">{{ tableName }} 表详情</h2>
+    <el-card class="procedure-detail p-4">
+        <template #header>
+            <div class="card-header">
+                <span>{{ tableName }}- {{procName}}</span>
+                <el-button type="primary" @click="goBack">返回</el-button>
+            </div>
+        </template>
 
         <el-tabs v-model="activeTab">
             <!-- Tab1：表结构 -->
@@ -61,14 +66,17 @@
 <script setup>
 import { ref } from 'vue'
 
-import { diff_match_patch, DIFF_INSERT, DIFF_DELETE, DIFF_EQUAL } from 'diff-match-patch'
 
+import { useRoute, useRouter } from 'vue-router'
 import VersionDiff from '../components/VersionDiff.vue'
 import CopyableTextarea from '../components/CopyableTextarea.vue'
 const tableName = ref('user_orders')
 const activeTab = ref('structure')
 const activeStructureTab = ref('fields')
 
+const route = useRoute()
+const router = useRouter()
+const procName = route.params.name
 const fields = ref([
     { name: 'id', type: 'int', nullable: '否', default: '', comment: '主键' },
     { name: 'user_id', type: 'int', nullable: '否', default: '', comment: '用户ID' },
@@ -88,10 +96,6 @@ const sampleData = [
     { id: 1, user_id: 101, amount: 23.50 },
     { id: 2, user_id: 102, amount: 99.99 },
 ]
-
-
-
-
 
 
 const versions = ref([
@@ -132,12 +136,23 @@ const compareSelectedVersions = () => {
 }
 
 
+const goBack = () => router.back()
 </script>
 
 <style scoped>
 .p-4 {
     padding: 1rem;
 }
+.procedure-detail {
+    padding: 20px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
 </style>
 
 <style scoped>

@@ -3,9 +3,9 @@
       <template #title>
         <span>{{ item.meta?.title }}</span>
       </template>
-      <MenuItem v-for="child in item.children" :key="child.path" :item="child" :base-path="fullPath" />
+      <MenuItem v-for="child in item.children" :key="child.path" :item="child" :base-path="fullPath"/>
     </el-sub-menu>
-    <el-menu-item v-else :index="fullPath">
+    <el-menu-item v-else :index="fullPath" v-show="item.meta.display">
       {{ item.meta?.title }}
     </el-menu-item>
   </template>
@@ -25,8 +25,9 @@
     },
   })
   
-  const hasChildren = computed(
-    () => Array.isArray(props.item.children) && props.item.children.length > 0,
+  const hasChildren = computed(() =>{
+      return  Array.isArray(props.item.children) && props.item.children.length > 0
+    }
   )
   
   const fullPath = computed(() => {

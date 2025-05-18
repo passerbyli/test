@@ -65,10 +65,7 @@
 
             <!-- SQL 定义 -->
             <el-tab-pane label="SQL 定义" name="sql">
-                <div class="sql-header">
-                    <el-button icon="CopyDocument" @click="copySql">复制 SQL</el-button>
-                </div>
-                <pre class="sql-block"><code>{{ procedure.definition }}</code></pre>
+                <CopyableTextarea :content="procedure.definition" label="" height="280px" />
             </el-tab-pane>
 
             <!-- 血缘图 -->
@@ -117,6 +114,7 @@ const route = useRoute()
 const router = useRouter()
 const procName = route.params.procName
 
+import CopyableTextarea from '../components/CopyableTextarea.vue'
 const procedure = ref(null)
 const activeTab = ref('info')
 const compareSelection = ref([])
@@ -145,7 +143,52 @@ const loadProcedureDetail = async () => {
                     { "name": "user_name", "type": "VARCHAR", "description": "用户名" },
                     { "name": "age", "type": "INT", "description": "年龄" }
                 ],
-                "definition": "CREATE OR REPLACE PROCEDURE ...",
+                "definition": `CREATE OR REPLACE PROCEDURE ct_cms.etl_user_orders(target_date DATE)
+      LANGUAGE plpgsql AS $$
+      BEGIN
+      -- 阶段1：在临时Schema中创建临时表
+      CREATE TEMP TABLE tmp_raw_orders ON COMMIT DROP AS
+      SELECT
+      o.order_id,
+      u.user_id,
+      o.amount::NUMERIC(12,2) AS amount,
+      o.order_time
+      FROM ct_cms.orders o -- 源表带Schema‌:ml-citation{ref="6" data="citationList"}
+      JOIN ct_cms.users u USING (user_id)
+      WHERE o.order_date = target_date;
+
+      -- 阶段2：使用多层WITH处理
+      WITH user_stats AS (
+      SELECT
+      user_id,
+      COUNT(*) AS order_count,
+      SUM(amount) AS total_amount
+      FROM tmp_raw_orders
+      GROUP BY user_id
+      ),
+      latest_orders AS (
+      SELECT DISTINCT ON (user_id)
+      user_id,
+      order_time AS last_order
+      FROM tmp_raw_orders
+      ORDER BY user_id, order_time DESC
+      )
+      truncate table ct_cms.user_orders_wide_a;
+      -- 阶段3：写入目标Schema的物理表
+      INSERT INTO ct_cms.user_orders_wide_a
+      SELECT
+      u.user_id,
+      u.username,
+      s.order_count,
+      s.total_amount,
+      l.last_order
+      FROM ct_cms.users u -- 显式指定源Schema‌:ml-citation{ref="3" data="citationList"}
+      LEFT JOIN user_stats s USING (user_id)
+      LEFT JOIN latest_orders l USING (user_id)
+      WHERE u.created_at <= target_date;
+        public.p_rename_table('ct_cms','user_orders_wide_a','ct_cms','user_orders_wide') -- 清理临时表（ON COMMIT DROP自动处理）
+        EXCEPTION WHEN others THEN RAISE NOTICE 'ETL失败: %' , SQLERRM; ROLLBACK; END; $$;
+`,
                 "versions": [
                     { "version_no": 1, "create_time": "2024-01-01", "created_by": "张三", "definition": "..." },
                     { "version_no": 2, "create_time": "2024-02-01", "created_by": "张三", "definition": "..." }
@@ -160,12 +203,6 @@ const loadProcedureDetail = async () => {
 
 onMounted(loadProcedureDetail)
 
-const copySql = () => {
-    if (procedure.value) {
-        navigator.clipboard.writeText(procedure.value.definition)
-        ElMessage.success('SQL 已复制')
-    }
-}
 
 const compareVersions = () => {
     const [v1, v2] = compareSelection.value

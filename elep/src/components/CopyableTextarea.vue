@@ -3,7 +3,7 @@
         <div class="header">
             <span class="label" v-if="label">{{ label }}</span>
             <el-button type="primary" size="small" @click="copySelectedOrAll" icon="CopyDocument" plain>
-                复制选中 / 全部
+                复制
             </el-button>
         </div>
 

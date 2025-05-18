@@ -123,10 +123,14 @@ const route = useRoute()
 // 获取当前激活的菜单项
 const activeMenu = computed(() => route.path)
 
+
+
 // 过滤出有 meta.title 的路由作为菜单显示
 const routes = computed(() =>
     router.options.routes[0].children.filter((r) => r.meta?.title || (r.children && r.children.length))
 )
+
+
 const isLogin = ref(false)
 const dialogVisible = ref(false)
 const loginReqError = ref(false)

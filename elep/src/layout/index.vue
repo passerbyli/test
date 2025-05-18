@@ -5,9 +5,10 @@
         </div>
         <el-container>
             <el-header class="cus_header header-flex">
-                <div class="header-lf">小工具
+                <div class="header-lf">小工具{{ appInfo.version }}
                 </div>
-                <el-menu mode="horizontal" :default-active="activeMenu" class="cus-menu-horizontal" router>
+                <el-menu mode="horizontal" :default-active="activeMenu" class="cus-menu-horizontal" router
+                    v-show="menuPosition == 'top'">
                     <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
                 </el-menu>
                 <div class="operate-setting">
@@ -17,13 +18,12 @@
                         </el-icon>
                     </el-tooltip>
                     <div v-if="isLogin" class="sys-user">
-                        <div class="username"> {{ userinfo?.username }}</div>
                         <el-select class="item-box" v-model="form.role" @change="handleChangeRole" placeholder="请选择">
                             <el-option label="开发" value="开发" />
                             <el-option label="测试" value="测试" />
                             <el-option label="SM" value="SM" />
                         </el-select>
-                        <div>{{ form.username }}</div>
+                        <div class="username"> {{ userinfo.displayName }}</div>
                         <el-button plain @click="openLoginWin()">注销</el-button>
                     </div>
                     <div v-else>
@@ -32,9 +32,8 @@
                 </div>
             </el-header>
             <el-container class="classic-content">
-                <el-aside width="200px" style="display: none;">
-                    <el-menu :default-active="activeMenu" class="cus-menu-vertical" background-color="#fff"
-                        text-color="#333" active-text-color="#409EFF" router>
+                <el-aside class="left-side" width="200px" v-show="menuPosition == 'left'">
+                    <el-menu :default-active="activeMenu" class="cus-menu-vertical" router>
                         <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
                     </el-menu>
                 </el-aside>
@@ -88,41 +87,53 @@ import MenuItem from './MenuItem.vue' // 递归组件
 
 
 
+const isLogin = ref(false)
 let form = reactive(structuredClone(defaultForm))
+const dialogVisible = ref(false)
+const loginReqError = ref(false)
+const menuPosition = ref('top')
+const loginMsg = ref('')
+const appInfo = ref('')
+const userinfo = ref({
+    role: '',
+    username: '',
+    displayName: ''
+})
 
 onMounted(async () => {
     const config = await loadConfig()
-    Object.assign(form, defaultForm, config.global.auth)
+
+    menuPosition.value = config.global.menuPosition || 'top'
+    form.value = Object.assign(form, defaultForm, config.global.auth)
+    if (config.global.auth.username && config.global.auth.password && config.global.auth.role) {
+        const res = await login(config.global.auth.username, config.global.auth.password, config.global.auth.role)
+        handleLogin2(res)
+    }
     if (window.ipc) {
+        await window.authApi.authLogin()
         window.ipc.receive('fromMain', (data) => {
             if (data && data.event) {
                 if (data.event === 'console') {
                     console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
-                } else if (data.event == 'openLoginWin') {
-                    dialogVisible.value = true
-                    userinfo.value = {}
-                    isLogin.value = false
+                } else if (data.event == 'loginInfo') {
+                    isLogin.value = data.data?.global?.isLogin
+                    if (data.data?.global?.isLogin) {
+                        userinfo.value = data.data.global.auth
+                        form.value = {
+                            username: data.data.global.auth.username,
+                            password: data.data.global.auth.password,
+                            role: data.data.global.auth.role
+                        }
+                    } else {
+                    }
                 }
             }
         })
-        window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
-            isLogin.value = true
-            userinfo.value = res
+        await window.ipc.sendInvoke('toMain', { event: 'appInfo' }).then(res => {
+            appInfo.value = {
+                version: res.version
+            }
         })
-        setInterval(() => {
-            window.ipc.sendInvoke("toMain", { event: "getUserInfo" }).then(res => {
-                if (res.type == 'error') {
-                    loginReqError.value = true
-                    loginMsg.value = res.message
-                } else {
-                    console.log(res.data)
-                    isLogin.value = true
-                    userinfo.value = res.data
-                    dialogVisible.value = false
-                }
-            })
-        }, 3000000)
-
     }
 })
 
@@ -137,19 +148,34 @@ const route = useRoute()
 // 获取当前激活的菜单项
 const activeMenu = computed(() => route.path)
 
-// 过滤出有 meta.title 的路由作为菜单显示
-const routes = computed(() =>
-    router.options.routes[0].children.filter((r) => r.meta?.title || (r.children && r.children.length))
-)
-const isLogin = ref(false)
-const dialogVisible = ref(false)
-const loginReqError = ref(false)
-const loginMsg = ref('')
-const userinfo = ref({
-    role: '',
-    username: ''
-})
+function filterDisplayRoutes(routes) {
+    return routes
+        .map(route => {
+            // 如果有 children，递归过滤
+            const children = route.children ? filterDisplayRoutes(route.children) : []
 
+            // 如果自己 display 为 true 或 有合法子节点，则保留
+            if (route.meta?.display || children.length > 0) {
+                return {
+                    ...route,
+                    // 只保留过滤后的 children
+                    children: children.length > 0 ? children : undefined
+                }
+            }
+
+            // 否则过滤掉
+            return null
+        })
+        .filter(Boolean) // 去掉 null
+}
+
+// 过滤出有 meta.title 的路由作为菜单显示
+const routes = computed(() => {
+    let list = router.options.routes[0].children.filter(r => (r.meta.title || (r.children && r.children.length)))
+    list = filterDisplayRoutes(list)
+    return list
+}
+)
 
 const openLoginWin = () => {
     dialogVisible.value = true
@@ -164,7 +190,12 @@ const handleChangeRole = async (item) => {
 
 const handleLogin = async () => {
     const res = await login(form.username, form.password, form.role)
+    handleLogin2(res)
+}
+
+const handleLogin2 = (res) => {
     if (res.success) {
+        isLogin.value = res.global.isLogin
         ElMessage.success('登录成功')
         if (res.type == 'error') {
             loginReqError.value = true
@@ -173,8 +204,12 @@ const handleLogin = async () => {
             loginReqError.value = true
             loginMsg.value = res.message
         } else {
-            isLogin.value = true
-            userinfo.value = res.data
+            userinfo.value = res.global.auth
+            form.value = {
+                username: res.global.auth.username,
+                password: res.global.auth.password,
+                role: res.global.auth.role
+            }
             dialogVisible.value = false
         }
     } else {
@@ -282,11 +317,39 @@ const LayHeader = defineComponent({
     color: #fff;
 }
 
+.cus_header {
+    background: var(--cus-background);
+}
+
+.left-side {
+    background: var(--cus-background);
+}
+
 .classic-footer {
-    height: 40px;
+    height: 30px;
+    line-height: 30px;
+    color: var(--vt-c-white);
+    background: var(--cus-background);
 }
 </style>
 <style lang="scss">
+.el-menu {
+    background-color: var(--cus-background);
+    color: var(--vt-c-white);
+}
+
+.el-menu-item.is-active {
+    color: var(--vt-c-white);
+}
+
+.el-menu-item:hover {
+    background-color: var(--cus-background);
+}
+
+.el-sub-menu__title:hover {
+    background-color: var(--cus-background);
+}
+
 .cus-menu-vertical .el-menu-item.is-active {}
 
 .cus-menu-horizontal {

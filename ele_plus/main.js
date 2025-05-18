@@ -65,7 +65,7 @@ function createWindow() {
   }
 
   if (isDev) {
-    win.loadURL('http://localhost:5173') // Vite 默认端口
+    win.loadURL('http://localhost:5174') // Vite 默认端口
   } else {
     win.loadFile(path.join(__dirname, 'pages/index.html'))
   }

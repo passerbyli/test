@@ -44,8 +44,13 @@ function getConfig() {
   return store.store
 }
 
+function getBasePath() {
+  let config = getConfig()
+  return config.global.basePath
+}
+
 function updateConfig(newData) {
   store.store = { ...store.store, ...newData }
 }
 
-module.exports = { getConfig, updateConfig }
+module.exports = { getConfig, updateConfig, getBasePath }

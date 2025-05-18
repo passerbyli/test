@@ -48,7 +48,7 @@
             <el-table-column prop="data_volume" label="数据量（行）" width="140" />
             <el-table-column label="操作" fixed="right" width="140">
                 <template #default="{ row }">
-                    <el-button type="primary" size="small" @click="viewLineage(row)">
+                    <el-button type="primary" size="small" @click="viewDetail(row)">
                         血缘分析
                     </el-button>
                 </template>
@@ -59,6 +59,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 // 模拟数据
 const dbList = ['db1', 'db2']
@@ -115,11 +118,11 @@ const filteredTables = computed(() => {
         return matchText && matchDb && matchSchema && matchLayer && matchOwner && matchTag
     })
 })
-
-const viewLineage = (row) => {
-    console.log('血缘分析:', row)
-    // TODO: 跳转血缘图页面或弹窗
+// 跳转逻辑
+const viewDetail = (row) => {
+    router.push({ name: 'tableDetail', params: { name: row.table_name } })
 }
+
 </script>
 
 <style scoped>

@@ -43,7 +43,6 @@ app.whenReady().then(function () {
 })
 
 ipcMain.handle('refresh-window', () => {
-  console.log('----0000----')
   win.reload()
 })
 // ipcRenderer.invoke 处理
@@ -56,7 +55,6 @@ ipcMain.on('toMain', async (e, args) => {
   if (!args || !args.event) {
     return
   }
-
   const data = await ipcHandle(e, args)
   const webContents = e.sender
   const win = BrowserWindow.fromWebContents(webContents)

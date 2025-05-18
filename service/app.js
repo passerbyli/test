@@ -12,7 +12,7 @@ app.use(
     secret: 'your_secret_key', // 用于加密session
     resave: false, // 每次请求是否强制保存session
     saveUninitialized: true, // 是否保存未初始化的session
-    cookie: { maxAge: 60 * 60 * 1000 }, // session有效时间：1小时
+    cookie: { maxAge: 5 * 1000 }, // session有效时间：1小时
   })
 )
 
@@ -31,7 +31,7 @@ app.post('/login', (req, res) => {
   const { username, password } = req.body
   const users = readJsonFile('./users.json')
   const user = users.find((u) => u.username === username && u.password === password)
-
+  console.log(username, password)
   if (user) {
     req.session.user = { username } // 保存登录信息到session
     console.log('login ok------')
@@ -107,6 +107,13 @@ app.get('/messages/:id', authenticateSession, (req, res) => {
   } else {
     res.status(404).json({ message: '信息未找到' })
   }
+})
+
+app.get('/version', (req, res) => {
+  res.json({
+    version: '1.1.0',
+    url: 'https://www.bilibili.com/',
+  })
 })
 
 // 启动服务器

@@ -53,7 +53,6 @@
             <el-table-column label="操作" width="160" fixed="right">
                 <template #default="{ row }">
                     <el-button size="small" @click="viewDetail(row)">详情</el-button>
-                    <el-button size="small" type="primary" @click="viewLineage(row)">血缘</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -114,11 +113,9 @@ const filteredProcedures = computed(() => {
 
 // 跳转逻辑
 const viewDetail = (row) => {
-    router.push({ name: 'ProcedureDetail', params: { procName: row.proc_name } })
+    router.push({ name: 'ProcedureDetail', params: { name: row.proc_name } })
 }
-const viewLineage = (row) => {
-    console.log('查看血缘:', row.proc_name)
-}
+
 </script>
 
 <style scoped>

@@ -14,10 +14,10 @@
               </el-form-item>
             </el-col>
             <el-col :span="12">
-              <el-form-item label="主题风格">
-                <el-select v-model="form.global.theme" placeholder="主题风格" style="width: 100%">
-                  <el-option label="明亮 (light)" value="light" />
-                  <el-option label="暗黑 (dark)" value="dark" />
+              <el-form-item label="菜单位置">
+                <el-select v-model="form.global.menuPosition" placeholder="菜单位置" style="width: 100%">
+                  <el-option label="左侧" value="left" />
+                  <el-option label="顶部" value="top" />
                 </el-select>
               </el-form-item>
             </el-col>
@@ -34,6 +34,17 @@
                 <el-tag :type="form.global.isLogin ? 'success' : 'info'">
                   {{ form.global.isLogin ? '已登录' : '未登录' }}
                 </el-tag>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="默认文件路径">
+                <el-input type="text" v-model="form.global.basePath">
+              <template #append>
+                <el-button :icon="FolderOpened" @click="selectFolder" />
+              </template>
+            </el-input>
               </el-form-item>
             </el-col>
           </el-row>
@@ -96,6 +107,7 @@
 </template>
 
 <script setup>
+import { FolderOpened } from '@element-plus/icons-vue'
 import { reactive, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { defaultForm } from '../services/defaultForm.js'
@@ -119,6 +131,19 @@ function reset() {
     Object.assign(form, config)
     ElMessage.warning('已重置为当前配置')
   })
+}
+async function  selectFolder(){
+  if (window.ipc) {
+          await window.ipc
+            .sendInvoke('toMain', {
+              event: 'select-folder',
+            })
+            .then((result) => {
+              if (result) {
+                form.global.basePath = result[0]
+              }
+            })
+        }
 }
 </script>
 

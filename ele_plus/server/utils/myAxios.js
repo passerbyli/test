@@ -2,12 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const axios = require('axios')
 const https = require('https')
-const {
-  getBasePath,
-  getUserDataProperty,
-  setUserDataJsonProperty,
-  setValueByPath,
-} = require('./storeUtil')
+const { getBasePath, setValueByPath } = require('./storeUtil')
 const { mainSendToRender } = require('./mainProcessMsgHandle')
 const constants = require('../../constant/constants')
 

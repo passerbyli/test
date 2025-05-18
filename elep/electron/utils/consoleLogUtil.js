@@ -9,9 +9,7 @@ function log(...msg) {
     let currentWindow
     for (let i = 0; i < windows.length; i++) {
       const win = windows[i]
-      if (win) {
-        console.log('======', win.title)
-      }
+
       if (win && win.title == 'Vite App') {
         currentWindow = win
         break

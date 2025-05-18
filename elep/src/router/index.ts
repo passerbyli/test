@@ -13,6 +13,7 @@ const router = createRouter({
           name: 'home',
           component: () => import('../views/HomeView.vue'),
           meta: {
+            display: true,
             title: '首页',
           },
         },
@@ -20,6 +21,7 @@ const router = createRouter({
           path: '/dataGovernance',
           name: 'dataGovernance',
           meta: {
+            display: true,
             title: '数据治理',
           },
           children: [
@@ -28,6 +30,7 @@ const router = createRouter({
               path: '/dataSource',
               component: () => import('../views/DataSourceView.vue'),
               meta: {
+                display: true,
                 title: '数据源管理',
               },
               children: [],
@@ -37,15 +40,17 @@ const router = createRouter({
               name: 'tableAssets',
               component: () => import('../views/TableAssets.vue'),
               meta: {
+                display: true,
                 title: '表资产',
               },
               children: [],
             },
             {
-              path: '/tableDetail',
+              path: '/tableDetail/:name',
               name: 'tableDetail',
               component: () => import('../views/TableDetail.vue'),
               meta: {
+                display: false,
                 title: '表明细',
               },
               children: [],
@@ -55,6 +60,7 @@ const router = createRouter({
               name: 'ProcedureAssetOverview',
               component: () => import('../views/ProcedureAssetOverview.vue'),
               meta: {
+                display: true,
                 title: '存储过程列表',
               },
               children: [],
@@ -64,6 +70,7 @@ const router = createRouter({
               name: 'ProcedureDetail',
               component: () => import('../views/ProcedureDetail.vue'),
               meta: {
+                display: false,
                 title: '存储过程明细',
               },
               children: [],
@@ -73,6 +80,7 @@ const router = createRouter({
               name: 'ScheduleTaskOverview',
               component: () => import('../views/ScheduleTaskOverview.vue'),
               meta: {
+                display: true,
                 title: '调度任务',
               },
               children: [],
@@ -82,6 +90,7 @@ const router = createRouter({
               name: 'dataBase',
               component: () => import('../views/DataBaseView.vue'),
               meta: {
+                display: true,
                 title: '数据库',
               },
               children: [],
@@ -91,6 +100,7 @@ const router = createRouter({
               name: 'dataScriptAnalysis',
               component: () => import('../views/DataScriptAnalysisView.vue'),
               meta: {
+                display: true,
                 title: '数据脚本分析',
               },
               children: [],
@@ -100,6 +110,7 @@ const router = createRouter({
               name: 'dataLineage',
               component: () => import('../views/DataLineageView.vue'),
               meta: {
+                display: true,
                 title: '数据管理',
               },
             },
@@ -109,6 +120,7 @@ const router = createRouter({
           path: '/test',
           name: 'test',
           meta: {
+            display: true,
             title: 'test',
           },
           children: [
@@ -117,6 +129,7 @@ const router = createRouter({
               name: 'test0',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test0',
               },
             },
@@ -125,6 +138,7 @@ const router = createRouter({
               name: 'test1',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test1',
               },
             },
@@ -141,6 +155,7 @@ const router = createRouter({
               name: 'test3',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test3',
               },
             },
@@ -149,6 +164,7 @@ const router = createRouter({
               name: 'test4',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test4',
               },
             },
@@ -157,6 +173,7 @@ const router = createRouter({
               name: 'test5',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test5',
               },
             },
@@ -165,6 +182,7 @@ const router = createRouter({
               name: 'test6',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test6',
               },
             },
@@ -173,6 +191,7 @@ const router = createRouter({
               name: 'test7',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test7',
               },
             },
@@ -181,6 +200,7 @@ const router = createRouter({
               name: 'test8',
               component: () => import('../views/HomeView.vue'),
               meta: {
+                display: true,
                 title: 'test8',
               },
             },
@@ -192,15 +212,17 @@ const router = createRouter({
           name: 'about',
           component: () => import('../views/HomeView.vue'),
           meta: {
+            display: true,
             title: '关于',
           },
         },
         {
-          path: '/log2',
-          name: 'log2',
-          component: () => import('../views/HomeView.vue'),
+          path: '/log',
+          name: 'log',
+          component: () => import('../views/LogView.vue'),
           meta: {
-            title: 'log2',
+            display: true,
+            title: 'log',
           },
         },
         {
@@ -208,6 +230,7 @@ const router = createRouter({
           name: 'setting',
           component: () => import('../views/SettingView.vue'),
           meta: {
+            display: false,
             title: '设置',
           },
         },

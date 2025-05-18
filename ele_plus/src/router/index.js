@@ -6,26 +6,21 @@ const router = createRouter({
     {
       path: '/',
       component: Layout,
-      // component: HomeView,
 
       // component: () => import('../views/vue3.vue'),
       // component: () => import('../views/Test1View.vue'),
-      // component: () => import('../views/Test0View.vue'),
       // component: () => import('../views/tree.vue'),
-      // component: () => import('../views/BloodRelationship.vue'),
       children: [
         {
           path: '',
           name: 'home',
           // component: HomeView,
 
+          component: () => import('../views/HomeView.vue'),
           // component: () => import('../views/vue3.vue'),
           // component: () => import('../views/Test1View.vue'),
-          // component: () => import('../views/Test0View.vue'),
-          component: () => import('../views/DataSourceManager.vue'),
           // component: () => import('../views/tree.vue'),
 
-          // component: () => import('../views/BloodRelationship.vue'),
           meta: {
             title: '首页',
           },
@@ -37,6 +32,24 @@ const router = createRouter({
             title: '数据治理',
           },
           children: [
+            {
+              path: '/DataSourceManager',
+              name: 'DataSourceManager',
+              component: () => import('../views/DataSourceManager.vue'),
+              meta: {
+                title: 'DataSourceManager',
+              },
+              children: [],
+            },
+            {
+              path: '/BloodRelationship',
+              name: 'BloodRelationship',
+              component: () => import('../views/BloodRelationship.vue'),
+              meta: {
+                title: 'BloodRelationship',
+              },
+              children: [],
+            },
             {
               path: '/dataBase',
               name: 'dataBase',
@@ -144,40 +157,49 @@ const router = createRouter({
                 title: 'test8',
               },
             },
-            // {
-            //   path: '/test4',
-            //   name: 'test4',
-            //   component: () => import('../views/Test7View.vue'),
-            //   meta: {
-            //     title: 'test4',
-            //   },
-            // },
-            // {
-            //   path: '/test4',
-            //   name: 'test4',
-            //   component: () => import('../views/Test7View.vue'),
-            //   meta: {
-            //     title: 'test4',
-            //   },
-            // },
-            // {
-            //   path: '/test4',
-            //   name: 'test4',
-            //   component: () => import('../views/Test7View.vue'),
-            //   meta: {
-            //     title: 'test4',
-            //   },
-            // },
           ],
         },
 
         {
-          path: '/about',
-          name: 'about',
-          component: () => import('../views/AboutView.vue'),
+          path: '/ab',
+          name: 'ab',
           meta: {
             title: '关于',
           },
+          children: [
+            {
+              path: '/about',
+              name: 'about',
+              component: () => import('../views/AboutView.vue'),
+              meta: {
+                title: '关于',
+              },
+            },
+            {
+              path: '/tree',
+              name: 'tree',
+              component: () => import('../views/tree.vue'),
+              meta: {
+                title: 'tree',
+              },
+            },
+            {
+              path: '/tree2',
+              name: 'tree2',
+              component: () => import('../views/tree2.vue'),
+              meta: {
+                title: 'tree2',
+              },
+            },
+            {
+              path: '/vue3',
+              name: 'vue3',
+              component: () => import('../views/vue3.vue'),
+              meta: {
+                title: 'vue3',
+              },
+            },
+          ],
         },
         {
           path: '/log2',
