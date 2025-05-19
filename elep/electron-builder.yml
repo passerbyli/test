@@ -1,23 +1,24 @@
 appId: com.example.eleplus
-productName: ElePlus
+productName: elep
 copyright: Copyright © 2025 YourName
 
-# files:
-#   - constant/**/*
-#   - server/**/*
-#   - plugins/**/*
-#   - dist/**/*
-#   - main.js
-#   - preload.js
-#   - node_modules/**/*
-#   - package.json
-#   - '!**/node_modules/.bin'
-#   - '!**/node_modules/*/test'
-#   - '!**/node_modules/*/docs'
+files:
+  - dist/**/*
+  - electron/**/*
+  - pages/**/*
+  - plugins/**/*
+  - node_modules/**/*
+  - public
+  - preload.js
+  - main.js
+  - package.json
+  - '!**/node_modules/.bin'
+  - '!**/node_modules/*/test'
+  - '!**/node_modules/*/docs'
 
 extraResources:
-  - from: assets
-    to: assets
+  - from: public
+    to: public
     filter:
       - '**/*'
 
@@ -30,13 +31,28 @@ mac:
   target:
     - dmg
     - zip
-  icon: public/icon.icns
+  icon: public/icons/icon.icns
   artifactName: '${productName}-${version}-mac-${arch}.${ext}'
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  sign: false
+dmg:
+  sign: false
+  background: public/icons/1024x1024.png
+  iconSize: 100
+  contents:
+    - x: 130
+      y: 220
+      type: file
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
 
 win:
   target:
     - nsis
-  icon: public/icon.ico
+  icon: public/icons/icon.ico
   artifactName: '${productName}-${version}-win.${ext}'
 
 nsis:
@@ -49,3 +65,4 @@ linux:
   target: AppImage
 
 publish: null
+generateUpdatesFilesForAllChannels: false

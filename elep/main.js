@@ -1,13 +1,4 @@
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Menu,
-  MenuItem,
-  Notification,
-  shell,
-  dialog,
-} = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
@@ -16,7 +7,7 @@ const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
 let win = null
 
 function createWindow() {
-  const iconPath = path.join(__dirname, 'public/favicon.png')
+  const iconPath = path.join(__dirname, 'public/icons/512x512.png')
   // 创建浏览器窗口
   win = new BrowserWindow({
     width: 1440,
