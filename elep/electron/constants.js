@@ -1,5 +1,6 @@
 module.exports = {
   API: {
+    checkVersion: 'http://localhost:3000/version',
     beta: {},
     prod: {
       login: 'http://localhost:3000/login',

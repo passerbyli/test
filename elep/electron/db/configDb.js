@@ -1,4 +1,3 @@
-// electron/db/configDb.js
 const Store = require('electron-store')
 
 const store = new Store({
@@ -6,13 +5,31 @@ const store = new Store({
   defaults: {
     global: {
       isLogin: false,
+      auth: {
+        role: '',
+        displayName: '',
+        username: '',
+        password: '',
+        errorCount: 0,
+        errorMessage: '',
+        cookies: [],
+      },
+      menuPosition: 'left',
       theme: 'light',
       language: 'zh_CN',
       notify: { disable: false },
+      basePath: '',
+      autoLogin: {
+        disable: true,
+        cron: '* * */30 * * *',
+      },
     },
     modules: {
       module2: {
-        cronJobs: { cronJob1: '', cronJob2: '' },
+        cronJobs: {
+          cronJob1: '',
+          cronJob2: '',
+        },
         type: 'PI',
       },
       module3: {
@@ -21,20 +38,6 @@ const store = new Store({
           pord: { username: '', password: '', cookies: [] },
         },
         currentEnv: 'beta',
-      },
-      module4: {
-        sources: [
-          // 示例数据
-          {
-            name: '主数据库',
-            type: 'PostgreSQL',
-            host: 'localhost',
-            port: 5432,
-            username: 'user',
-            password: 'pass',
-            database: 'mydb',
-          },
-        ],
       },
     },
   },

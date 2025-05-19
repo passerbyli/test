@@ -111,7 +111,7 @@ app.get('/messages/:id', authenticateSession, (req, res) => {
 
 app.get('/version', (req, res) => {
   res.json({
-    version: '1.1.0',
+    version: '0.0.7',
     url: 'https://www.bilibili.com/',
   })
 })

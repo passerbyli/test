@@ -1,10 +1,24 @@
-// defaultForm.js（可独立一个文件）
 export const defaultForm = {
   global: {
     isLogin: false,
+    auth: {
+      role: '',
+      displayName: '',
+      username: '',
+      password: '',
+      errorCount: 0,
+      errorMessage: '',
+      cookies: [],
+    },
+    menuPosition: 'left',
     theme: 'light',
     language: 'zh_CN',
     notify: { disable: false },
+    basePath: '',
+    autoLogin: {
+      disable: true,
+      cron: '* * */30 * * *',
+    },
   },
   modules: {
     module2: {

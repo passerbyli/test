@@ -67,7 +67,7 @@ function loninHandle(username, password, role, isAuto = false) {
         password,
         role,
         errorCount: 0,
-        errMessage: '',
+        errorMessage: '',
         displayName: username,
         cookies: response.headers['set-cookie'],
       }
@@ -86,7 +86,7 @@ function loninHandle(username, password, role, isAuto = false) {
       consoleUtil.log(err.response?.data.message)
       auth.cookies = ''
       auth.errorCount = auth.errorCount + 1
-      auth.errMessage = err.response?.data.message
+      auth.errorMessage = err.response?.data.message
       updateConfig({
         global: {
           ...config.global,

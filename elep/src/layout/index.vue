@@ -126,6 +126,8 @@ onMounted(async () => {
                         }
                     } else {
                     }
+                } else if (data.event =='appNewVersion'){
+                    console.log(data.data)
                 }
             }
         })
