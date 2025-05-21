@@ -33,5 +33,11 @@ pnpm build
 ```
 
 pnpm approve-builds
+
 # 或
+
 pnpm install --unsafe-perm
+
+USING PERIODIC COMMIT 10
+LOAD CSV FROM "file:///triples.csv" AS line
+create (a:actors{personId:line[0],name:line[1],type:line[2]})
