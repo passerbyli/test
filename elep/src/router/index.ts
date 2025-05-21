@@ -7,12 +7,14 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: Layout,
+      // component: Layout,
       children: [
         {
           path: '',
           name: 'home',
-          component: () => import('../views/HomeView.vue'),
+          // component: () => import('../views/HomeView.vue'),
+
+          component: () => import('../views/test1.vue'),
           meta: {
             display: true,
             title: '首页',

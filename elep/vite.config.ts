@@ -11,6 +11,15 @@ export default defineConfig({
     outDir: './pages',
     assetsDir: './assets',
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000', // 后端服务器地址
+        changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ''),
+      },
+    },
+  },
   plugins: [vue(), vueDevTools()],
   resolve: {
     alias: {

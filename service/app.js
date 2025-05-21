@@ -1,6 +1,7 @@
 const express = require('express')
 const session = require('express-session')
 const fs = require('fs')
+var url = require('url')
 const bodyParser = require('body-parser')
 
 const app = express()
@@ -110,6 +111,42 @@ app.get('/messages/:id', authenticateSession, (req, res) => {
 })
 
 app.get('/version', (req, res) => {
+  res.json({
+    version: '0.0.7',
+    url: 'https://www.bilibili.com/',
+  })
+})
+
+app.get('/api/lineage/procs', (req, res) => {
+  const messages = readJsonFile('./allProcesses.json')
+  res.json(messages)
+})
+
+app.get('/api/lineage/graph',async (req, res) => {
+  var query = url.parse(req.url, true).query
+  console.log(query.proc)
+  const messages =await readJsonFile('./allProcesses.json')
+  let message = {}
+  messages.forEach((item) => {
+    if (item.name == query.proc) {
+      message = item
+    }
+  })
+  if (message) {
+    res.json(message)
+  } else {
+    res.status(404).json({ message: '信息未找到' })
+  }
+})
+
+app.get('/api/lineage/node/:id', (req, res) => {
+  res.json({
+    version: '0.0.7',
+    url: 'https://www.bilibili.com/',
+  })
+})
+
+app.get('/api/lineage/edge/:id', (req, res) => {
   res.json({
     version: '0.0.7',
     url: 'https://www.bilibili.com/',
