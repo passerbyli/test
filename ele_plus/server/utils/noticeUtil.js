@@ -1,6 +1,5 @@
 const { getUserDataProperty } = require('./storeUtil')
 
-const consoleUtil = require('./consoleLogUtil')
 const { Notification } = require('electron')
 const noticeTitle = '测试'
 

@@ -2,7 +2,7 @@ const constants = require('../constants.js')
 const { getConfig, updateConfig } = require('../db/configDb.js')
 const { sendNotice } = require('../utils/commonUtil.js')
 const consoleUtil = require('../utils/consoleLogUtil.js')
-const { CronJob } = require('../utils/cronUtils.js')
+const { CronJob } = require('../../plugins/cron/cronUtil.js')
 const { mainSendToRender } = require('../utils/mainSendToRender.js')
 const myAxios = require('../utils/myAxios.js')
 

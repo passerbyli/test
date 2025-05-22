@@ -10,25 +10,7 @@
                 <el-menu mode="horizontal" :default-active="activeMenu" class="cus-menu-horizontal" router>
                     <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
                 </el-menu>
-                <div class="operate-setting">
-                    <el-tooltip class="box-item" content="设置" placement="top">
-                        <el-icon class="sys-setting" @click="redirectSetting">
-                            <Setting />
-                        </el-icon>
-                    </el-tooltip>
-                    <div v-if="isLogin" class="sys-user">
-                        <div class="username"> {{ userinfo?.username }}</div>
-                        <el-select class="item-box" v-model="form.role" @change="changeRole" placeholder="请选择">
-                            <el-option label="开发" value="开发" />
-                            <el-option label="测试" value="测试" />
-                            <el-option label="SM" value="SM" />
-                        </el-select>
-                        <el-button plain @click="openLoginWin()">注销</el-button>
-                    </div>
-                    <div v-else>
-                        <el-button plain @click="openLoginWin()">登录</el-button>
-                    </div>
-                </div>
+
             </el-header>
             <el-container class="classic-content">
                 <el-aside width="200px" style="display: none;">
@@ -44,40 +26,16 @@
                 </el-container>
             </el-container>
 
-            <el-footer class="cus_footer classic-footer">Footer</el-footer>
         </el-container>
-        <el-dialog v-model="dialogVisible" title="登录" draggable show-close='false' close-on-press-escape="false"
-            close-on-click-modal="false">
-            <el-form :model="form" label-width="auto">
-                <el-form-item label="角色">
 
-
-                </el-form-item>
-                <el-form-item label="用户名">
-                    <el-input v-model="form.username" placeholder="请输入用户名" />
-                </el-form-item>
-                <el-form-item label="密码">
-                    <el-input v-model="form.password" type="password" placeholder="请输入密码" />
-                </el-form-item>
-                <el-alert v-if="loginReqError" :title="loginMsg" type="error" effect="dark" :closable="false" />
-            </el-form>
-            <template #footer>
-                <span class="dialog-footer">
-                    <el-button @click="dialogVisible = false">取消</el-button>
-                    <el-button type="primary" @click="login()">登录</el-button>
-                </span>
-            </template>
-        </el-dialog>
     </div>
 </template>
 <script setup>
-import { Setting } from '@element-plus/icons-vue'
 import { defineComponent, h, computed, ref, onMounted } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 
 import MenuItem from './MenuItem.vue' // 递归组件
 
-const popoverRef = ref()
 
 onMounted(() => {
     if (window.ipc) {
@@ -85,37 +43,14 @@ onMounted(() => {
             if (data && data.event) {
                 if (data.event === 'console') {
                     console.log('%c助手：', 'color:#fff;font-size:14px', data.data)
-                } else if (data.event == 'openLoginWin') {
-                    dialogVisible.value = true
-                    userinfo.value = {}
-                    isLogin.value = false
-                }
+                } 
             }
         })
-        window.ipc.sendInvoke("toMain", { event: "init" }).then(res => {
-            isLogin.value = true
-            userinfo.value = res
-        })
-        // setInterval(() => {
-        //   window.ipc.sendInvoke("toMain", { event: "getUserInfo" }).then(res => {
-        //     if (res.type == 'error') {
-        //       loginReqError.value = true
-        //       loginMsg.value = res.message
-        //     } else {
-        //       console.log(res.data)
-        //       isLogin.value = true
-        //       userinfo.value = res.data
-        //       dialogVisible.value = false
-        //     }
-        //   })
-        // }, 3000000)
+
 
     }
 })
-const { push } = useRouter()
-const redirectSetting = () => {
-    push(`/setting`)
-}
+
 
 
 const router = useRouter()
@@ -131,61 +66,7 @@ const routes = computed(() =>
 )
 
 
-const isLogin = ref(false)
-const dialogVisible = ref(false)
-const loginReqError = ref(false)
-const loginMsg = ref('')
-const userinfo = ref({
-    role: '',
-    username: ''
-})
 
-const form = ref({
-    username: 'admin',
-    password: '123456',
-    role: '开发'
-})
-
-const openLoginWin = () => {
-    dialogVisible.value = true
-}
-
-const changeRole = (item) => {
-    window.ipc.sendInvoke('toMain', {
-        event: 'changeRole',
-        params: item
-    }).then(res => {
-        window.ipc?.refreshWindow()
-    })
-}
-
-const login = () => {
-    if (window.ipc) {
-        window.ipc
-            .sendInvoke('toMain', {
-                event: 'login',
-                params: {
-                    username: form.value.username,
-                    password: form.value.password,
-                    role: form.value.role
-                },
-            })
-            .then((res) => {
-                console.log('====', res)
-                if (res.type == 'error') {
-                    loginReqError.value = true
-                    loginMsg.value = res.message
-                } else if (res.message == '用户名或密码错误') {
-                    loginReqError.value = true
-                    loginMsg.value = res.message
-                } else {
-                    isLogin.value = true
-                    userinfo.value = res.data
-                    dialogVisible.value = false
-                }
-            })
-    }
-}
 
 const LayHeader = defineComponent({
     name: "LayHeader",

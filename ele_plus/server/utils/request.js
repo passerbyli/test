@@ -1,7 +1,6 @@
 const http = require('http')
 const fs = require('fs')
 const { setValueByPath, getUserDataProperty } = require('./storeUtil')
-const consoleUtil = require('./consoleLogUtil')
 const myAxios = require('./myAxios')
 const constants = require('../../constant/constants')
 
@@ -87,7 +86,6 @@ async function getMessage() {
       return response.data
     })
     .catch((err) => {
-      consoleUtil.error('============getMessage:', err?.response?.data)
       return {
         type: 'error',
         message: err?.response?.data,
@@ -128,7 +126,6 @@ async function queryKg(params) {
       return response.data
     })
     .catch((err) => {
-      consoleUtil.error('============getMessage:', err?.response?.data)
       return {
         type: 'error',
         message: err?.response?.data,

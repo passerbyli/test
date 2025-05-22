@@ -168,14 +168,6 @@ const router = createRouter({
           },
           children: [
             {
-              path: '/about',
-              name: 'about',
-              component: () => import('../views/AboutView.vue'),
-              meta: {
-                title: '关于',
-              },
-            },
-            {
               path: '/tree',
               name: 'tree',
               component: () => import('../views/tree.vue'),
@@ -200,22 +192,6 @@ const router = createRouter({
               },
             },
           ],
-        },
-        {
-          path: '/log2',
-          name: 'log2',
-          component: () => import('../views/LogTableView.vue'),
-          meta: {
-            title: 'log2',
-          },
-        },
-        {
-          path: '/setting',
-          name: 'setting',
-          component: () => import('../views/SettingView.vue'),
-          meta: {
-            title: '设置',
-          },
         },
       ],
     },

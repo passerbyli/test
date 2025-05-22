@@ -8,7 +8,7 @@ const consoleUtil = require('../utils/consoleLogUtil')
 const path = require('node:path')
 const fs = require('node:fs')
 const { getVersion } = require('../utils/requestUtil')
-const { CronJob } = require('../utils/cronUtils')
+const { CronJob } = require('../../plugins/cron/cronUtil')
 const { mainSendToRender } = require('../utils/mainSendToRender')
 function registerAllIpc(ipcMain) {
   registerAuthIpc(ipcMain)
@@ -42,6 +42,16 @@ async function ipcHandle(e, args) {
       version: app.getVersion(),
     }
   } else if (event == 'init') {
+  } else if (event == 'selectFile') {
+    const { canceled, filePaths } = await dialog.showOpenDialog({
+      title: '选择 SQL 或 JSON 文件',
+      filters: [{ name: 'SQL/JSON', extensions: ['sql', 'json'] }],
+      properties: ['openFile'],
+    })
+    if (canceled) return null
+    const filePath = filePaths[0]
+    const content = fs.readFileSync(filePath, 'utf-8')
+    data = { filePath, content }
   }
   return data
 }

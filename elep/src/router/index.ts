@@ -14,7 +14,7 @@ const router = createRouter({
           name: 'home',
           // component: () => import('../views/HomeView.vue'),
 
-          component: () => import('../views/test1.vue'),
+          component: () => import('../views/test4.vue'),
           meta: {
             display: true,
             title: '首页',

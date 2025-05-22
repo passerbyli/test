@@ -10,7 +10,6 @@ const {
 } = require('electron')
 const path = require('node:path')
 const { ipcHandle } = require('./server/ipcHandle')
-const consoleLogUtil = require('./server/utils/consoleLogUtil')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 let win = null
@@ -103,7 +102,6 @@ app.whenReady().then(function () {
   createWindow()
 
   if (!Notification.isSupported()) {
-    consoleLogUtil.log('Notifications are not supported')
     return
   }
 
@@ -117,9 +115,7 @@ app.whenReady().then(function () {
   // Notification.requestPermission().then((permission) => {
   //   console.log("-----2:", Notification.isSupported());
   //   if (permission === "granted") {
-  //     consoleLogUtil.log("Notifications are granted");
   //   } else {
-  //     consoleLogUtil.log("Notifications are denied");
   //   }
   // });
 })

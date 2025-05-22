@@ -11,14 +11,10 @@ const fs = require('node:fs')
 const db = require('./utils/db')
 // const { getToBid } = require('./index')
 const { getMessage, getUserInfo, queryKg } = require('./utils/request')
-const consoleUtil = require('./utils/consoleLogUtil')
 const { main } = require('../plugins/sqlParse/sqlParse')
-const { CronJob } = require('../plugins/cron/cronUtil')
-const { mainSendToRender } = require('./utils/mainProcessMsgHandle')
 const { createDBClient } = require('../plugins/dbService')
 
 const store = require('../store')
-const { loginHeader } = require('./handlers/authHandler')
 // import { getConfig, setConfig, initConfig } from './configStore.js'
 
 let dbclient = null
@@ -60,8 +56,6 @@ async function ipcHandle(e, args) {
     data = await dbclient.getDBQuery(params.sql)
   } else if (event === 'getDataSources') {
     data = datas
-  } else if (event == 'init') {
-    data = await authLogin()
   } else if (event === 'getUserDataProperty') {
     data = getUserDataProperty(params)
   } else if (event === 'setUserDataJsonProperty') {
@@ -92,14 +86,6 @@ async function ipcHandle(e, args) {
     data = await dbclient.getProcedureDetail(params.database, params.procName)
   } else if (event === 'getProcedureInout') {
     data = await dbclient.getProcedureParams(params.database, params.procName)
-  } else if (event === 'login') {
-    const userStat = await loginHeader(params)
-    if (userStat.type != 'error') {
-      data = await getUserInfo()
-      job()
-    } else {
-      data = userStat?.message?.data
-    }
   } else if (event === 'getUserInfo') {
     data = await getUserInfo()
   } else if (event === 'startBid') {
@@ -201,37 +187,6 @@ async function ipcHandle(e, args) {
   return data
 }
 
-async function authLogin() {
-  let userInfo = {}
-  const authInfo = getUserDataProperty('auth')
-  if (authInfo.username && authInfo.password) {
-    await loginHeader(authInfo.username, authInfo.password, authInfo.role)
-    userInfo = await getUserInfo()
-    await job()
-  }
-
-  return userInfo.data
-}
-
-const jobTask = new CronJob('MyJob')
-function job() {
-  jobTask.setExpression('*/3 * * * * *')
-  jobTask.setCallback(() => {
-    console.log('定时任务触发', new Date().toLocaleTimeString())
-    getUserInfo()
-
-    let auth = getUserDataProperty('auth')
-    if (auth.exception) {
-      jobTask.stop()
-      mainSendToRender('openLoginWin')
-    }
-    if (!auth.exception && !auth.isLogin) {
-      authLogin()
-    }
-  })
-  jobTask.start()
-}
-
 // 获取日志目录
 const getLogPath = (dateStr) => {
   const fileName = `request_${dateStr}.log`
@@ -282,12 +237,8 @@ async function openDirectory(dirPath, type) {
 
   shell
     .openPath(folderPath)
-    .then(() => {
-      consoleUtil.log('文件夹已打开')
-    })
-    .catch((err) => {
-      consoleUtil.error('无法打开文件夹:', err)
-    })
+    .then(() => {})
+    .catch((err) => {})
 }
 
 // const mysql = require('mysql2/promise')
