@@ -1,6 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('node:path')
 
+// const db = require('./electron/db/postgres')
+const crud = require('./electron/db/crud')
+const XLSX = require('xlsx')
+
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
@@ -50,6 +54,103 @@ ipcMain.on('toMain', async (e, args) => {
   const webContents = e.sender
   const win = BrowserWindow.fromWebContents(webContents)
   win.webContents.send('fromMain', { event: args.event, data: data })
+})
+
+ipcMain.handle('table/query-all', async (event, args) => {
+  console.log('x-----')
+  // 参数结构：{ filters, page, pageSize }
+  const { filters, page, pageSize } = args
+  const { keyword, dataSource, schema, layer } = filters
+
+  let sql = `
+    SELECT t.uuid, t.name AS table_name, t.layer, t.type, t.description,
+           s.name AS schema_name, d.name AS data_source
+    FROM ads_dl.table_metadata t
+    LEFT JOIN ads_dl.schema_metadata s ON t.schema_uuid = s.uuid
+    LEFT JOIN ads_dl.data_source d ON s.data_source_uuid = d.uuid
+    WHERE 1=1
+  `
+  const params = []
+
+  if (keyword) {
+    sql += ` AND (t.name ILIKE $${params.length + 1} OR t.description ILIKE $${params.length + 1})`
+    params.push(`%${keyword}%`)
+  }
+  if (dataSource) {
+    sql += ` AND d.name = $${params.length + 1}`
+    params.push(dataSource)
+  }
+  if (schema) {
+    sql += ` AND s.name = $${params.length + 1}`
+    params.push(schema)
+  }
+  if (layer) {
+    sql += ` AND t.layer = $${params.length + 1}`
+    params.push(layer)
+  }
+
+  // return await crud.queryWithPagination(sql, params, { page, pageSize })
+})
+
+ipcMain.handle('table/distinct-options', async () => {
+  return {
+    dataSources: await crud.getDistinctValues('data_source', 'name'),
+    schemas: await crud.getDistinctValues('schema_metadata', 'name'),
+    layers: await crud.getDistinctValues('table_metadata', 'layer'),
+  }
+})
+
+ipcMain.handle('table/export-all', async (event, filters) => {
+  // 同 query-all 中构造 SQL，只是不分页
+  const { keyword, dataSource, schema, layer } = filters
+  let sql = `
+    SELECT t.name AS table_name, t.layer, t.type, t.description,
+           s.name AS schema_name, d.name AS data_source
+    FROM table_metadata t
+    LEFT JOIN schema_metadata s ON t.schema_uuid = s.uuid
+    LEFT JOIN data_source d ON s.data_source_uuid = d.uuid
+    WHERE 1=1
+  `
+  const params = []
+
+  if (keyword) {
+    sql += ` AND (t.name ILIKE $${params.length + 1} OR t.description ILIKE $${params.length + 1})`
+    params.push(`%${keyword}%`)
+  }
+  if (dataSource) {
+    sql += ` AND d.name = $${params.length + 1}`
+    params.push(dataSource)
+  }
+  if (schema) {
+    sql += ` AND s.name = $${params.length + 1}`
+    params.push(schema)
+  }
+  if (layer) {
+    sql += ` AND t.layer = $${params.length + 1}`
+    params.push(layer)
+  }
+
+  return await crud.query(sql, params)
+})
+
+ipcMain.handle('table/export-all-to-file', async (event, filters) => {
+  const data = await crud.queryTableExport(filters)
+
+  const { filePath, canceled } = await dialog.showSaveDialog({
+    title: '导出表清单',
+    defaultPath: 'table_list_export.xlsx',
+    filters: [{ name: 'Excel', extensions: ['xlsx'] }],
+  })
+
+  if (canceled || !filePath) return null
+
+  const ws = XLSX.utils.json_to_sheet(data)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, 'Tables')
+  const buffer = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' })
+
+  fs.writeFileSync(filePath, buffer)
+  return filePath
 })
 
 app.on('window-all-closed', () => {

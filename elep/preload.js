@@ -39,3 +39,13 @@ contextBridge.exposeInMainWorld('ipc', {
   },
   refreshWindow: () => ipcRenderer.invoke('refresh-window'),
 })
+
+contextBridge.exposeInMainWorld('dbAPI', {
+  getAllTables: () => ipcRenderer.invoke('get-all-tables'),
+  getTableDetail: (id) => ipcRenderer.invoke('get-table-detail', id),
+
+  tableQueryAll: (params) => ipcRenderer.invoke('table/query-all', params),
+  tableDistinctOptions: () => ipcRenderer.invoke('table/distinct-options'),
+  tableExportAll: (filters) => ipcRenderer.invoke('table/export-all', filters),
+  exportToFile: (filters) => ipcRenderer.invoke('table/export-all-to-file', filters),
+})

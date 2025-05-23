@@ -7,14 +7,20 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      // component: Layout,
+      component: Layout,
       children: [
         {
           path: '',
           name: 'home',
           // component: () => import('../views/HomeView.vue'),
 
-          component: () => import('../views/test4.vue'),
+          // component: () => import('../views/test4.vue'),
+          component: () => import('../views/TableListPage.vue'),
+          // component: () => import('../views/ExportSqlPage.vue'),
+          // component: () => import('../views/ExportSqlPage.vue'),
+          // component: () => import('../views/ExportSqlPage.vue'),
+          // component: () => import('../views/ExportSqlPage.vue'),
+          // component: () => import('../views/ExportSqlPage.vue'),
           meta: {
             display: true,
             title: '首页',
