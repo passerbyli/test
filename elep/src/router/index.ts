@@ -15,7 +15,7 @@ const router = createRouter({
           // component: () => import('../views/HomeView.vue'),
 
           // component: () => import('../views/test4.vue'),
-          component: () => import('../views/TableListPage.vue'),
+          component: () => import('../views/TableAssets.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
@@ -55,7 +55,7 @@ const router = createRouter({
               children: [],
             },
             {
-              path: '/tableDetail/:name',
+              path: '/tableDetail/:id',
               name: 'tableDetail',
               component: () => import('../views/TableDetail.vue'),
               meta: {
@@ -145,7 +145,7 @@ const router = createRouter({
             {
               path: '/test1',
               name: 'test1',
-              component: () => import('../views/HomeView.vue'),
+              component: () => import('../views/test1.vue'),
               meta: {
                 display: true,
                 title: 'test1',
@@ -154,7 +154,7 @@ const router = createRouter({
             {
               path: '/test2',
               name: 'test2',
-              component: () => import('../views/HomeView.vue'),
+              component: () => import('../views/test2.vue'),
               meta: {
                 title: 'test2',
               },

@@ -3,11 +3,11 @@ const registerAuthIpc = require('./authIpc')
 const registerConfigIpc = require('./configIpc')
 const registerDataSourceIpc = require('./dataSourceIpc')
 const { exec } = require('child_process')
-const { getConfig, getBasePath } = require('../db/configDb')
+const { getBasePath } = require('../db/configDb')
 const consoleUtil = require('../utils/consoleLogUtil')
 const path = require('node:path')
 const fs = require('node:fs')
-const { getVersion } = require('../utils/requestUtil')
+const { getVersion, queryKg } = require('../utils/requestUtil')
 const { CronJob } = require('../../plugins/cron/cronUtil')
 const { mainSendToRender } = require('../utils/mainSendToRender')
 function registerAllIpc(ipcMain) {
@@ -52,6 +52,8 @@ async function ipcHandle(e, args) {
     const filePath = filePaths[0]
     const content = fs.readFileSync(filePath, 'utf-8')
     data = { filePath, content }
+  } else if (event === 'kg') {
+    data = await queryKg(params)
   }
   return data
 }

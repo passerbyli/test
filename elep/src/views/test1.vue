@@ -1,5 +1,5 @@
 <template>
-    <div style="height: 100vh; display: flex; flex-direction: column">
+    <div style="height: 900px;width: 1000px; display: flex; flex-direction: column">
         <div style="padding: 10px; background: #f0f0f0; display: flex; align-items: center; gap: 20px; flex-wrap: wrap">
             <select v-model="selectedProc" @change="loadGraphData" style="padding: 6px">
                 <option v-for="p in procList" :value="p.name" :key="p.name">{{ p.name }}</option>
@@ -29,10 +29,11 @@
                 <span style="margin-left: 12px; color: #666">点击图例可高亮分层</span>
             </div>
         </div>
-        <div ref="containerRef" style="flex: 1; position: relative">
+        <div ref="containerRef" style="flex: 1; position: relative">11
             <div v-if="!graphData.nodes?.length"
                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #aaa; font-size: 16px">
                 暂无数据，请选择存储过程或修改路径查询条件</div>
+                22
         </div>
 
         <div v-if="drawer.visible"
@@ -83,9 +84,28 @@ async function loadGraphData() {
     graphData.edges = res.data?.edges || []
     if (graph && graphData.nodes.length) {
         graph.changeData(res.data)
+        graph.fitView(0, { position: 'top' })
         graph.render()
-        graph.fitView(20)
+        // 在图渲染完成后
+        // 确保在布局完成后执行偏移
+        graph.on('afterlayout', () => {
+            const group = graph.getGroup()
+            const bbox = group.getCanvasBBox()
+
+            // 获取画布宽高
+            const graphWidth = graph.get('width')
+            const graphHeight = graph.get('height')
+            console.log(graphWidth, graphHeight)
+            // 计算偏移
+            const dx = (graphWidth - bbox.width) / 2 - bbox.minX
+            const dy = 20 - bbox.minY  // 顶部留 20px 间距
+
+            // 应用偏移
+            graph.translate(dx, dy)
+        })
+
     } else {
+        console.log('-------------')
         graph?.changeData({ nodes: [], edges: [] })
     }
 }
@@ -160,8 +180,8 @@ function initGraph() {
 
     graph = new G6.Graph({
         container: containerRef.value,
-        width: containerRef.value.clientWidth,
-        height: containerRef.value.clientHeight,
+        width: 1000,
+        height: 800,
         layout: { type: 'dagre', rankdir: 'LR', nodesep: 40, ranksep: 120 },
         modes: { default: ['drag-canvas', 'zoom-canvas', 'drag-node'] },
         defaultNode: { type: 'table-node' },
@@ -176,7 +196,7 @@ function initGraph() {
     })
 
     window.addEventListener('resize', resizeHandler)
-
+  
     graph.on('node:click', async (evt) => {
         const model = evt.item.getModel()
         const res = await axios.get(`/api/lineage/node/${model.id}`)

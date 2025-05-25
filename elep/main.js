@@ -10,12 +10,41 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
 let win = null
 
+// 检查是否已存在实例
+const gotTheLock = app.requestSingleInstanceLock()
+
+if (!gotTheLock) {
+  // 已经有一个实例在运行，退出当前进程
+  app.quit()
+} else {
+  // 监听 second-instance 事件（第二次启动时触发）
+  app.on('second-instance', (event, argv, workingDirectory) => {
+    if (win) {
+      if (win.isMinimized()) win.restore()
+      win.focus()
+    }
+  })
+
+  // 创建窗口
+  app.whenReady().then(() => {
+    registerAllIpc(ipcMain)
+    createWindow()
+  })
+
+  // 所有窗口关闭时退出（可选，如果你希望退出应用时）
+  app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') app.quit()
+  })
+}
+
 function createWindow() {
   const iconPath = path.join(__dirname, 'public/icons/512x512.png')
   // 创建浏览器窗口
   win = new BrowserWindow({
     width: 1440,
     height: 800,
+    minimizable: false, // 禁用最小化
+    maximizable: false, // 禁用最大化
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -30,12 +59,18 @@ function createWindow() {
     win.loadFile(path.join(__dirname, 'pages/index.html'))
   }
   win.webContents.openDevTools()
+
+  win.on('close', (e) => {
+    e.preventDefault() // 阻止默认关闭行为
+    if (win.isMinimized()) {
+      win.restore()
+    } else {
+      win.minimize()
+    }
+  })
 }
 
-app.whenReady().then(function () {
-  registerAllIpc(ipcMain)
-  createWindow()
-})
+// app.whenReady().then(function () {})
 
 ipcMain.handle('refresh-window', () => {
   win.reload()
@@ -57,8 +92,6 @@ ipcMain.on('toMain', async (e, args) => {
 })
 
 ipcMain.handle('table/query-all', async (event, args) => {
-  console.log('x-----')
-  // 参数结构：{ filters, page, pageSize }
   const { filters, page, pageSize } = args
   const { keyword, dataSource, schema, layer } = filters
 
@@ -89,12 +122,12 @@ ipcMain.handle('table/query-all', async (event, args) => {
     params.push(layer)
   }
 
-  // return await crud.queryWithPagination(sql, params, { page, pageSize })
+  return await crud.queryWithPagination(sql, params, { page, pageSize })
 })
 
 ipcMain.handle('table/distinct-options', async () => {
   return {
-    dataSources: await crud.getDistinctValues('data_source', 'name'),
+    dataSources: await crud.getDistinctValues('table_metadata', 'name'),
     schemas: await crud.getDistinctValues('schema_metadata', 'name'),
     layers: await crud.getDistinctValues('table_metadata', 'layer'),
   }
@@ -151,6 +184,48 @@ ipcMain.handle('table/export-all-to-file', async (event, filters) => {
 
   fs.writeFileSync(filePath, buffer)
   return filePath
+})
+
+ipcMain.handle('get-table-detail', async (event, data) => {
+  let { id } = data
+  let sql = `
+SELECT
+t.uuid as table_uuid,
+    t.name AS table_name,
+    t.schema_name as table_schema_name,
+    t.layer as table_layer,
+    t.type as table_type,
+    t.description as table_description,
+    t.table_statement,
+    c.name AS column_name,
+    c.description as column_description
+FROM ads_dl.column_metadata c
+         LEFT JOIN ads_dl.table_metadata t ON t.uuid = c.table_uuid
+  WHERE 1=1`
+
+  const params = []
+
+  if (id) {
+    sql += ` AND c.table_uuid = $${params.length + 1}`
+    params.push(id)
+  }
+  const tableInfo = await crud.query(sql, params)
+  return { tableInfo }
+})
+
+ipcMain.handle('get-table-data-view', async (event, data) => {
+  let { table_schema_name, table_name } = data
+  let sql = `
+SELECT
+*
+FROM ${table_schema_name}.${table_name}
+limit 10
+ `
+
+  const params = []
+
+  const tableInfo = await crud.query(sql, params)
+  return tableInfo
 })
 
 app.on('window-all-closed', () => {

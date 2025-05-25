@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import hljs from 'highlight.js/lib/core'
 import sql from 'highlight.js/lib/languages/sql'
@@ -35,10 +35,10 @@ const props = defineProps({
 
 const codeRef = ref(null)
 
-const lines = computed(() => props.content.split('\n'))
+const lines = computed(() => props.content?.split('\n'))
 
 const highlightedCode = computed(() =>
-    hljs.highlight(props.content, { language: 'sql' }).value
+    hljs.highlight(props.content||'', { language: 'sql' }).value
 )
 
 const copySelectedOrAll = async () => {

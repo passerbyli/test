@@ -1,38 +1,40 @@
 <template>
     <div class="table-asset-overview">
-        <!-- 顶部筛选栏 -->
-        <div class="filter-bar">
-            <el-input v-model="searchText" placeholder="搜索表名或别名" clearable class="filter-input" />
-
-            <el-select v-model="selectedDb" placeholder="数据库" clearable class="filter-select">
-                <el-option v-for="db in dbList" :key="db" :label="db" :value="db" />
-            </el-select>
-
-            <el-select v-model="selectedSchema" placeholder="Schema" clearable class="filter-select">
-                <el-option v-for="schema in schemaList" :key="schema" :label="schema" :value="schema" />
-            </el-select>
-
-            <el-select v-model="selectedLayer" placeholder="分层" clearable class="filter-select">
-                <el-option v-for="layer in layers" :key="layer" :label="layer" :value="layer" />
-            </el-select>
-
-            <el-select v-model="selectedOwner" placeholder="负责人" clearable class="filter-select">
-                <el-option v-for="owner in owners" :key="owner" :label="owner" :value="owner" />
-            </el-select>
-
-            <el-select v-model="selectedTag" placeholder="标签" clearable class="filter-select">
-                <el-option v-for="tag in tags" :key="tag" :label="tag" :value="tag" />
-            </el-select>
-        </div>
+        <el-form :inline="true" :model="filters" class="mb-4">
+            <el-form-item label="关键词">
+                <el-input v-model="filters.keyword" placeholder="表名 / 描述" clearable />
+            </el-form-item>
+            <el-form-item label="数据库">
+                <el-select v-model="filters.dataSource" placeholder="全部" clearable>
+                    <el-option v-for="item in optionLists.dataSources" :key="item" :label="item" :value="item" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="Schema">
+                <el-select v-model="filters.schema" placeholder="全部" clearable>
+                    <el-option v-for="item in optionLists.schemas" :key="item" :label="item" :value="item" />
+                </el-select>
+            </el-form-item>
+            <el-form-item label="分层">
+                <el-select v-model="filters.layer" placeholder="全部" clearable>
+                    <el-option v-for="item in optionLists.layers" :key="item" :label="item" :value="item" />
+                </el-select>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="loadTables">搜索</el-button>
+                <el-button @click="resetFilters">重置</el-button>
+                <el-button type="success" @click="exportAll" :disabled="tableList.length === 0">导出</el-button>
+            </el-form-item>
+        </el-form>
 
         <!-- 表格区域 -->
-        <el-table :data="filteredTables" stripe border size="small">
+        <el-table :data="tableList" stripe border size="small" v-loading="loading">
+            <el-table-column prop="uuid" label="uuid" width="270" />
             <el-table-column prop="table_name" label="表名" width="180" />
             <el-table-column prop="table_alias" label="中文名" width="180" />
             <el-table-column prop="database" label="数据库" width="120" />
             <el-table-column prop="schema" label="Schema" width="120" />
             <el-table-column prop="table_layer" label="分层" width="100" />
-            <el-table-column prop="owner" label="负责人" width="100" />
+            <el-table-column prop="field" label="领域" width="100" />
             <el-table-column prop="tags" label="标签" width="180">
                 <template #default="{ row }">
                     <el-tag v-for="tag in row.tags" :key="tag" class="tag" size="small" type="info">
@@ -40,89 +42,94 @@
                     </el-tag>
                 </template>
             </el-table-column>
-            <el-table-column prop="score" label="评分" width="120">
-                <template #default="{ row }">
-                    <el-rate :model-value="row.score" disabled show-score />
-                </template>
-            </el-table-column>
-            <el-table-column prop="data_volume" label="数据量（行）" width="140" />
+
             <el-table-column label="操作" fixed="right" width="140">
-                <template #default="{ row }">
-                    <el-button type="primary" size="small" @click="viewDetail(row)">
-                        血缘分析
+                <template #default="scope">
+                    <el-button type="primary" size="small" @click="viewDetail(scope.row)">
+                        详情
                     </el-button>
                 </template>
             </el-table-column>
         </el-table>
+        <!-- 分页 -->
+        <div class="text-right mt-4">
+            <el-pagination v-model:current-page="pagination.page" v-model:page-size="pagination.pageSize"
+                :total="pagination.total" layout="prev, pager, next, jumper" @current-change="loadTables" />
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useRouter } from 'vue-router'
 
+import { ref, reactive, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
 const router = useRouter()
 
-// 模拟数据
-const dbList = ['db1', 'db2']
-const schemaList = ['public', 'analytics']
-const layers = ['ODS', 'DWD', 'DWS', 'ADS']
-const owners = ['张三', '李四']
-const tags = ['核心', '实时', '临时']
 
-const searchText = ref('')
-const selectedDb = ref('')
-const selectedSchema = ref('')
-const selectedLayer = ref('')
-const selectedOwner = ref('')
-const selectedTag = ref('')
 
-const tables = ref([
-    {
-        table_name: 'user_info',
-        table_alias: '用户信息表',
-        database: 'db1',
-        schema: 'public',
-        table_layer: 'DWD',
-        owner: '张三',
-        tags: ['核心'],
-        score: 4.8,
-        data_volume: 120000,
-    },
-    {
-        table_name: 'order_stat',
-        table_alias: '订单统计',
-        database: 'db2',
-        schema: 'analytics',
-        table_layer: 'DWS',
-        owner: '李四',
-        tags: ['历史', '核心'],
-        score: 4.2,
-        data_volume: 234567,
-    },
-])
+const loading = ref(false)
+const filters = reactive({ keyword: '', dataSource: '', schema: '', layer: '' })
+const optionLists = reactive({ dataSources: [], schemas: [], layers: [] })
+const pagination = reactive({ page: 1, pageSize: 10, total: 0 })
+const tableList = ref([])
 
-const filteredTables = computed(() => {
-    return tables.value.filter((table) => {
-        const matchText =
-            !searchText.value ||
-            table.table_name.includes(searchText.value) ||
-            table.table_alias.includes(searchText.value)
-
-        const matchDb = !selectedDb.value || table.database === selectedDb.value
-        const matchSchema = !selectedSchema.value || table.schema === selectedSchema.value
-        const matchLayer = !selectedLayer.value || table.table_layer === selectedLayer.value
-        const matchOwner = !selectedOwner.value || table.owner === selectedOwner.value
-        const matchTag = !selectedTag.value || table.tags.includes(selectedTag.value)
-
-        return matchText && matchDb && matchSchema && matchLayer && matchOwner && matchTag
-    })
-})
-// 跳转逻辑
-const viewDetail = (row) => {
-    router.push({ name: 'tableDetail', params: { name: row.table_name } })
+const loadOptions = async () => {
+    const res = await window.dbAPI.tableDistinctOptions()
+    console.log(res)
+    optionLists.dataSources = res.dataSources
+    optionLists.schemas = res.schemas
+    optionLists.layers = res.layers
 }
 
+const loadTables = async () => {
+    loading.value = true
+    try {
+        let res = await window.dbAPI.tableQueryAll({
+            filters: {
+                keyword: filters.keyword,
+                dataSource: filters.dataSource,
+                schema: filters.schema,
+                layer: filters.schema,
+            },
+            page: pagination.page,
+            pageSize: pagination.pageSize,
+        })
+        tableList.value = res.data
+        pagination.total = res.total
+    } catch (e) {
+        ElMessage.error('加载失败', e)
+    } finally {
+        loading.value = false
+    }
+}
+
+const resetFilters = () => {
+    filters.keyword = ''
+    filters.dataSource = ''
+    filters.schema = ''
+    filters.layer = ''
+    pagination.page = 1
+    loadTables()
+}
+
+
+const viewDetail = (row) => {
+    router.push({ name: 'tableDetail', params: { id: row.uuid } })
+}
+const exportAll = async () => {
+    const result = await window.dbAPI.exportToFile({ ...filters })
+    if (result) {
+        ElMessage.success('导出成功：' + result)
+    } else {
+        ElMessage.warning('取消导出')
+    }
+}
+
+onMounted(() => {
+    loadOptions()
+    loadTables()
+})
 </script>
 
 <style scoped>
