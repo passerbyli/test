@@ -57,7 +57,7 @@ async function ipcHandle(e, args) {
   }
   return data
 }
-
+//chrome://version/
 function openChrome(params) {
   const chromePath = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
   // const chromePath = `"C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"`

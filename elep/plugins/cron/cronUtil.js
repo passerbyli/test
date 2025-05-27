@@ -20,11 +20,16 @@ class CronJob {
   }
 
   setExpression(expr) {
-    if (typeof expr === 'string' && validator.isLength(expr, { min: 9 })) {
-      this.cronExpr = expr
-    } else {
+    if (typeof expr !== 'string' || !validator.isLength(expr, { min: 9 })) {
       throw new Error('无效的 cron 表达式')
     }
+
+    const cronRegex = /^(\*|([0-9,-\/]+))(\s+(\*|([0-9,-\/]+))){4,5}$/
+    if (!cronRegex.test(expr.trim())) {
+      console.warn(`[${this.name}] 警告：cron 表达式格式可能不正确，请检查 -> ${expr}`)
+    }
+
+    this.cronExpr = expr.trim()
   }
 
   start() {
@@ -35,7 +40,15 @@ class CronJob {
     try {
       this._job = new NodeCronJob(
         this.cronExpr,
-        this._callback,
+        () => {
+          const now = new Date().toISOString()
+          console.log(`[${this.name}] 执行任务 at ${now}`)
+          try {
+            this._callback()
+          } catch (err) {
+            console.error(`[${this.name}] 执行回调时出错：`, err)
+          }
+        },
         null,
         true, // 立即启动
       )
@@ -60,7 +73,8 @@ module.exports = {
 
 if (require.main === module) {
   const job = new CronJob('MyJob')
-  job.setExpression('*/5 * * * * *') // 每5秒执行
+  // 0 0 9-18 0 0 1-6
+  job.setExpression('0/5 * * * * *') // 每5秒执行
   job.setCallback(() => {
     console.log('定时任务触发', new Date().toLocaleTimeString())
   })
@@ -69,5 +83,5 @@ if (require.main === module) {
   // 例如 10 秒后手动停止
   setTimeout(() => {
     job.stop()
-  }, 10000)
+  }, 100000)
 }

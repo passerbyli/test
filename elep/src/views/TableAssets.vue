@@ -115,7 +115,7 @@ const resetFilters = () => {
 
 
 const viewDetail = (row) => {
-    router.push({ name: 'tableDetail', params: { id: row.uuid } })
+    router.push({ name: 'tableDetail', params: { id: row.id } })
 }
 const exportAll = async () => {
     const result = await window.dbAPI.exportToFile({ ...filters })

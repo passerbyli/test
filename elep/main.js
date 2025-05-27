@@ -96,11 +96,12 @@ ipcMain.handle('table/query-all', async (event, args) => {
   const { keyword, dataSource, schema, layer } = filters
 
   let sql = `
-    SELECT t.uuid, t.name AS table_name, t.layer, t.type, t.description,
-           s.name AS schema_name, d.name AS data_source
-    FROM ads_dl.table_metadata t
-    LEFT JOIN ads_dl.schema_metadata s ON t.schema_uuid = s.uuid
-    LEFT JOIN ads_dl.data_source d ON s.data_source_uuid = d.uuid
+    SELECT t.id, 
+    t.name AS table_name, 
+    t.layer, t.type, 
+    t.description,
+    t.schema_name
+    FROM ads_dl.metadata_table t
     WHERE 1=1
   `
   const params = []
