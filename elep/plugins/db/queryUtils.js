@@ -1,40 +1,18 @@
-const { Pool } = require('pg')
-const mysql = require('mysql2/promise')
+/**
+ * 通用数据库操作工具
+ * 包含多数据源支持、schema支持、高级条件查询
+ */
+const { getDb } = require('./db')
+const { buildWhereClause } = require('./buildWhereClause')
 const config = require('./config.json')
 
-const dbMap = {}
-
-function getDb(dbName) {
-  const dbConfig = config[dbName]
-  if (!dbConfig) throw new Error(`数据源 ${dbName} 未配置`)
-
-  if (!dbMap[dbName]) {
-    if (dbConfig.type === 'postgres') {
-      dbMap[dbName] = new Pool(dbConfig)
-    } else if (dbConfig.type === 'mysql') {
-      dbMap[dbName] = mysql.createPool(dbConfig)
-    } else {
-      throw new Error(`不支持的数据源类型: ${dbConfig.type}`)
-    }
-  }
-
-  return dbMap[dbName]
-}
-
-// 工具函数：生成完整表名（含 schema）
-function formatTable(dbType, schema, table) {
-  if (!schema) throw new Error('缺少 schema 参数')
-
-  if (dbType === 'postgres') {
-    return `"${schema}"."${table}"`
-  } else if (dbType === 'mysql') {
-    return `\`${schema}\`.\`${table}\``
-  } else {
-    throw new Error(`不支持的数据库类型: ${dbType}`)
-  }
-}
-
-// 通用查询
+/**
+ * 通用查询
+ * @param {string} dbName - 数据源
+ * @param {string} schema - Schema 名
+ * @param {string} sql - SQL 语句
+ * @param {Array} params - 参数
+ */
 async function query(dbName, schema, sql, params = []) {
   const db = getDb(dbName)
   const dbType = config[dbName].type
@@ -48,7 +26,9 @@ async function query(dbName, schema, sql, params = []) {
   }
 }
 
-// 分页查询
+/**
+ * 分页查询
+ */
 async function queryWithPagination(
   dbName,
   schema,
@@ -56,7 +36,6 @@ async function queryWithPagination(
   params = [],
   { page = 1, pageSize = 20 } = {},
 ) {
-  const db = getDb(dbName)
   const dbType = config[dbName].type
   const offset = (page - 1) * pageSize
 
@@ -76,12 +55,14 @@ async function queryWithPagination(
   return { total, data }
 }
 
-// 插入
+/**
+ * 插入数据
+ */
 async function insert(dbName, schema, table, data) {
   const dbType = config[dbName].type
   const keys = Object.keys(data)
   const values = Object.values(data)
-  const fullTable = formatTable(dbType, schema, table)
+  const fullTable = dbType === 'postgres' ? `"${schema}"."${table}"` : `\`${schema}\`.\`${table}\``
 
   if (dbType === 'postgres') {
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
@@ -91,12 +72,14 @@ async function insert(dbName, schema, table, data) {
   } else {
     const placeholders = keys.map(() => '?').join(', ')
     const sql = `INSERT INTO ${fullTable} (${keys.join(',')}) VALUES (${placeholders})`
-    const res = await query(dbName, schema, sql, values)
-    return res.insertId ? { id: res.insertId, ...data } : res[0]
+    const rows = await query(dbName, schema, sql, values)
+    return rows.insertId ? { id: rows.insertId, ...data } : rows[0]
   }
 }
 
-// 更新
+/**
+ * 更新数据
+ */
 async function update(dbName, schema, table, data, condition = {}) {
   const dbType = config[dbName].type
   const keys = Object.keys(data)
@@ -106,21 +89,25 @@ async function update(dbName, schema, table, data, condition = {}) {
 
   if (!condKeys.length) throw new Error('Update 条件不能为空')
 
-  let setClause, condClause
-  if (dbType === 'postgres') {
-    setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ')
-    condClause = condKeys.map((k, i) => `"${k}" = $${i + 1 + keys.length}`).join(' AND ')
-  } else {
-    setClause = keys.map((k) => `\`${k}\` = ?`).join(', ')
-    condClause = condKeys.map((k) => `\`${k}\` = ?`).join(' AND ')
-  }
+  const setClause =
+    dbType === 'postgres'
+      ? keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ')
+      : keys.map((k) => `\`${k}\` = ?`).join(', ')
 
-  const sql = `UPDATE ${formatTable(dbType, schema, table)} SET ${setClause} WHERE ${condClause}`
+  const condClause =
+    dbType === 'postgres'
+      ? condKeys.map((k, i) => `"${k}" = $${i + 1 + keys.length}`).join(' AND ')
+      : condKeys.map((k) => `\`${k}\` = ?`).join(' AND ')
+
+  const fullTable = dbType === 'postgres' ? `"${schema}"."${table}"` : `\`${schema}\`.\`${table}\``
+  const sql = `UPDATE ${fullTable} SET ${setClause} WHERE ${condClause}`
   const rows = await query(dbName, schema, sql, [...values, ...condValues])
   return rows[0]
 }
 
-// 删除
+/**
+ * 删除数据
+ */
 async function remove(dbName, schema, table, condition = {}) {
   const dbType = config[dbName].type
   const condKeys = Object.keys(condition)
@@ -128,11 +115,13 @@ async function remove(dbName, schema, table, condition = {}) {
 
   if (!condKeys.length) throw new Error('Delete 条件不能为空')
 
-  const condClause = condKeys
-    .map((k, i) => (dbType === 'postgres' ? `"${k}" = $${i + 1}` : `\`${k}\` = ?`))
-    .join(' AND ')
+  const condClause =
+    dbType === 'postgres'
+      ? condKeys.map((k, i) => `"${k}" = $${i + 1}`).join(' AND ')
+      : condKeys.map((k) => `\`${k}\` = ?`).join(' AND ')
 
-  const sql = `DELETE FROM ${formatTable(dbType, schema, table)} WHERE ${condClause}`
+  const fullTable = dbType === 'postgres' ? `"${schema}"."${table}"` : `\`${schema}\`.\`${table}\``
+  const sql = `DELETE FROM ${fullTable} WHERE ${condClause}`
   await query(dbName, schema, sql, condValues)
   return true
 }
@@ -143,4 +132,5 @@ module.exports = {
   insert,
   update,
   remove,
+  buildWhereClause,
 }

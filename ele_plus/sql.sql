@@ -13,13 +13,16 @@ create sequence if not exists ads_dl.metadata_schema_id_seq increment by 1
 create table if not exists ads_dl.metadata_schema
 (
     id BIGINT NOT NULL DEFAULT nextval('ads_dl.metadata_schema_id_seq'::regclass),
-
     name             VARCHAR(128) NOT NULL,
-    description      varchar(400)
+    description      varchar(400),
+    field varchar(400),
+    create_time TIMESTAMP DEFAULT now(),
+updated_time TIMESTAMP DEFAULT now()
 );
 
 COMMENT ON TABLE ads_dl.metadata_schema IS 'Schema表';
 COMMENT ON COLUMN ads_dl.metadata_schema.name IS 'Schema 名称';
+COMMENT ON COLUMN ads_dl.metadata_schema.field IS '领域';
 COMMENT ON COLUMN ads_dl.metadata_schema.description IS '描述';
 
 
@@ -38,7 +41,10 @@ create table if not exists ads_dl.metadata_table
     layer VARCHAR(128),
     type VARCHAR(128),
     schema_id BIGINT ,
-    schema_name VARCHAR(128)
+    schema_name VARCHAR(128),
+    field varchar(400),
+    create_time TIMESTAMP DEFAULT now(),
+updated_time TIMESTAMP DEFAULT now()
 );
 
 COMMENT ON TABLE ads_dl.metadata_table IS 'table表';
@@ -48,6 +54,7 @@ COMMENT ON COLUMN ads_dl.metadata_table.layer IS '所属分层（如 ods、dwd�
 COMMENT ON COLUMN ads_dl.metadata_table.type IS '表类型（table、view、tmp）';
 COMMENT ON COLUMN ads_dl.metadata_table.schema_id IS 'schema_id';
 COMMENT ON COLUMN ads_dl.metadata_table.schema_name IS 'schema名称';
+COMMENT ON COLUMN ads_dl.metadata_table.field IS '领域';
 
 
 -- 字段表
@@ -63,7 +70,13 @@ create table if not exists
                               description      varchar(400),
                               field_type       varchar(400),
                               field_length     varchar(400),
-                              field_alias      varchar(400)
+                              field_alias      varchar(400),
+                              table_id BIGINT,
+                              table_name varchar(400),
+                              schema_id BIGINT,
+                              schema_name varchar(400),
+    create_time TIMESTAMP DEFAULT now(),
+updated_time TIMESTAMP DEFAULT now()
 
 );
 
@@ -73,6 +86,10 @@ COMMENT ON COLUMN ads_dl.metadata_field.description IS '字段描述';
 COMMENT ON COLUMN ads_dl.metadata_field.field_type IS '字段类型';
 COMMENT ON COLUMN ads_dl.metadata_field.field_length IS '字段长度';
 COMMENT ON COLUMN ads_dl.metadata_field.field_alias IS '字段别名';
+COMMENT ON COLUMN ads_dl.metadata_field.table_id IS '表id';
+COMMENT ON COLUMN ads_dl.metadata_field.table_name IS '表名称';
+COMMENT ON COLUMN ads_dl.metadata_field.schema_id IS 'schema_id';
+COMMENT ON COLUMN ads_dl.metadata_field.schema_name IS 'schema名称';
 
 
 
@@ -91,7 +108,9 @@ create table if not exists ads_dl.metadata_sqlscript
     schema_name VARCHAR(128),
     type varchar(128),
     content TEXT,
-    parsed BOOLEAN DEFAULT FALSE
+    parsed BOOLEAN DEFAULT FALSE,
+    create_time TIMESTAMP DEFAULT now(),
+updated_time TIMESTAMP DEFAULT now()
 );
 
 COMMENT ON TABLE ads_dl.metadata_sqlscript IS 'sql脚本表';
@@ -116,21 +135,27 @@ create table if not exists ads_dl.metadata_table_lineage
     description      varchar(400),
     from_table_id BIGINT ,
     from_table_name VARCHAR(128),
+    from_schema_name VARCHAR(128),
     to_table_id BIGINT ,
     to_table_name VARCHAR(128),
+    to_schema_name VARCHAR(128),
     sql_id BIGINT,
     sql_name VARCHAR(128),
     task_id BIGINT,
-    task_name VARCHAR(128)
+    task_name VARCHAR(128),
+    create_time TIMESTAMP DEFAULT now(),
+updated_time TIMESTAMP DEFAULT now()
 );
 
-COMMENT ON TABLE ads_dl.metadata_table_lineage IS 'sql脚本表';
+COMMENT ON TABLE ads_dl.metadata_table_lineage IS '表级血缘关系表';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.name IS 'sql脚本名称';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.description IS '描述';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.from_table_id IS '来源表_id';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.from_table_name IS '来源表';
+COMMENT ON COLUMN ads_dl.metadata_table_lineage.from_schema_name IS '来源表schema';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.to_table_id IS '目标表_id';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.to_table_name IS '目标表';
+COMMENT ON COLUMN ads_dl.metadata_table_lineage.to_schema_name IS '目标表schema';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.sql_id IS 'sql脚本_id';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.sql_name IS 'sql脚本名称';
 COMMENT ON COLUMN ads_dl.metadata_table_lineage.task_id IS '调度_id';
@@ -151,14 +176,16 @@ create table if not exists ads_dl.metadata_schedule
     platform VARCHAR(128),
     type varchar(128),
     sql_id bigint,
-    sql_name varchar(128)
+    sql_name varchar(128),
+    create_time TIMESTAMP DEFAULT now(),
+updated_time TIMESTAMP DEFAULT now()
 );
 
 COMMENT ON TABLE ads_dl.metadata_schedule IS '调度表';
 COMMENT ON COLUMN ads_dl.metadata_schedule.name IS '调度名称';
 COMMENT ON COLUMN ads_dl.metadata_schedule.description IS '描述';
 COMMENT ON COLUMN ads_dl.metadata_schedule.platform IS '调度平台';
-COMMENT ON COLUMN ads_dl.metadata_schedule.type IS '任务类型（sql/stored_proc/api）''';
+COMMENT ON COLUMN ads_dl.metadata_schedule.type IS '任务类型（sql/stored_proc/api）';
 COMMENT ON COLUMN ads_dl.metadata_schedule.sql_id IS 'sql脚本_id';
 COMMENT ON COLUMN ads_dl.metadata_schedule.sql_name IS 'sql脚本名称';
 
