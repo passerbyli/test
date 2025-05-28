@@ -53,6 +53,14 @@ function createWindow() {
     },
     icon: iconPath,
   })
+
+  // 隐藏菜单栏
+  win.setMenuBarVisibility(false)
+
+  // 或者禁止菜单栏显示快捷键（如 Alt 键呼出菜单）
+  win.setAutoHideMenuBar(true)
+
+  
   if (isDev) {
     win.loadURL('http://localhost:5173') // Vite 默认端口
   } else {
