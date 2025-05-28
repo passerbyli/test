@@ -13,7 +13,7 @@ if not exist %cards_dir% (
 
 :: 获取 cards 目录下的所有子文件夹
 for /d %%i in (%cards_dir%\*) do (
-    set card=%%~nxi
+    set "card=%%~nxi"
     echo ================================
     echo Building for card: !card!
     npm run build:beta -- -- !card!
