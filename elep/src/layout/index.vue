@@ -4,9 +4,15 @@
             <LayHeader />
         </div>
         <el-container>
-            <el-header class="cus_header header-flex">
-                <div class="header-lf">小工具{{ appInfo.version }}
+            <div class="title-bar" @dblclick="handleDoubleClick">
+                <div class="drag-region"></div>
+                <div class="control-buttons">
+                    <el-button type="text" icon="Minus" @click="minimize" />
+                    <el-button type="text" icon="CopyDocument" @click="maximize" />
+                    <el-button type="text" icon="Close" @click="minimize" /> <!-- ❌ 也是最小化 -->
                 </div>
+            </div>
+            <el-header class="cus_header header-flex">
                 <el-menu mode="horizontal" :default-active="activeMenu" class="cus-menu-horizontal" router
                     v-show="menuPosition == 'top'">
                     <menu-item v-for="route in routes" :key="route.path" :item="route" :base-path="route.path" />
@@ -99,6 +105,7 @@ const userinfo = ref({
     username: '',
     displayName: ''
 })
+
 
 onMounted(async () => {
     const config = await loadConfig()
@@ -363,4 +370,26 @@ const LayHeader = defineComponent({
 .cus-menu-horizontal.el-menu--horizontal>.el-menu-item.is-active {}
 
 .cus-menu-horizontal.el-menu--horizontal>.el-sub-menu.is-active .el-sub-menu__title {}
+</style>
+
+<style scoped>
+.title-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 36px;
+    padding: 0 10px;
+    background-color: #2c3e50;
+    color: white;
+    -webkit-app-region: drag;
+    /* 可拖动区域 */
+    user-select: none;
+}
+
+.control-buttons {
+    display: flex;
+    gap: 4px;
+    -webkit-app-region: no-drag;
+    /* 按钮不可拖动 */
+}
 </style>

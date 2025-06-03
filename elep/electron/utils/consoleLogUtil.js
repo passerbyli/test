@@ -39,6 +39,6 @@ function log(...msg) {
 }
 
 function error(...msg) {
-  log(msg)
+  log(...msg)
 }
 module.exports = { log, error }

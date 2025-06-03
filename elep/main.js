@@ -41,10 +41,12 @@ function createWindow() {
   const iconPath = path.join(__dirname, 'public/icons/512x512.png')
   // 创建浏览器窗口
   win = new BrowserWindow({
-    width: 1440,
+    width: 1200,
     height: 800,
-    minimizable: false, // 禁用最小化
-    maximizable: false, // 禁用最大化
+    frame: false, // 去掉原生边框
+    autoHideMenuBar: true, // 隐藏菜单栏
+    transparent: false, // 不设置透明（否则可能失效）
+    roundedCorners: true,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -54,13 +56,21 @@ function createWindow() {
     icon: iconPath,
   })
 
+  // 窗口控制监听
+  ipcMain.on('window-minimize', () => win.minimize())
+  ipcMain.on('window-maximize', () => {
+    win.isMaximized() ? win.unmaximize() : win.maximize()
+  })
+  ipcMain.on('window-toggle-maximize', () => {
+    win.isMaximized() ? win.unmaximize() : win.maximize()
+  })
+
   // 隐藏菜单栏
   win.setMenuBarVisibility(false)
 
   // 或者禁止菜单栏显示快捷键（如 Alt 键呼出菜单）
   win.setAutoHideMenuBar(true)
 
-  
   if (isDev) {
     win.loadURL('http://localhost:5173') // Vite 默认端口
   } else {

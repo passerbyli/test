@@ -51,3 +51,9 @@ contextBridge.exposeInMainWorld('dbAPI', {
   tableExportAll: (filters) => ipcRenderer.invoke('table/export-all', filters),
   exportToFile: (filters) => ipcRenderer.invoke('table/export-all-to-file', filters),
 })
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  minimize: () => ipcRenderer.send('window-minimize'),
+  maximize: () => ipcRenderer.send('window-maximize'),
+  toggleMaximize: () => ipcRenderer.send('window-toggle-maximize'),
+})
