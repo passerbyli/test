@@ -1,4 +1,17 @@
-const { app, BrowserWindow, ipcMain } = require('electron')
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  Tray,
+  Menu,
+  screen,
+  clipboard,
+  globalShortcut,
+  desktopCapturer,
+  Notification,
+  nativeImage,
+} = require('electron')
+
 const path = require('node:path')
 
 // const db = require('./electron/db/postgres')
@@ -9,7 +22,7 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
 let win = null
-
+let tray = null
 // 检查是否已存在实例
 const gotTheLock = app.requestSingleInstanceLock()
 
@@ -29,6 +42,7 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     registerAllIpc(ipcMain)
     createWindow()
+    registerGlobalShortcut()
   })
 
   // 所有窗口关闭时退出（可选，如果你希望退出应用时）
@@ -65,6 +79,8 @@ function createWindow() {
     win.isMaximized() ? win.unmaximize() : win.maximize()
   })
 
+  createTray()
+
   // 隐藏菜单栏
   win.setMenuBarVisibility(false)
 
@@ -86,6 +102,55 @@ function createWindow() {
       win.minimize()
     }
   })
+}
+
+function createTray() {
+  tray = new Tray(path.join(__dirname, 'public/icons/512x512.png')) // 替换为你的图标
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: '吸取屏幕颜色', click: handlePickColor },
+    { type: 'separator' },
+    { label: '退出', role: 'quit' },
+  ])
+  tray.setToolTip('屏幕取色器')
+  tray.setContextMenu(contextMenu)
+
+  // macOS: 左键点击弹出菜单
+  tray.on('click', () => {
+    tray.popUpContextMenu(contextMenu)
+  })
+
+  // 兼容 Windows/Linux: 右键弹出
+  tray.on('right-click', () => {
+    tray.popUpContextMenu(contextMenu)
+  })
+}
+async function handlePickColor() {
+  try {
+    const sources = await desktopCapturer.getSources({ types: ['screen'] })
+    const source = sources[0]
+
+    const image = source.thumbnail
+    const { x, y } = screen.getCursorScreenPoint()
+
+    const bitmap = image.toBitmap()
+    const width = image.getSize().width
+    const i = (y * width + x) * 4
+    const r = bitmap[i]
+    const g = bitmap[i + 1]
+    const b = bitmap[i + 2]
+    console.log(r)
+    console.log(g)
+    console.log(b)
+
+    const hex = `#${[r, g, b].map((c) => c.toString(16).padStart(2, '0')).join('')}`
+    clipboard.writeText(hex)
+
+    new Notification({ title: '吸色成功', body: hex }).show()
+  } catch (e) {
+    console.log(e.message)
+    new Notification({ title: '吸色失败', body: e.message }).show()
+  }
 }
 
 // app.whenReady().then(function () {})
@@ -261,4 +326,47 @@ app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
   }
+})
+
+let pickerWin = null
+
+function registerGlobalShortcut() {
+  globalShortcut.register('CommandOrControl+Shift+C', () => {
+    openColorPickerOverlay()
+  })
+}
+
+function openColorPickerOverlay() {
+  if (pickerWin) return
+
+  pickerWin = new BrowserWindow({
+    fullscreen: true,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    hasShadow: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'plugins/colorPicker/pickerPreload.js'),
+    },
+  })
+
+  pickerWin.setIgnoreMouseEvents(false)
+  pickerWin.loadFile(path.join(__dirname, 'plugins/colorPicker/pickerWindow.html'))
+
+  pickerWin.on('closed', () => {
+    pickerWin = null
+  })
+}
+
+// 关闭吸色窗口
+ipcMain.on('close-picker', () => {
+  pickerWin?.close()
+  pickerWin = null
+})
+
+// 提供截图
+ipcMain.handle('get-screen', async () => {
+  const sources = await desktopCapturer.getSources({ types: ['screen'] })
+  return sources[0].thumbnail.toDataURL()
 })

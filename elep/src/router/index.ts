@@ -15,7 +15,8 @@ const router = createRouter({
           // component: () => import('../views/HomeView.vue'),
 
           // component: () => import('../views/test4.vue'),
-          component: () => import('../views/TableAssets.vue'),
+          // component: () => import('../views/TableAssets.vue'),
+          component: () => import('../views/test5.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
