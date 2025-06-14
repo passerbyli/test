@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>独立请求页面</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; width: 600px; }
+    textarea { width: 100%; height: 300px; margin-top: 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h2>接口请求工具</h2>
+  <label>接口地址：</label><br/>
+  <input type="text" id="apiUrl" style="width:100%;" value="https://jsonplaceholder.typicode.com/posts" />
+  <button id="queryBtn" style="margin-top:10px;">查询</button>
+  <textarea id="responseBox" readonly></textarea>
+  <script src="page.js"></script>
+</body>
+</html>

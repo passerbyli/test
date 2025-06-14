@@ -57,8 +57,8 @@ function createWindow() {
   win = new BrowserWindow({
     width: 1200,
     height: 800,
-    frame: false, // 去掉原生边框
-    autoHideMenuBar: true, // 隐藏菜单栏
+    // frame: false, // 去掉原生边框
+    // autoHideMenuBar: true, // 隐藏菜单栏
     transparent: false, // 不设置透明（否则可能失效）
     roundedCorners: true,
     webPreferences: {
@@ -369,4 +369,14 @@ ipcMain.on('close-picker', () => {
 ipcMain.handle('get-screen', async () => {
   const sources = await desktopCapturer.getSources({ types: ['screen'] })
   return sources[0].thumbnail.toDataURL()
+})
+
+const { openChromeWithPlugin } = require('./plugins/common/openChromeWithPlugin')
+
+ipcMain.handle('plugin:launch-chrome', async () => {
+  let pluginPath = path.join(__dirname, 'chrome/my-extensiondebug')
+  pluginPath = '/Users/lihaomin/projects/GitHub/test/chrome/my-extensiondebug'
+  const guidePath = path.join(__dirname, './public/plugin-guide.html')
+  openChromeWithPlugin(pluginPath, guidePath)
+  return 'done'
 })

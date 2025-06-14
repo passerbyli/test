@@ -1,6 +1,6 @@
 <template>
   <el-config-provider>
-    <TitleBar />
+    <!-- <TitleBar /> -->
     <router-view></router-view>
   </el-config-provider>
 </template>

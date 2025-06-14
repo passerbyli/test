@@ -53,6 +53,7 @@ contextBridge.exposeInMainWorld('dbAPI', {
 })
 
 contextBridge.exposeInMainWorld('electronAPI', {
+  invoke: (channel, ...args) => ipcRenderer.invoke(channel, ...args),
   minimize: () => ipcRenderer.send('window-minimize'),
   maximize: () => ipcRenderer.send('window-maximize'),
   toggleMaximize: () => ipcRenderer.send('window-toggle-maximize'),
