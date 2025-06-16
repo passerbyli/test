@@ -9,6 +9,7 @@
         "storage",
         "tabs"
     ],
+    "devtools_page": "devtools.html",
     "action": {
         "default_popup": "menu.html"
     },
