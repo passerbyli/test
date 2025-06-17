@@ -10,3 +10,4 @@ document.querySelectorAll('a[data-url]').forEach((link) => {
     window.close() // 关闭 popup
   })
 })
+

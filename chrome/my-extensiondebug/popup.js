@@ -21,3 +21,20 @@ document.getElementById('queryBtn').addEventListener('click', async () => {
     output.value = '请求失败：' + err.message
   }
 })
+
+
+const preview = document.createElement('div')
+preview.style.cssText = `
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  z-index: 999999;
+`
+document.body.appendChild(preview)
+
+// 在 pickColor 中更新
+preview.textContent = `选中的颜色：${result.sRGBHex}`
+preview.style.borderColor = result.sRGBHex

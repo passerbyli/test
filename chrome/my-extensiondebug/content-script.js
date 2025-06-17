@@ -91,3 +91,16 @@ if (document.readyState === 'loading') {
 } else {
   initToolsPanel()
 }
+
+
+
+async function pickColor() {
+  try {
+    const eyeDropper = new EyeDropper()
+    const result = await eyeDropper.open()
+    console.log('取到的颜色:', result.sRGBHex)
+    alert(`你选择的颜色是：${result.sRGBHex}`)
+  } catch (e) {
+    console.warn('取色取消', e)
+  }
+}
