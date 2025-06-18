@@ -1,5 +1,6 @@
 {
     "watch": [
+        "common",
         "electron",
         "plugins",
         "preload.js",

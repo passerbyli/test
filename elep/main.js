@@ -21,6 +21,7 @@ const XLSX = require('xlsx')
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
+
 let win = null
 let tray = null
 // 检查是否已存在实例
@@ -270,6 +271,39 @@ ipcMain.handle('table/export-all-to-file', async (event, filters) => {
   return filePath
 })
 
+ipcMain.handle('diffApiByRoute', async (event, route_id) => {
+  let sql = `
+    SELECT
+      COALESCE(p.api_id, t.api_id) AS api_id,
+
+      CASE WHEN p.name IS DISTINCT FROM t.name THEN 'DIFF' ELSE '' END AS name_diff,
+      CASE WHEN p.url IS DISTINCT FROM t.url THEN 'DIFF' ELSE '' END AS url_diff,
+      CASE WHEN p.input_params IS DISTINCT FROM t.input_params THEN 'DIFF' ELSE '' END AS input_diff,
+      CASE WHEN p.output_params IS DISTINCT FROM t.output_params THEN 'DIFF' ELSE '' END AS output_diff,
+      CASE WHEN p.backend_script IS DISTINCT FROM t.backend_script THEN 'DIFF' ELSE '' END AS backend_diff,
+
+      p.name  AS prod_name,
+      t.name  AS test_name,
+      p.url   AS prod_url,
+      t.url   AS test_url,
+      p.input_params  AS prod_input,
+      t.input_params  AS test_input,
+      p.output_params AS prod_output,
+      t.output_params AS test_output
+
+    FROM
+      (SELECT * FROM metadata_api WHERE env = 'prod' AND route_id = $1) p
+    FULL OUTER JOIN
+      (SELECT * FROM metadata_api WHERE env = 'test' AND route_id = $1) t
+    ON p.api_id = t.api_id
+    ORDER BY api_id
+  `
+
+  const result = await crud.query(sql, [route_id])
+  console.log(result.rows)
+  return result.rows
+})
+
 ipcMain.handle('get-table-detail', async (event, data) => {
   let { id } = data
   let sql = `
@@ -372,6 +406,7 @@ ipcMain.handle('get-screen', async () => {
 })
 
 const { openChromeWithPlugin } = require('./plugins/common/openChromeWithPlugin')
+const { log } = require('./common/commonUtil')
 
 ipcMain.handle('plugin:launch-chrome', async () => {
   let pluginPath = path.join(__dirname, 'chrome/my-extensiondebug')

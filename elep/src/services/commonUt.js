@@ -46,4 +46,11 @@ function multiFieldSort(list, rules) {
 
 const commonUtils = { simpleHtmlToText, multiFieldSort }
 
-module.exports = commonUtils
+// CommonJS 导出（Node.js / Electron 主进程使用）
+// if (typeof module !== 'undefined' && module.exports) {
+//   module.exports = commonUtils
+// }
+
+// ESM 导出（Vue / 前端使用）
+// export default commonUtils
+export { simpleHtmlToText }

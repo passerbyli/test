@@ -9,10 +9,10 @@
 
 <script setup>
 import { ref } from 'vue'
-
 const msg = ref('')
 
 async function launchPlugin() {
+    log('test')
     await window.electronAPI.invoke('plugin:launch-chrome')
     msg.value = 'Chrome 已启动，请在新页面中点击进入插件页手动启用'
 }

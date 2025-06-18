@@ -58,3 +58,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   maximize: () => ipcRenderer.send('window-maximize'),
   toggleMaximize: () => ipcRenderer.send('window-toggle-maximize'),
 })
+
+contextBridge.exposeInMainWorld('serviceApi', {
+  diffApiByRoute: (router_id) => ipcRenderer.invoke('diffApiByRoute', router_id),
+})

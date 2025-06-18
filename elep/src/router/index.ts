@@ -22,7 +22,9 @@ const router = createRouter({
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
-          component: () => import('../views/PluginToggle.vue'),
+          // component: () => import('../views/PluginToggle.vue'),
+          component: () => import('../views/InterfaceList.vue'),
+
           meta: {
             display: true,
             title: '首页',
@@ -36,6 +38,25 @@ const router = createRouter({
             title: '数据治理',
           },
           children: [
+            {
+              path: '/interfaces',
+              name: 'InterfaceList',
+              component: () => import('../views/InterfaceList.vue'),
+              meta: {
+                display: true,
+                title: '接口管理',
+              },
+            },
+            {
+              path: '/interfaces/:id',
+              name: 'InterfaceDetail',
+              component: () => import('../views/InterfaceDetail.vue'),
+              props: true,
+              meta: {
+                display: true,
+                title: '接口详情',
+              },
+            },
             {
               name: 'dataSource',
               path: '/dataSource',
