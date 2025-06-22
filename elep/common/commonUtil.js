@@ -19,7 +19,7 @@ function simpleHtmlToText(html) {
 function multiFieldSort(list, rules) {
   // 复制一份，保证不改动原数组
   return [...list].sort((a, b) => {
-    for (const { key, order = 'asc', customOrder } of rules) {
+    for (const {key, order = 'asc', customOrder} of rules) {
       let cmp = 0
 
       // ① 自定义顺序逻辑
@@ -44,6 +44,6 @@ function multiFieldSort(list, rules) {
   })
 }
 
-const commonUtils = { simpleHtmlToText, multiFieldSort }
+const commonUtils = {simpleHtmlToText, multiFieldSort}
 
 module.exports = commonUtils

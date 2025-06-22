@@ -50,13 +50,7 @@ async function query(dbName, schema, sql, params = []) {
 }
 
 // 分页查询
-async function queryWithPagination(
-  dbName,
-  schema,
-  baseSql,
-  params = [],
-  { page = 1, pageSize = 20 } = {},
-) {
+async function queryWithPagination(dbName, schema, baseSql, params = [], { page = 1, pageSize = 20 } = {}) {
   const db = getDb(dbName)
   const dbType = config[dbName].type
   const offset = (page - 1) * pageSize
@@ -86,7 +80,7 @@ async function insert(dbName, schema, table, data) {
 
   if (dbType === 'postgres') {
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
-    const sql = `INSERT INTO ${fullTable} (${keys.map((k) => `"${k}"`).join(',')}) VALUES (${placeholders}) RETURNING *`
+    const sql = `INSERT INTO ${fullTable} (${keys.map(k => `"${k}"`).join(',')}) VALUES (${placeholders}) RETURNING *`
     const rows = await query(dbName, schema, sql, values)
     return rows[0]
   } else {
@@ -112,8 +106,8 @@ async function update(dbName, schema, table, data, condition = {}) {
     setClause = keys.map((k, i) => `"${k}" = $${i + 1}`).join(', ')
     condClause = condKeys.map((k, i) => `"${k}" = $${i + 1 + keys.length}`).join(' AND ')
   } else {
-    setClause = keys.map((k) => `\`${k}\` = ?`).join(', ')
-    condClause = condKeys.map((k) => `\`${k}\` = ?`).join(' AND ')
+    setClause = keys.map(k => `\`${k}\` = ?`).join(', ')
+    condClause = condKeys.map(k => `\`${k}\` = ?`).join(' AND ')
   }
 
   const sql = `UPDATE ${formatTable(dbType, schema, table)} SET ${setClause} WHERE ${condClause}`
@@ -129,9 +123,7 @@ async function remove(dbName, schema, table, condition = {}) {
 
   if (!condKeys.length) throw new Error('Delete 条件不能为空')
 
-  const condClause = condKeys
-    .map((k, i) => (dbType === 'postgres' ? `"${k}" = $${i + 1}` : `\`${k}\` = ?`))
-    .join(' AND ')
+  const condClause = condKeys.map((k, i) => (dbType === 'postgres' ? `"${k}" = $${i + 1}` : `\`${k}\` = ?`)).join(' AND ')
 
   const sql = `DELETE FROM ${formatTable(dbType, schema, table)} WHERE ${condClause}`
   await query(dbName, schema, sql, condValues)
@@ -143,5 +135,5 @@ module.exports = {
   queryWithPagination,
   insert,
   update,
-  remove,
+  remove
 }

@@ -12,7 +12,7 @@ const store = new Store({
         password: '',
         errorCount: 0,
         errorMessage: '',
-        cookies: [],
+        cookies: []
       },
       menuPosition: 'left',
       theme: 'light',
@@ -21,26 +21,26 @@ const store = new Store({
       basePath: '',
       autoLogin: {
         disable: true,
-        cron: '* * */30 * * *',
-      },
+        cron: '* * */30 * * *'
+      }
     },
     modules: {
       module2: {
         cronJobs: {
           cronJob1: '',
-          cronJob2: '',
+          cronJob2: ''
         },
-        type: 'PI',
+        type: 'PI'
       },
       module3: {
         accounts: {
           beta: { username: '', password: '', cookies: [] },
-          pord: { username: '', password: '', cookies: [] },
+          pord: { username: '', password: '', cookies: [] }
         },
-        currentEnv: 'beta',
-      },
-    },
-  },
+        currentEnv: 'beta'
+      }
+    }
+  }
 })
 
 function getConfig() {
