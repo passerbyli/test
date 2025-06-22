@@ -327,23 +327,23 @@ const LayHeader = defineComponent({
 }
 
 .cus_header {
-    background: var(--cus-background);
+    background: var(--color2);
 }
 
 .left-side {
-    background: var(--cus-background);
+    background: var(--color2);
 }
 
 .classic-footer {
     height: 30px;
     line-height: 30px;
     color: var(--vt-c-white);
-    background: var(--cus-background);
+    background: var(--color2);
 }
 </style>
 <style lang="scss">
 .el-menu {
-    background-color: var(--cus-background);
+    background-color: var(--color2);
     color: var(--vt-c-white);
 }
 
@@ -352,11 +352,11 @@ const LayHeader = defineComponent({
 }
 
 .el-menu-item:hover {
-    background-color: var(--cus-background);
+    background-color: var(--color2);
 }
 
 .el-sub-menu__title:hover {
-    background-color: var(--cus-background);
+    background-color: var(--color2);
 }
 
 .cus-menu-vertical .el-menu-item.is-active {}

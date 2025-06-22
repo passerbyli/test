@@ -10,8 +10,6 @@
 
   --vt-c-indigo: #2c3e50;
 
-  --cus-background: #faa852;
-
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
   --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
   --vt-c-divider-dark-1: rgba(84, 84, 84, 0.65);
@@ -21,6 +19,14 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+
+  --cus-background: #faa852;
+  --color1: rgb(221, 176, 120); /* 九斤黄*/
+  --color2: rgb(218, 146, 51); /* 杏子*/
+  --color3: rgb(188, 110, 55); /* 媚蝶*/
+  --color4: rgb(159, 82, 22); /* 韎韐*/
+
+  --el-color-primary: var(--color4) !important;
 }
 
 /* semantic color variables for this project */
@@ -42,4 +48,11 @@ html,
 body {
   margin: 0;
   padding: 0;
+}
+
+#grad1 {
+  background-image: radial-gradient(circle at center, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 1));
+  border-radius: 8px;
+  width: 60px;
+  height: 60px;
 }

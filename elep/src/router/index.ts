@@ -48,7 +48,7 @@ const router = createRouter({
               },
             },
             {
-              path: '/interfaces/:id',
+              path: '/route-detail/:route_id',
               name: 'InterfaceDetail',
               component: () => import('../views/InterfaceDetail.vue'),
               props: true,

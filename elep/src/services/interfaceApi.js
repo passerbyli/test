@@ -127,3 +127,11 @@ export async function getInterfaceDetail(id, env) {
 export async function diffApiByRoute(routeId) {
   return await window.serviceApi.diffApiByRoute(routeId)
 }
+
+export async function queryApiListByRoute(params) {
+  return await window.serviceApi.queryApiListByRoute(params)
+}
+
+export async function getApiDetailByRouteId(params) {
+  return await window.serviceApi.getApiDetailByRouteId(params)
+}

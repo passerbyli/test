@@ -36,6 +36,7 @@ function formatTable(dbType, schema, table) {
 
 // 通用查询
 async function query(dbName, schema, sql, params = []) {
+  console.log(['===='], schema, sql, params)
   const db = getDb(dbName)
   const dbType = config[dbName].type
 

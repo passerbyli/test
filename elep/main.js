@@ -140,16 +140,12 @@ async function handlePickColor() {
     const r = bitmap[i]
     const g = bitmap[i + 1]
     const b = bitmap[i + 2]
-    console.log(r)
-    console.log(g)
-    console.log(b)
 
     const hex = `#${[r, g, b].map((c) => c.toString(16).padStart(2, '0')).join('')}`
     clipboard.writeText(hex)
 
     new Notification({ title: '吸色成功', body: hex }).show()
   } catch (e) {
-    console.log(e.message)
     new Notification({ title: '吸色失败', body: e.message }).show()
   }
 }
@@ -292,16 +288,173 @@ ipcMain.handle('diffApiByRoute', async (event, route_id) => {
       t.output_params AS test_output
 
     FROM
-      (SELECT * FROM metadata_api WHERE env = 'prod' AND route_id = $1) p
+      (SELECT * FROM ads_dl.metadata_api WHERE env = 'prod' AND route_id =$1) p
     FULL OUTER JOIN
-      (SELECT * FROM metadata_api WHERE env = 'test' AND route_id = $1) t
+      (SELECT * FROM ads_dl.metadata_api WHERE env = 'test' AND route_id = $1) t
     ON p.api_id = t.api_id
     ORDER BY api_id
   `
-
-  const result = await crud.query(sql, [route_id])
-  console.log(result.rows)
+  const params = []
+  if (route_id) {
+    params.push(`${route_id}`)
+  }
+  const result = await crud.query('pg1', '', sql, params)
   return result.rows
+})
+
+ipcMain.handle('getApiDetailByRouteId', async (event, route_id) => {
+  const sql = `
+  SELECT env,
+         jsonb_build_object(
+           'id', id,
+           'api_id', api_id,
+           'name', name,
+           'url', url,
+           'description', description,
+           'request_example', request_example,
+           'input_params', input_params,
+           'output_params', output_params,
+           'backend_script', backend_script
+         ) AS data
+  FROM ads_dl.metadata_api
+  WHERE route_id = $1 AND env IN ('prod','test')`
+  const rows = await crud.query('pg1', '', sql, [route_id])
+  const result = { prod: null, test: null }
+  rows.forEach((r) => (result[r.env] = r.data))
+  return result
+})
+
+ipcMain.handle('queryApiListByRoute', async (event, params) => {
+  const { page, pageSize, nameLike, routeLike, urlLike, domain, authType, impl } = {
+    ...{
+      page: 1,
+      pageSize: 20,
+      nameLike: '',
+      routeLike: '',
+      urlLike: '',
+      domain: '',
+      authType: '',
+      impl: '',
+    },
+    ...params,
+  }
+
+  console.log(page, pageSize, nameLike, routeLike, urlLike, domain, authType, impl)
+  // 过滤条件
+  const where = []
+  const values = []
+  let idx = 1
+  if (nameLike) {
+    where.push(`(p.name ILIKE $${idx} OR t.name ILIKE $${idx})`)
+    values.push(`%${nameLike}%`)
+    idx++
+  }
+  if (routeLike) {
+    where.push(`(p.route ILIKE $${idx} OR t.route ILIKE  $${idx})`)
+    values.push(`%${routeLike}%`)
+    idx++
+  }
+  if (urlLike) {
+    where.push(`(p.url ILIKE $${idx} OR t.url ILIKE  $${idx})`)
+    values.push(`%${urlLike}%`)
+    idx++
+  }
+  if (domain) {
+    where.push(`COALESCE(p.domain,t.domain)= $${idx}`)
+    values.push(`${domain}`)
+    idx++
+  }
+  if (authType) {
+    where.push(`COALESCE(p.auth_type,t.auth_type)= $${idx}`)
+    values.push(`${authType}`)
+    idx++
+  }
+  if (impl) {
+    where.push(`COALESCE(p.impl,t.impl)= $${idx}`)
+    values.push(`${impl}`)
+    idx++
+  }
+  const whereSQL = where.length ? `WHERE ${where.join(' AND ')}` : ''
+
+  const baseSQL = `
+    FROM
+      (SELECT * FROM ads_dl.metadata_api WHERE env='prod') p
+    FULL JOIN
+      (SELECT * FROM ads_dl.metadata_api WHERE env='test') t
+    ON p.route_id = t.route_id
+    ${whereSQL}
+  `
+
+  // total
+  const totalRes = await crud.query(
+    'pg1',
+    '',
+    `SELECT COUNT(DISTINCT COALESCE(p.route_id,t.route_id)) ${baseSQL}`,
+    values,
+  )
+  console.log('--====', totalRes)
+  const total = Number(totalRes[0].count)
+
+  // data
+  const offset = (page - 1) * pageSize
+  const dataSQL = `
+    SELECT
+      COALESCE(p.route_id,t.route_id)  AS route_id,
+      COALESCE(p.route,t.route)        AS route_name,
+      p.api_id                         AS prod_api_id,
+      t.api_id                         AS test_api_id,
+      p.name                           AS prod_name,
+      t.name                           AS test_name,
+      p.url                            AS prod_url,
+      t.url                            AS test_url,
+      COALESCE(p.domain,t.domain)      AS domain,
+      COALESCE(p.impl,t.impl)          AS impl,
+      COALESCE(p.auth_type,t.auth_type)AS auth_type,
+      COALESCE(p.description,t.description) AS description
+    ${baseSQL}
+   GROUP BY COALESCE(p.route_id, t.route_id),
+         COALESCE(p.route, t.route),
+         prod_api_id, test_api_id, prod_name, test_name,
+         prod_url, test_url,
+         COALESCE(p.domain, t.domain),
+         COALESCE(p.impl, t.impl),
+         COALESCE(p.auth_type, t.auth_type),
+         COALESCE(p.description, t.description)
+    ORDER BY route_id
+    LIMIT $${idx} OFFSET $${idx + 1}
+  `
+
+  values.push(`${pageSize}`)
+  values.push(`${offset}`)
+
+  const dataRes = await crud.query('pg1', '', dataSQL, values)
+
+  return { total, list: dataRes }
+})
+
+ipcMain.handle('queryApiListByRoute——bak', async (event) => {
+  let sql = `
+    SELECT
+      COALESCE(prod.route_id, test.route_id) AS route_id,
+      COALESCE(prod.route, test.route) AS route,
+
+      prod.api_id AS prod_api_id,
+      test.api_id AS test_api_id,
+
+      prod.env AS prod_env,
+      test.env AS test_env
+
+    FROM
+      (SELECT route_id, route, api_id, env FROM ads_dl.metadata_api WHERE env = 'prod') prod
+    FULL OUTER JOIN
+      (SELECT route_id, route, api_id, env FROM ads_dl.metadata_api WHERE env = 'test') test
+    ON prod.route_id = test.route_id
+    ORDER BY route_id;
+  `
+
+  const result = await crud.query('pg1', 'xxxaaa', sql)
+  console.log('---', result)
+  return result
 })
 
 ipcMain.handle('get-table-detail', async (event, data) => {

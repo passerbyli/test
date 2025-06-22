@@ -61,4 +61,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
 contextBridge.exposeInMainWorld('serviceApi', {
   diffApiByRoute: (router_id) => ipcRenderer.invoke('diffApiByRoute', router_id),
+  queryApiListByRoute: (params) => ipcRenderer.invoke('queryApiListByRoute', params),
+  getApiDetailByRouteId: (router_id) => ipcRenderer.invoke('getApiDetailByRouteId', router_id),
 })

@@ -20,7 +20,7 @@ module.exports = {
       ORDER BY t.created_at DESC
     `
     const res = await pool.query(sql)
-    console.log(res)
+
     return res.rows
   },
 
