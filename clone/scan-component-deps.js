@@ -5,53 +5,54 @@ const path = require('path')
 const XLSX = require('xlsx')
 const simpleGit = require('simple-git')
 const { execSync } = require('child_process')
-let pLimit
 const { performance } = require('perf_hooks')
 
-const EXCEL_PATH = 'repos.xlsx'
-const CLONE_DIR = path.resolve(__dirname, 'cloned')
-const OUTPUT_EXCEL = 'component-version-report.xlsx'
-const TARGET_PACKAGE = process.env.TARGET || 'vue'
-const MAX_CONCURRENT = 4 // 并发子项目数量
-
-const workbook = XLSX.readFile(EXCEL_PATH)
-const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
-const output = []
-
-function isValidProject(pkgPath) {
-  try {
-    const pkg = fs.readJsonSync(pkgPath)
-    return pkg.dependencies?.[TARGET_PACKAGE] || pkg.devDependencies?.[TARGET_PACKAGE]
-  } catch {
-    return false
-  }
-}
-
-function findValidProjects(basePath) {
-  const result = []
-  function search(dir) {
-    const entries = fs.readdirSync(dir)
-    if (entries.includes('package.json')) {
-      const pkgPath = path.join(dir, 'package.json')
-      if (isValidProject(pkgPath)) {
-        result.push(dir)
-        return
-      }
-    }
-    for (const entry of entries) {
-      const sub = path.join(dir, entry)
-      if (fs.statSync(sub).isDirectory() && !entry.includes('node_modules')) {
-        search(sub)
-      }
-    }
-  }
-  search(basePath)
-  return result
-}
-
+let pLimit
 ;(async () => {
   pLimit = (await import('p-limit')).default
+
+  const EXCEL_PATH = 'repos.xlsx'
+  const CLONE_DIR = path.resolve(__dirname, 'cloned')
+  const OUTPUT_EXCEL = 'component-version-report.xlsx'
+  const TARGET_PACKAGE = process.env.TARGET || 'vue'
+  const MAX_CONCURRENT = 4
+
+  const workbook = XLSX.readFile(EXCEL_PATH)
+  const sheet = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]])
+  const output = []
   const limit = pLimit(MAX_CONCURRENT)
+
+  function isValidProject(pkgPath) {
+    try {
+      const pkg = fs.readJsonSync(pkgPath)
+      return pkg.dependencies?.[TARGET_PACKAGE] || pkg.devDependencies?.[TARGET_PACKAGE]
+    } catch {
+      return false
+    }
+  }
+
+  function findValidProjects(basePath) {
+    const result = []
+    function search(dir) {
+      const entries = fs.readdirSync(dir)
+      if (entries.includes('package.json')) {
+        const pkgPath = path.join(dir, 'package.json')
+        if (isValidProject(pkgPath)) {
+          result.push(dir)
+          return
+        }
+      }
+      for (const entry of entries) {
+        const sub = path.join(dir, entry)
+        if (fs.statSync(sub).isDirectory() && !entry.includes('node_modules')) {
+          search(sub)
+        }
+      }
+    }
+    search(basePath)
+    return result
+  }
+
   const globalStart = performance.now()
   let totalProjects = 0
   let handledProjects = 0
@@ -130,18 +131,34 @@ function findValidProjects(basePath) {
               版本: 'npm install 失败',
               是否直接依赖: '',
               依赖路径: '',
+              备注: '依赖安装失败',
             })
             console.warn(`❌ ${tag} 安装失败`)
           }
 
           if (!installed) return
 
+          let raw
           try {
-            const raw = execSync(`npm ls ${TARGET_PACKAGE} --all --json`, {
-              cwd: projectPath,
-            }).toString()
-            const json = JSON.parse(raw)
+            raw = execSync(`npm ls ${TARGET_PACKAGE} --all --json`, { cwd: projectPath }).toString()
+          } catch (e) {
+            output.push({
+              仓库名: repoName,
+              仓库地址: gitUrl,
+              分支: targetBranch || '(默认)',
+              项目路径: relPath,
+              包名: TARGET_PACKAGE,
+              版本: 'npm ls 失败',
+              是否直接依赖: '',
+              依赖路径: '',
+              备注: 'npm ls 命令失败，可能未正确安装依赖',
+            })
+            console.warn(`❌ ${tag} npm ls 失败`)
+            return
+          }
 
+          try {
+            const json = JSON.parse(raw)
             const collectDeps = (node, stack = [], isRoot = false) => {
               if (!node.dependencies) return
               for (const [pkg, dep] of Object.entries(node.dependencies)) {
@@ -155,6 +172,7 @@ function findValidProjects(basePath) {
                     版本: dep.version,
                     是否直接依赖: isRoot && json.dependencies?.[pkg] ? '是' : '否',
                     依赖路径: [...stack, pkg].join(' > '),
+                    备注: '',
                   })
                 } else {
                   collectDeps(dep, [...stack, pkg], false)
@@ -174,6 +192,7 @@ function findValidProjects(basePath) {
               版本: '依赖分析失败',
               是否直接依赖: '',
               依赖路径: '',
+              备注: 'JSON 解析失败或依赖树结构异常',
             })
             console.warn(`❌ ${tag} 依赖分析失败`)
           }
