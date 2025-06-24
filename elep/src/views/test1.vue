@@ -33,7 +33,7 @@
             <div v-if="!graphData.nodes?.length"
                 style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #aaa; font-size: 16px">
                 暂无数据，请选择存储过程或修改路径查询条件</div>
-                22
+            22
         </div>
 
         <div v-if="drawer.visible"
@@ -48,6 +48,7 @@
             </div>
         </div>
     </div>
+
 </template>
 
 <script setup>
@@ -196,7 +197,7 @@ function initGraph() {
     })
 
     window.addEventListener('resize', resizeHandler)
-  
+
     graph.on('node:click', async (evt) => {
         const model = evt.item.getModel()
         const res = await axios.get(`/api/lineage/node/${model.id}`)
@@ -228,3 +229,11 @@ onBeforeUnmount(() => {
     window.removeEventListener('resize', resizeHandler)
 })
 </script>
+<style>
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+</style>
