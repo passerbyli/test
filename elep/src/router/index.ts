@@ -24,7 +24,8 @@ const router = createRouter({
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/PluginToggle.vue'),
           // component: () => import('../views/InterfaceList.vue'),
-          component: () => import('../views/style.vue'),
+          // component: () => import('../views/style.vue'),
+          component: () => import('../views/test6.vue'),
 
           meta: {
             display: true,
