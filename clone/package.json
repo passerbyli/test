@@ -8,7 +8,9 @@
     "scan": "node scan-component-deps.js",
     "scan:vue": "TARGET=vue node scan-component-deps.js",
     "scan:ep": "TARGET=element-plus node scan-component-deps.js",
-    "scanW:ep": "cross-env TARGET=element-plus node scan-component-deps.js"
+    "scanW:ep": "cross-env TARGET=element-plus node scan-component-deps.js",
+    "scan2:vue": "TARGET=vue node scan-component-deps_v1.js",
+    "scan2:ep": "TARGET=element-plus INSTALLER=pnpm node scan-component-deps_v1.js"
   },
   "keywords": [],
   "author": "",

@@ -20,3 +20,4 @@ dist
 *.xlsx
 /musit-app/out
 musit-app/package-lock.json
+/clone/cloned/*
