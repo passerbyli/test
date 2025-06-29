@@ -37,7 +37,7 @@ function readWithXlsx(filePath, options) {
   const workbook = xlsx.readFile(filePath, {
     cellFormula: true,
     cellText: true,
-    cellDates: true,
+    cellDates: true
   })
   const sheet = getTargetSheetXlsx(workbook, options)
   const data = xlsx.utils.sheet_to_json(sheet, { raw: false })
@@ -71,11 +71,11 @@ function readWithNodeXlsx(filePath, options) {
   const rows = sheet.data
 
   const headers = rows[0]
-  const data = rows.slice(1).map((row) =>
+  const data = rows.slice(1).map(row =>
     headers.reduce((acc, header, index) => {
       acc[header] = row[index]
       return acc
-    }, {}),
+    }, {})
   )
 
   return filterColumns(data, options.columns)
@@ -86,7 +86,7 @@ function readWithSheetjsStyle(filePath, options) {
   const workbook = sheetJsStyle.readFile(filePath, {
     cellFormula: true,
     cellText: true,
-    cellDates: true,
+    cellDates: true
   })
   const sheet = getTargetSheetXlsx(workbook, options)
   const data = sheetJsStyle.utils.sheet_to_json(sheet, { raw: false })
@@ -100,11 +100,11 @@ async function readWithXlsxPopulate(filePath, options) {
 
   const rows = sheet.usedRange().value()
   const headers = rows[0]
-  const data = rows.slice(1).map((row) =>
+  const data = rows.slice(1).map(row =>
     headers.reduce((acc, header, index) => {
       acc[header] = row[index]
       return acc
-    }, {}),
+    }, {})
   )
 
   return filterColumns(data, options.columns)
@@ -141,7 +141,7 @@ function getTargetSheetExceljs(workbook, { sheetName, sheetIndex, useActiveSheet
 // 根据配置获取目标 sheet - node-xlsx
 function getTargetSheetNodeXlsx(workbook, { sheetName, sheetIndex }) {
   if (sheetName) {
-    return workbook.find((sheet) => sheet.name === sheetName)
+    return workbook.find(sheet => sheet.name === sheetName)
   }
   if (typeof sheetIndex === 'number') {
     return workbook[sheetIndex]
@@ -155,7 +155,7 @@ function getTargetSheetXlsxPopulate(workbook, { sheetName, sheetIndex, useActive
     return workbook.activeSheet()
   }
   if (sheetName) {
-    return workbook.sheets().find((sheet) => sheet.name() === sheetName)
+    return workbook.sheets().find(sheet => sheet.name() === sheetName)
   }
   if (typeof sheetIndex === 'number') {
     return workbook.sheets()[sheetIndex]
@@ -166,20 +166,67 @@ function getTargetSheetXlsxPopulate(workbook, { sheetName, sheetIndex, useActive
 // 筛选指定列的数据
 function filterColumns(data, columns) {
   if (!Array.isArray(columns) || columns.length === 0) return data
-  return data.map((row) =>
+  return data.map(row =>
     columns.reduce((filteredRow, column) => {
       filteredRow[column] = row[column] || ''
       return filteredRow
-    }, {}),
+    }, {})
   )
 }
 
-module.exports = { readExcel }
+function exportToExcelFile(list, headers, outputPath) {
+  if (!Array.isArray(list) || !Array.isArray(headers)) {
+    throw new Error('list 和 headers 必须是数组')
+  }
+
+  const filteredHeaders = headers.filter(h => h.export !== false)
+  const sheetData = [filteredHeaders.map(h => h.title || h.key)]
+  const linkCells = {}
+
+  list.forEach((row, rowIndex) => {
+    const sheetRow = []
+
+    filteredHeaders.forEach((h, colIndex) => {
+      let val = row[h.key]
+      if (h.type === 'date' && val) {
+        val = new Date(val).toISOString().slice(0, 10)
+      } else if (h.type === 'number') {
+        val = Number(val)
+      } else {
+        val = val != null ? String(val) : ''
+      }
+
+      sheetRow.push(val)
+
+      if (h.link && row[h.linkKey]) {
+        const cellRef = XLSX.utils.encode_cell({ r: rowIndex + 1, c: colIndex })
+        linkCells[cellRef] = {
+          l: { Target: row[h.linkKey] }
+        }
+      }
+    })
+
+    sheetData.push(sheetRow)
+  })
+
+  const worksheet = XLSX.utils.aoa_to_sheet(sheetData)
+  Object.entries(linkCells).forEach(([cell, link]) => {
+    worksheet[cell].l = link.l
+  })
+
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1')
+
+  XLSX.writeFile(workbook, outputPath)
+  console.log(`✅ Excel 导出成功：${outputPath}`)
+}
+
+module.exports = { exportToExcelFile, readExcel }
 
 const inputFilePath = path.join(__dirname, 'a_test.xlsx') // 输入文件路径
 
 let res = readExcel('xlsx', inputFilePath, {
-  useActiveSheet: true,
+  useActiveSheet: true
   //   sheetIndex: 0,
   //   columns: ["标题"],
 })

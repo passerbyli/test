@@ -1,22 +1,12 @@
-const {
-  app,
-  BrowserWindow,
-  ipcMain,
-  Tray,
-  Menu,
-  screen,
-  clipboard,
-  globalShortcut,
-  desktopCapturer,
-  Notification,
-  nativeImage,
-} = require('electron')
+const { app, BrowserWindow, ipcMain, Tray, Menu, screen, clipboard, globalShortcut, desktopCapturer, Notification, nativeImage } = require('electron')
 
 const path = require('node:path')
 
 // const db = require('./electron/db/postgres')
 const crud = require('./electron/db/crud')
 const XLSX = require('xlsx')
+
+const { exportToExcelFile } = require('./plugins/excel/excel')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
@@ -66,9 +56,9 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
-      preload: path.join(__dirname, 'preload.js'), // use a preload script
+      preload: path.join(__dirname, 'preload.js') // use a preload script
     },
-    icon: iconPath,
+    icon: iconPath
   })
 
   // 窗口控制监听
@@ -95,7 +85,7 @@ function createWindow() {
   }
   win.webContents.openDevTools()
 
-  win.on('close', (e) => {
+  win.on('close', e => {
     e.preventDefault() // 阻止默认关闭行为
     if (win.isMinimized()) {
       win.restore()
@@ -108,11 +98,7 @@ function createWindow() {
 function createTray() {
   tray = new Tray(path.join(__dirname, 'public/icons/512x512.png')) // 替换为你的图标
 
-  const contextMenu = Menu.buildFromTemplate([
-    { label: '吸取屏幕颜色', click: handlePickColor },
-    { type: 'separator' },
-    { label: '退出', role: 'quit' },
-  ])
+  const contextMenu = Menu.buildFromTemplate([{ label: '吸取屏幕颜色', click: handlePickColor }, { type: 'separator' }, { label: '退出', role: 'quit' }])
   tray.setToolTip('屏幕取色器')
   tray.setContextMenu(contextMenu)
 
@@ -141,7 +127,7 @@ async function handlePickColor() {
     const g = bitmap[i + 1]
     const b = bitmap[i + 2]
 
-    const hex = `#${[r, g, b].map((c) => c.toString(16).padStart(2, '0')).join('')}`
+    const hex = `#${[r, g, b].map(c => c.toString(16).padStart(2, '0')).join('')}`
     clipboard.writeText(hex)
 
     new Notification({ title: '吸色成功', body: hex }).show()
@@ -210,7 +196,7 @@ ipcMain.handle('table/distinct-options', async () => {
   return {
     dataSources: await crud.getDistinctValues('table_metadata', 'name'),
     schemas: await crud.getDistinctValues('schema_metadata', 'name'),
-    layers: await crud.getDistinctValues('table_metadata', 'layer'),
+    layers: await crud.getDistinctValues('table_metadata', 'layer')
   }
 })
 
@@ -253,7 +239,7 @@ ipcMain.handle('table/export-all-to-file', async (event, filters) => {
   const { filePath, canceled } = await dialog.showSaveDialog({
     title: '导出表清单',
     defaultPath: 'table_list_export.xlsx',
-    filters: [{ name: 'Excel', extensions: ['xlsx'] }],
+    filters: [{ name: 'Excel', extensions: ['xlsx'] }]
   })
 
   if (canceled || !filePath) return null
@@ -320,7 +306,7 @@ ipcMain.handle('getApiDetailByRouteId', async (event, route_id) => {
   WHERE route_id = $1 AND env IN ('prod','test')`
   const rows = await crud.query('pg1', '', sql, [route_id])
   const result = { prod: null, test: null }
-  rows.forEach((r) => (result[r.env] = r.data))
+  rows.forEach(r => (result[r.env] = r.data))
   return result
 })
 
@@ -334,9 +320,9 @@ ipcMain.handle('queryApiListByRoute', async (event, params) => {
       urlLike: '',
       domain: '',
       authType: '',
-      impl: '',
+      impl: ''
     },
-    ...params,
+    ...params
   }
 
   console.log(page, pageSize, nameLike, routeLike, urlLike, domain, authType, impl)
@@ -386,12 +372,7 @@ ipcMain.handle('queryApiListByRoute', async (event, params) => {
   `
 
   // total
-  const totalRes = await crud.query(
-    'pg1',
-    '',
-    `SELECT COUNT(DISTINCT COALESCE(p.route_id,t.route_id)) ${baseSQL}`,
-    values,
-  )
+  const totalRes = await crud.query('pg1', '', `SELECT COUNT(DISTINCT COALESCE(p.route_id,t.route_id)) ${baseSQL}`, values)
   console.log('--====', totalRes)
   const total = Number(totalRes[0].count)
 
@@ -432,7 +413,7 @@ ipcMain.handle('queryApiListByRoute', async (event, params) => {
   return { total, list: dataRes }
 })
 
-ipcMain.handle('queryApiListByRoute——bak', async (event) => {
+ipcMain.handle('queryApiListByRoute——bak', async event => {
   let sql = `
     SELECT
       COALESCE(prod.route_id, test.route_id) AS route_id,
@@ -534,8 +515,8 @@ function openColorPickerOverlay() {
     skipTaskbar: true,
     hasShadow: false,
     webPreferences: {
-      preload: path.join(__dirname, 'plugins/colorPicker/pickerPreload.js'),
-    },
+      preload: path.join(__dirname, 'plugins/colorPicker/pickerPreload.js')
+    }
   })
 
   pickerWin.setIgnoreMouseEvents(false)
@@ -567,4 +548,23 @@ ipcMain.handle('plugin:launch-chrome', async () => {
   const guidePath = path.join(__dirname, './public/plugin-guide.html')
   openChromeWithPlugin(pluginPath, guidePath)
   return 'done'
+})
+
+ipcMain.handle('export-excel', async (event, { list, headers }) => {
+  const { canceled, filePath } = await dialog.showSaveDialog({
+    title: '保存 Excel 文件',
+    defaultPath: '导出结果.xlsx',
+    filters: [{ name: 'Excel 文件', extensions: ['xlsx'] }]
+  })
+
+  if (canceled || !filePath) {
+    return { success: false, message: '用户取消导出' }
+  }
+
+  try {
+    exportToExcelFile(list, headers, filePath)
+    return { success: true, path: filePath }
+  } catch (err) {
+    return { success: false, message: err.message }
+  }
 })

@@ -25,6 +25,7 @@
                 <el-button type="success" @click="exportAll" :disabled="tableList.length === 0">导出</el-button>
             </el-form-item>
         </el-form>
+        <el-button type="primary" @click="handleExport">导出 Excel</el-button>
 
         <!-- 表格区域 -->
         <el-table :data="tableList" stripe border size="small" v-loading="loading">
@@ -81,7 +82,18 @@ const loadOptions = async () => {
     optionLists.schemas = res.schemas
     optionLists.layers = res.layers
 }
+async function handleExport() {
+    const result = await window.electronAPI.invoke('export-excel', {
+        list: data,
+        headers
+    })
 
+    if (result.success) {
+        ElMessage.success('导出成功: ' + result.path)
+    } else {
+        ElMessage.warning('导出失败: ' + result.message)
+    }
+}
 const loadTables = async () => {
     loading.value = true
     try {
