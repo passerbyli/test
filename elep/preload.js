@@ -12,11 +12,7 @@ contextBridge.exposeInMainWorld('authApi', {
   authLogin: () => ipcRenderer.invoke('auth:authLogin'),
 })
 
-contextBridge.exposeInMainWorld('dsApi', {
-  list: () => ipcRenderer.invoke('ds:list'),
-  save: (data) => ipcRenderer.invoke('ds:save', data),
-  test: (ds) => ipcRenderer.invoke('ds:test', ds),
-})
+
 
 contextBridge.exposeInMainWorld('ipc', {
   send: (channel, data) => {
@@ -38,6 +34,12 @@ contextBridge.exposeInMainWorld('ipc', {
     }
   },
   refreshWindow: () => ipcRenderer.invoke('refresh-window'),
+})
+
+contextBridge.exposeInMainWorld('dsApi', {
+  list: () => ipcRenderer.invoke('ds:list'),
+  save: data => ipcRenderer.invoke('ds:save', data),
+  test: ds => ipcRenderer.invoke('ds:test', ds)
 })
 
 contextBridge.exposeInMainWorld('dbAPI', {

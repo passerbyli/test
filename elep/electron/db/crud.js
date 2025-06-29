@@ -1,5 +1,6 @@
 const { Pool } = require('pg')
 const mysql = require('mysql2/promise')
+const { v4: uuidv4 } = require('uuid')
 const config = require('./config.json')
 
 const dbMap = {}
@@ -21,7 +22,13 @@ function getDb(dbName) {
   return dbMap[dbName]
 }
 
-// 工具函数：生成完整表名（含 schema）
+/**
+ * 工具函数：生成完整表名（含 schema）
+ * @param {*} dbType
+ * @param {*} schema
+ * @param {*} table
+ * @returns
+ */
 function formatTable(dbType, schema, table) {
   if (!schema) throw new Error('缺少 schema 参数')
 
@@ -34,9 +41,14 @@ function formatTable(dbType, schema, table) {
   }
 }
 
-// 通用查询
-async function query(dbName, schema, sql, params = []) {
-  console.log(['===='], schema, sql, params)
+/**
+ * 通用查询
+ * @param {*} dbName 数据名称
+ * @param {*} sql 执行sql脚本
+ * @param {*} params 执行参数
+ * @returns
+ */
+async function query(dbName, sql, params = []) {
   const db = getDb(dbName)
   const dbType = config[dbName].type
 
@@ -64,14 +76,21 @@ async function queryWithPagination(dbName, schema, baseSql, params = [], { page 
     dataSql = `${baseSql} LIMIT $${params.length + 1} OFFSET $${params.length + 2}`
   }
 
-  const totalRes = await query(dbName, schema, countSql, params)
+  const totalRes = await query(dbName, countSql, params)
   const total = dbType === 'postgres' ? parseInt(totalRes[0].count, 10) : totalRes[0].total
-  const data = await query(dbName, schema, dataSql, allParams)
+  const data = await query(dbName, dataSql, allParams)
 
   return { total, data }
 }
 
-// 插入
+/**
+ * 插入
+ * @param {*} dbName
+ * @param {*} schema
+ * @param {*} table
+ * @param {*} data
+ * @returns
+ */
 async function insert(dbName, schema, table, data) {
   const dbType = config[dbName].type
   const keys = Object.keys(data)
@@ -81,12 +100,12 @@ async function insert(dbName, schema, table, data) {
   if (dbType === 'postgres') {
     const placeholders = keys.map((_, i) => `$${i + 1}`).join(', ')
     const sql = `INSERT INTO ${fullTable} (${keys.map(k => `"${k}"`).join(',')}) VALUES (${placeholders}) RETURNING *`
-    const rows = await query(dbName, schema, sql, values)
+    const rows = await query(dbName, sql, values)
     return rows[0]
   } else {
     const placeholders = keys.map(() => '?').join(', ')
     const sql = `INSERT INTO ${fullTable} (${keys.join(',')}) VALUES (${placeholders})`
-    const res = await query(dbName, schema, sql, values)
+    const res = await query(dbName, sql, values)
     return res.insertId ? { id: res.insertId, ...data } : res[0]
   }
 }
@@ -111,7 +130,7 @@ async function update(dbName, schema, table, data, condition = {}) {
   }
 
   const sql = `UPDATE ${formatTable(dbType, schema, table)} SET ${setClause} WHERE ${condClause}`
-  const rows = await query(dbName, schema, sql, [...values, ...condValues])
+  const rows = await query(dbName, sql, [...values, ...condValues])
   return rows[0]
 }
 
@@ -126,7 +145,7 @@ async function remove(dbName, schema, table, condition = {}) {
   const condClause = condKeys.map((k, i) => (dbType === 'postgres' ? `"${k}" = $${i + 1}` : `\`${k}\` = ?`)).join(' AND ')
 
   const sql = `DELETE FROM ${formatTable(dbType, schema, table)} WHERE ${condClause}`
-  await query(dbName, schema, sql, condValues)
+  await query(dbName, sql, condValues)
   return true
 }
 

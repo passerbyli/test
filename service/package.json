@@ -11,11 +11,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3": "^11.9.1",
     "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
     "electron-store": "8",
     "express": "^4.21.0",
     "express-session": "^1.18.1",
+    "faker": "^6.6.6",
     "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {

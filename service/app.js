@@ -3,6 +3,8 @@ const session = require('express-session')
 const fs = require('fs')
 var url = require('url')
 const bodyParser = require('body-parser')
+const faker = require('faker')
+const cors = require('cors')
 
 const app = express()
 const PORT = 3000
@@ -26,6 +28,66 @@ function readJsonFile(file) {
 function writeJsonFile(file, data) {
   fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8')
 }
+
+app.use(cors())
+
+// ✅ 模拟数据仓库
+const mockDb = []
+for (let i = 1; i <= 100; i++) {
+  mockDb.push({
+    id: i,
+    name: faker.name.findName(),
+    url: faker.internet.url(),
+    avatar: faker.image.avatar(),
+    intro: faker.lorem.sentence(),
+    tags: faker.random.words(3).split(' '),
+    extra: {
+      age: faker.datatype.number({ min: 18, max: 60 }),
+      active: faker.datatype.boolean(),
+    },
+  })
+}
+
+// ✅ /api/list?page=1&pageSize=10
+app.get('/api/list', (req, res) => {
+  const page = parseInt(req.query.page || '1')
+  const pageSize = parseInt(req.query.pageSize || '10')
+  const start = (page - 1) * pageSize
+  const end = start + pageSize
+  const list = mockDb.slice(start, end)
+
+  res.json({
+    total: mockDb.length,
+    data: list,
+  })
+})
+
+// ✅ /api/detail/:id
+app.get('/api/detail/:id', (req, res) => {
+  const id = parseInt(req.params.id)
+  const item = mockDb.find((i) => i.id === id)
+
+  if (!item) {
+    return res.status(404).json({ error: 'Not found' })
+  }
+
+  // 模拟结构更复杂
+  const detail = {
+    ...item,
+    input_params: [
+      { name: 'token', type: 'string', required: true, desc: '登录 token' },
+      { name: 'page', type: 'int', required: false, desc: '页码' },
+    ],
+    output_params: [{ name: 'result', type: 'object', required: true, desc: '返回结构' }],
+    request_example: {
+      token: 'abc123',
+      page: 1,
+    },
+    backend_script: `-- 查询语句\nSELECT * FROM users WHERE id = ${id};`,
+  }
+
+  res.json({ data: detail })
+})
 
 // 登录接口
 app.post('/login', (req, res) => {
