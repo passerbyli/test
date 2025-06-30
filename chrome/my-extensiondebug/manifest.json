@@ -8,7 +8,10 @@
         "webRequest",
         "storage",
         "activeTab",
-        "tabs"
+        "tabs",
+        "cookies",
+        "clipboardWrite"
+
     ],
     "devtools_page": "devtools.html",
     "action": {

@@ -38,3 +38,4 @@ document.body.appendChild(preview)
 // 在 pickColor 中更新
 preview.textContent = `选中的颜色：${result.sRGBHex}`
 preview.style.borderColor = result.sRGBHex
+
