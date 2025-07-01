@@ -1,20 +1,27 @@
 {
     "manifest_version": 3,
-    "name": "XHR Logger",
+    "name": "WebRequest Live Logger",
     "version": "1.0",
-    "description": "记录并展示当前页面所有 XHR 和 Fetch 请求",
+    "description": "使用 webRequest 实时记录请求并显示浮窗",
     "permissions": [
         "scripting",
-        "storage"
+        "webRequest",
+        "storage",
+        "activeTab",
+        "tabs",
+        "cookies",
+        "clipboardWrite"
+
     ],
+    "devtools_page": "devtools.html",
+    "action": {
+        "default_popup": "menu.html"
+    },
     "host_permissions": [
         "<all_urls>"
     ],
     "background": {
         "service_worker": "background.js"
-    },
-    "action": {
-        "default_popup": "popup.html"
     },
     "content_scripts": [
         {
@@ -30,15 +37,11 @@
     "web_accessible_resources": [
         {
             "resources": [
-                "floating-style.css",
-                "floating-config.js",
-                "inject.js",
-                "floating-ui.js"
+                "inject.js"
             ],
             "matches": [
                 "<all_urls>"
             ]
         }
-    ],
-    "devtools_page": "request-log.html"
+    ]
 }
