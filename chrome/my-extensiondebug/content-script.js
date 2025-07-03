@@ -115,3 +115,41 @@
     }
   }
 })()
+
+
+
+
+
+
+function addIconsToTree() {
+  // 遍历每一个树节点
+  document.querySelectorAll('.el-tree-node__content').forEach((node) => {
+    if (node.querySelector('.custom-icon')) return // 避免重复插入
+
+    const icon = document.createElement('span')
+    icon.className = 'custom-icon'
+    icon.innerHTML = '🌲' // 可以换成 FontAwesome 或 SVG
+    icon.style.marginRight = '5px'
+
+    // 插入到文本前
+    const label = node.querySelector('.el-tree-node__label')
+    if (label && label.parentNode) {
+      label.parentNode.insertBefore(icon, label)
+    }
+  })
+}
+
+// 初始执行一次
+addIconsToTree()
+
+// 使用 MutationObserver 监听 DOM 变化
+const treeContainer = document.querySelector('.el-tree')
+if (treeContainer) {
+  const observer = new MutationObserver(() => {
+    addIconsToTree()
+  })
+  observer.observe(treeContainer, {
+    childList: true,
+    subtree: true,
+  })
+}
