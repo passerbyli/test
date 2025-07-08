@@ -131,3 +131,32 @@ function sortByFields4(arr, fields) {
 
 
 // https://github.com/TriliumNext/Trilium/releases
+
+
+
+
+
+
+// configService.js
+const path = require('path')
+const fs = require('fs')
+const { app } = require('electron')
+
+const configPath = path.join(app.getPath('userData'), 'config.json')
+let configCache = null
+
+function ensureConfig() {
+  if (!fs.existsSync(configPath)) {
+    const defaultPath = path.join(__dirname, '..', 'config', 'config.json')
+    fs.copyFileSync(defaultPath, configPath)
+  }
+}
+
+function readConfig() {
+  if (configCache) return configCache
+  const raw = fs.readFileSync(configPath, 'utf-8')
+  configCache = JSON.parse(raw)
+  return configCache
+}
+
+module.exports = { ensureConfig, readConfig }
