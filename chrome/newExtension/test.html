@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>X6 插件功能测试</title>
+    <style>
+      #container {
+        width: 100%;
+        height: 600px;
+        border: 1px solid #ccc;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@antv/x6/dist/index.js"></script>
+  </head>
+  <body>
+    <h2>🧪 X6 插件功能验证页面</h2>
+    <div id="container"></div>
+
+    <script>
+      const { Graph } = window.X6
+
+      const graph = new Graph({
+        container: document.getElementById('container'),
+        grid: true,
+        panning: true,
+        selecting: true,
+      })
+
+      // 添加初始节点
+      const node1 = graph.addNode({
+        id: 'node1',
+        x: 100,
+        y: 100,
+        width: 120,
+        height: 40,
+        label: '节点 1',
+        attrs: {
+          body: {
+            'data-node-id': 'node1', // 设置自定义属性
+            stroke: '#5F95FF',
+            fill: '#EFF4FF',
+          },
+        },
+      })
+
+      const node2 = graph.addNode({
+        id: 'node2',
+        x: 300,
+        y: 200,
+        width: 120,
+        height: 40,
+        label: '节点 2',
+        attrs: {
+          body: {
+            'data-node-id': 'node2', // 设置自定义属性
+            stroke: '#5F95FF',
+            fill: '#EFF4FF',
+          },
+        },
+      })
+
+      // 添加边
+      graph.addEdge({
+        source: node1,
+        target: node2,
+      })
+
+      // 把 graph 暴露到 window 上供插件使用
+      window.custom_epo_utils = graph
+    </script>
+  </body>
+</html>
