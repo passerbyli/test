@@ -90,3 +90,16 @@ MATCH (t:Table)-[r:LINEAGE_TO]-()
 RETURN t.id AS id, t.name AS name, count(r) AS lineageCount
 ORDER BY lineageCount DESC
 ```
+
+
+
+git clone --branch 6.x https://github.com/neo4j/neo4j-javascript-driver.git
+cd neo4j-javascript-driver
+
+cd packages/neo4j-driver
+
+
+npm install
+npm pack
+
+npm install ./neo4j-driver-6.5.0.tgz

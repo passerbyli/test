@@ -15,25 +15,65 @@ contextBridge.exposeInMainWorld('authApi', {
 
 
 contextBridge.exposeInMainWorld('ipc', {
+  /**
+   * 用于单向消息发送，不带返回
+   * @param {*} channel
+   * @param {*} data
+   *
+   *
+   * @example
+   * 发消息到主进程
+   * window.ipc.send('toMain', data)
+   *
+   * 主进程监听方式
+   * ipcMain.on('toMain', (event, data) => { ... })
+   *
+   */
   send: (channel, data) => {
     let validChannels = ['toMain']
     if (validChannels.includes(channel)) {
       ipcRenderer.send(channel, data)
     }
   },
+  /**
+   * 用于接收主进程的消息
+   * @param {*} channel
+   * @param {*} func
+   * @example
+   * 用于接收主进程的消息
+   * window.ipc.receive('fromMain', (data) => { ... })
+   *
+   * 主进程发送消息
+   * window.webContents.send('fromMain', data)
+   */
   receive: (channel, func) => {
     let validChannels = ['fromMain']
     if (validChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => func(...args))
     }
   },
+  /**
+   *
+   * @param {*} channel
+   * @param {*} data
+   * @returns
+   *
+   * @example
+   * 用于带返回值的异步调用
+   * const result = await window.ipc.sendInvoke('toMain', { key: 123 })
+   *
+   * 主进程处理方式
+   * ipcMain.handle('toMain', async (event, data) => {
+   *    return someResult
+   * })
+   */
   sendInvoke: (channel, data) => {
     let validChannels = ['toMain']
     if (validChannels.includes(channel)) {
       return ipcRenderer.invoke(channel, data)
     }
   },
-  refreshWindow: () => ipcRenderer.invoke('refresh-window'),
+  refreshWindow: () => ipcRenderer.invoke('refresh-window')
 })
 
 contextBridge.exposeInMainWorld('dsApi', {
