@@ -87,13 +87,16 @@ const props = defineProps({
     name: {
         type: String,
         required: true
+    }, id: {
+        type: String,
+        required: true
     }
 })
 
 
 // 替换函数
 function replaceParams(sql, params) {
-    return sql.replace(/\$([a-zA-Z0-9_]+)/g, (match, p1) => {
+    return sql?.replace(/\$([a-zA-Z0-9_]+)/g, (match, p1) => {
         // 如果参数存在，就替换为带引号的值
         if (params.hasOwnProperty(p1)) {
             return `'${params[p1]}'`;
@@ -106,8 +109,9 @@ function replaceParams(sql, params) {
 }
 
 async function loadGraphData() {
-
+    console.log(props)
     let params = {
+        tableId: props.id,
         name: props.name,
         level: level.value,
         direction: direction.value,
@@ -122,7 +126,7 @@ async function loadGraphData() {
             cypher.value = replaceParams(response.cypher, response.params)
 
 
-            
+
             let res = {
                 nodes: [],
                 edges: response.edges

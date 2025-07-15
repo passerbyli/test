@@ -189,7 +189,7 @@ ipcMain.handle('table/query-all', async (event, args) => {
     params.push(layer)
   }
 
-  return await crud.queryWithPagination(sql, params, { page, pageSize })
+  return await crud.queryWithPagination('pg1', sql, params, { page, pageSize })
 })
 
 ipcMain.handle('table/distinct-options', async () => {
@@ -451,8 +451,8 @@ t.uuid as table_uuid,
     t.table_statement,
     c.name AS column_name,
     c.description as column_description
-FROM ads_dl.column_metadata c
-         LEFT JOIN ads_dl.table_metadata t ON t.uuid = c.table_uuid
+FROM ads_dl.metadata_field c
+         LEFT JOIN ads_dl.metadata_table t ON t.uuid = c.table_uuid
   WHERE 1=1`
 
   const params = []
@@ -461,7 +461,7 @@ FROM ads_dl.column_metadata c
     sql += ` AND c.table_uuid = $${params.length + 1}`
     params.push(id)
   }
-  const tableInfo = await crud.query(sql, params)
+  const tableInfo = await crud.query('pg1', sql, params)
   return { tableInfo }
 })
 
@@ -476,7 +476,7 @@ limit 10
 
   const params = []
 
-  const tableInfo = await crud.query(sql, params)
+  const tableInfo = await crud.query('pg1', sql, params)
   return tableInfo
 })
 

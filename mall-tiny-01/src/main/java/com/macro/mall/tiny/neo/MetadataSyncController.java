@@ -1,29 +1,36 @@
 package com.macro.mall.tiny.neo;
 
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
 @RestController
-@RequestMapping("/sync")
+@RequestMapping("/sync/api/neo4j")
+@RequiredArgsConstructor
 public class MetadataSyncController {
     private final MetadataSyncTask syncTask;
     private final Neo4jWriter neo4jWriter;
 
-    public MetadataSyncController(MetadataSyncTask syncTask, Neo4jWriter neo4jWriter) {
-        this.syncTask = syncTask;
-        this.neo4jWriter = neo4jWriter;
+
+    private final MetadataSyncService metadataSyncService;
+
+    @PostMapping("/sync")
+    public ResponseEntity<String> syncAll() {
+        metadataSyncService.syncAll();
+        return ResponseEntity.ok("Sync to Neo4j completed");
     }
 
-    @PostMapping("/all")
-    public String syncAll() {
-        syncTask.syncSchemas();
-        syncTask.syncTables();
-        syncTask.syncLineages();
-        syncTask.syncFields();
-        return "全部同步完成";
-    }
+//    @PostMapping("/all")
+//    public String syncAll() {
+//        syncTask.syncSchemas();
+//        syncTask.syncTables();
+//        syncTask.syncLineages();
+//        syncTask.syncFields();
+//        return "全部同步完成";
+//    }
 
     @PostMapping("/schemas")
     public String syncSchemas() {
@@ -203,7 +210,8 @@ public class MetadataSyncController {
                 } else if (value instanceof org.neo4j.driver.types.Relationship) {
                     org.neo4j.driver.types.Relationship r = (org.neo4j.driver.types.Relationship) value;
                     Map<String, Object> edge = new HashMap<>(r.asMap());
-                    edge.put("source", nodeIdToBusinessId.getOrDefault(r.startNodeId(), String.valueOf(r.startNodeId())));
+                    edge.put("source", nodeIdToBusinessId.getOrDefault(r.startNodeId(),
+                            String.valueOf(r.startNodeId())));
                     edge.put("target", nodeIdToBusinessId.getOrDefault(r.endNodeId(), String.valueOf(r.endNodeId())));
                     edge.put("label", r.type());
                     edges.add(edge);
@@ -263,7 +271,8 @@ public class MetadataSyncController {
         List<Map<String, Object>> nodes = new ArrayList<>();
         List<Map<String, Object>> edges = new ArrayList<>();
 
-        List<Map<String, Object>> found = neo4jWriter.query("MATCH (t:Table) WHERE t.name = $name RETURN t.id as id", Collections.singletonMap("name", tableName));
+        List<Map<String, Object>> found = neo4jWriter.query("MATCH (t:Table) WHERE t.name = $name RETURN t.id as id",
+                Collections.singletonMap("name", tableName));
         if (found.isEmpty()) return Collections.emptyMap();
         String id = found.get(0).get("id").toString();
         return queryLineageWithProps(id, level, direction);
@@ -281,7 +290,8 @@ public class MetadataSyncController {
                                                @RequestParam(value = "level", defaultValue = "3") int level,
                                                @RequestParam(value = "direction", defaultValue = "both") String direction) {
         List<Map<String, Object>> found = neo4jWriter.query(
-                "MATCH (a:Table)-[r:LINEAGE_TO {sqlName: $sqlName}]->(b:Table) RETURN b.id as id", Collections.singletonMap("sqlName", sqlName));
+                "MATCH (a:Table)-[r:LINEAGE_TO {sqlName: $sqlName}]->(b:Table) RETURN b.id as id",
+                Collections.singletonMap("sqlName", sqlName));
         if (found.isEmpty()) return Collections.emptyMap();
         String id = found.get(0).get("id").toString();
         return queryLineageWithProps(id, level, direction);
@@ -357,7 +367,8 @@ public class MetadataSyncController {
     public Map<String, Object> getLineageG6ByTable(@RequestParam("tableName") String tableName,
                                                    @RequestParam(value = "level", defaultValue = "3") int level,
                                                    @RequestParam(value = "direction", defaultValue = "both") String direction) {
-        List<Map<String, Object>> found = neo4jWriter.query("MATCH (t:Table) WHERE t.name = $name RETURN t.id as id", Collections.singletonMap("name", tableName));
+        List<Map<String, Object>> found = neo4jWriter.query("MATCH (t:Table) WHERE t.name = $name RETURN t.id as id",
+                Collections.singletonMap("name", tableName));
         if (found.isEmpty()) return Collections.singletonMap("message", "Table not found");
         String id = found.get(0).get("id").toString();
         return lineageToG6(id, level, direction);
@@ -374,7 +385,8 @@ public class MetadataSyncController {
     public Map<String, Object> getLineageG6BySql(@RequestParam("sqlName") String sqlName,
                                                  @RequestParam(value = "level", defaultValue = "3") int level,
                                                  @RequestParam(value = "direction", defaultValue = "both") String direction) {
-        List<Map<String, Object>> found = neo4jWriter.query("MATCH (a:Table)-[r:LINEAGE_TO {sqlName: $sqlName}]->(b:Table) RETURN b.id as id LIMIT 1", Collections.singletonMap("sqlName", sqlName));
+        List<Map<String, Object>> found = neo4jWriter.query("MATCH (a:Table)-[r:LINEAGE_TO {sqlName: $sqlName}]->" +
+                "(b:Table) RETURN b.id as id LIMIT 1", Collections.singletonMap("sqlName", sqlName));
         if (found.isEmpty()) return Collections.singletonMap("message", "No table found by sqlName");
         String id = found.get(0).get("id").toString();
         return lineageToG6(id, level, direction);
@@ -486,8 +498,10 @@ public class MetadataSyncController {
                     }
                     for (org.neo4j.driver.types.Relationship rel : path.relationships()) {
                         Map<String, Object> edge = new HashMap<>(rel.asMap());
-                        edge.put("source", nodeIdToBusinessId.getOrDefault(rel.startNodeId(), String.valueOf(rel.startNodeId())));
-                        edge.put("target", nodeIdToBusinessId.getOrDefault(rel.endNodeId(), String.valueOf(rel.endNodeId())));
+                        edge.put("source", nodeIdToBusinessId.getOrDefault(rel.startNodeId(),
+                                String.valueOf(rel.startNodeId())));
+                        edge.put("target", nodeIdToBusinessId.getOrDefault(rel.endNodeId(),
+                                String.valueOf(rel.endNodeId())));
                         edge.put("label", rel.type());
                         edges.add(edge);
                     }
@@ -504,7 +518,8 @@ public class MetadataSyncController {
 
     /**
      * 根据关系 name 字段查询上下游路径（LINEAGE_TO 关系），默认双向，适配 G6
-     * @param name 关系 name 属性（如 sql_7）
+     *
+     * @param name  关系 name 属性（如 sql_7）
      * @param level 溯源层级（默认 2）
      */
     @GetMapping("/g6/lineage/byRelName")
@@ -518,8 +533,9 @@ public class MetadataSyncController {
 
     /**
      * G6 封闭链路接口：同时查询以目标表为中心的上下游路径，方向一致，限制跳数，避免扩散
+     *
      * @param tableId 表 ID（如 dm.table_ads_1）
-     * @param level 跳数，默认 2
+     * @param level   跳数，默认 2
      */
     @GetMapping("/g6/lineageClosed")
     public Map<String, Object> getG6ClosedLineage(@RequestParam("tableId") String tableId,
@@ -553,8 +569,10 @@ public class MetadataSyncController {
                     }
                     for (org.neo4j.driver.types.Relationship rel : path.relationships()) {
                         Map<String, Object> edge = new HashMap<>(rel.asMap());
-                        edge.put("source", nodeIdToBusinessId.getOrDefault(rel.startNodeId(), String.valueOf(rel.startNodeId())));
-                        edge.put("target", nodeIdToBusinessId.getOrDefault(rel.endNodeId(), String.valueOf(rel.endNodeId())));
+                        edge.put("source", nodeIdToBusinessId.getOrDefault(rel.startNodeId(),
+                                String.valueOf(rel.startNodeId())));
+                        edge.put("target", nodeIdToBusinessId.getOrDefault(rel.endNodeId(),
+                                String.valueOf(rel.endNodeId())));
                         edge.put("label", rel.type());
                         edges.add(edge);
                     }

@@ -62,7 +62,7 @@ async function query(dbName, sql, params = []) {
 }
 
 // 分页查询
-async function queryWithPagination(dbName, schema, baseSql, params = [], { page = 1, pageSize = 20 } = {}) {
+async function queryWithPagination(dbName, baseSql, params = [], { page = 1, pageSize = 20 } = {}) {
   const db = getDb(dbName)
   const dbType = config[dbName].type
   const offset = (page - 1) * pageSize

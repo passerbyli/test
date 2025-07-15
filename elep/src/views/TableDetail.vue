@@ -45,6 +45,7 @@
                 <template v-if="loadedTabs.includes('lineage')">
                     <!-- 这里可以嵌入 G6 图组件 -->
                     <div class="text-gray-500">
+                        {{ id }}
                         <blood-relationship :id="id" :name="tableInfo.table_name"/>
                     </div>
                 </template>
