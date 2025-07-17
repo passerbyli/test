@@ -1,6 +1,5 @@
 const { Pool } = require('pg')
 const mysql = require('mysql2/promise')
-const { v4: uuidv4 } = require('uuid')
 const config = require('./config.json')
 
 const dbMap = {}

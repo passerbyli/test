@@ -9,14 +9,78 @@
         height: 600px;
         border: 1px solid #ccc;
       }
+      .html-code {
+        white-space: pre-wrap; /* ✅ 保留换行与缩进 */
+        word-break: break-word; /* ✅ 防止超长内容不换行 */
+        font-family: Consolas, monospace;
+        font-size: 14px;
+        background: #f8f8f8;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@antv/x6/dist/index.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-dax.min.js"></script>
   </head>
   <body>
     <h2>🧪 X6 插件功能验证页面</h2>
     <div id="container"></div>
 
+    <div>
+      <span class="btn-icon btn-copy" data-text="SUMX(GROUPBY(
+  FILTER('销量表', IF(ISFILTERED('门店表'[门店名]), '销量表'[销售门店] IN VALUES('门店表'[门店名]), TRUE())),
+  '销量表'[产品编码],
+  "SUM", SUMX(CURRENTGROUP(), '销量表'[销售量])
+), [SUM])">📋</span>
+      <pre class="html-code"><code>SUMX(GROUPBY(
+  FILTER('销量表', IF(ISFILTERED('门店表'[门店名]), '销量表'[销售门店] IN VALUES('门店表'[门店名]), TRUE())),
+  '销量表'[产品编码],
+  "SUM", SUMX(CURRENTGROUP(), '销量表'[销售量])
+), [SUM])</code></pre>
+    </div>
     <script>
+      // 转义函数（用于展示）
+      function escapeHTML(str) {
+        return str
+          .replace(/&/g, '&amp;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+      }
+
+      // // 显示转义版本
+      // const codeEl = document.querySelector('.html-code code')
+
+      // // 设置 data-text
+      // const btn = document.querySelector('.btn-copy')
+      // codeEl.innerText = daxCode // innerText 避免代码被解析
+      // btn.dataset.text = daxCode
+
+      // codeEl.innerText =htmlStr;  // innerText 避免代码被解析
+      // btn.dataset.text = htmlStr;
+
+      const daxCode = `SUMX(GROUPBY(
+  FILTER('销量表', IF(ISFILTERED('门店表'[门店名]), '销量表'[销售门店] IN VALUES('门店表'[门店名]), TRUE())),
+  '销量表'[产品编码],
+  "SUM", SUMX(CURRENTGROUP(), '销量表'[销售量])
+), [SUM])`
+
+      const htmlStr = `<div class="box">Hello & Welcome</div>`
+      // ✅ 正确插入显示内容
+      document.querySelector('.html-code code').innerText = daxCode
+
+      // ✅ 设置复制用的原始值
+      document.querySelector('.btn-copy').addEventListener('click', () => {
+        navigator.clipboard.writeText(daxCode).then(() => {
+          alert('复制成功')
+        })
+      })
+
       const { Graph } = window.X6
 
       const graph = new Graph({
