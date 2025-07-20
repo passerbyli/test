@@ -12,10 +12,11 @@ const router = createRouter({
         {
           path: '',
           name: 'home',
-          // component: () => import('../views/HomeView.vue'),
+          component: () => import('../views/HomeView.vue'),
 
           // component: () => import('../views/test4.vue'),
-          component: () => import('../views/TableAssets.vue'),
+          // component: () => import('../views/TableAssets.vue'),
+          // component: () => import('../views/LogView.vue'),
           // component: () => import('../views/test5.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),
           // component: () => import('../views/ExportSqlPage.vue'),

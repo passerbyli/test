@@ -28,6 +28,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { sysReadLogs } from '@/services/configService'
 
 const selectedDate = ref(new Date())
 const logList = ref([])
@@ -55,17 +56,16 @@ const handleCurrentChange = (val) => {
 const loadData = async () => {
     error.value = ''
     logList.value = []
-    if (window.ipc) {
-        await window.ipc.sendInvoke('toMain', { event: 'readLogTable', params: formatDate(selectedDate.value) }).then(res => {
-            if (res.success) {
-                total.value = res.data.length
-                allList.value = res.data
-                logList.value = allList.value.slice((currentPage.value - 1) * pageSize.value, currentPage.value * (pageSize.value))
-            } else {
-                error.value = res.message
-            }
-        })
-    }
+    sysReadLogs({ date: formatDate(selectedDate.value) }).then(res => {
+        if (res.success) {
+            total.value = res.data.length
+            allList.value = res.data
+            logList.value = allList.value.slice((currentPage.value - 1) * pageSize.value, currentPage.value * (pageSize.value))
+        } else {
+            error.value = res.message
+        }
+    })
+
 }
 
 
