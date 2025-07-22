@@ -8,6 +8,9 @@ const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
 
 const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
 
+const commonUtils = require('./common/commonUtil')
+console.log(commonUtils.simpleHtmlToText('<p>Hello <strong>World</strong></p>'))
+
 let win = null
 // 检查是否已存在实例
 const gotTheLock = app.requestSingleInstanceLock()

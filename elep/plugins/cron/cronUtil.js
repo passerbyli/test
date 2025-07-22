@@ -50,7 +50,7 @@ class CronJob {
           }
         },
         null,
-        true, // 立即启动
+        true // 立即启动
       )
       console.log(`[${this.name}] 启动定时任务：${this.cronExpr}`)
     } catch (error) {
@@ -68,7 +68,7 @@ class CronJob {
 }
 
 module.exports = {
-  CronJob,
+  CronJob
 }
 
 if (require.main === module) {

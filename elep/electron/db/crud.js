@@ -40,6 +40,39 @@ function formatTable(dbType, schema, table) {
   }
 }
 
+function formatSql(sql, params = [], dbType = 'postgres') {
+  let paramIndex = 1
+  let finalSql = sql
+  let finalParams = []
+
+  for (const param of params) {
+    if (Array.isArray(param)) {
+      if (param.length === 0) {
+        // 空数组，避免 SQL 语法错误
+        throw new Error('IN 查询参数数组不能为空')
+      }
+
+      if (dbType === 'postgres') {
+        const placeholders = param.map(() => `$${paramIndex++}`)
+        finalSql = finalSql.replace('?', `(${placeholders.join(', ')})`)
+      } else {
+        const placeholders = param.map(() => '?')
+        finalSql = finalSql.replace('?', `(${placeholders.join(', ')})`)
+      }
+      finalParams.push(...param)
+    } else {
+      if (dbType === 'postgres') {
+        finalSql = finalSql.replace('?', `$${paramIndex++}`)
+      } else {
+        finalSql = finalSql.replace('?', '?')
+      }
+      finalParams.push(param)
+    }
+  }
+
+  return { sql: finalSql, params: finalParams }
+}
+
 /**
  * 通用查询
  * @param {*} dbName 数据名称
@@ -50,12 +83,12 @@ function formatTable(dbType, schema, table) {
 async function query(dbName, sql, params = []) {
   const db = getDb(dbName)
   const dbType = config[dbName].type
-
+  const { sql: finalSql, params: finalParams } = formatSql(sql, params, dbType)
   if (dbType === 'postgres') {
-    const res = await db.query(sql, params)
+    const res = await db.query(finalSql, finalParams)
     return res.rows
   } else {
-    const [rows] = await db.execute(sql, params)
+    const [rows] = await db.execute(finalSql, finalParams)
     return rows
   }
 }
