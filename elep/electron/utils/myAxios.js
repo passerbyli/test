@@ -76,6 +76,8 @@ myAxios.interceptors.response.use(
 
 module.exports = myAxios
 
+//
+
 // const csrfToken = res.data.csrfToken
 // const setCookies = res.headers['set-cookie'] || []
 // const subCookie = setCookies.map(c => c.split(';')[0]).join('; ')

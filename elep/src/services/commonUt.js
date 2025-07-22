@@ -52,5 +52,4 @@ const commonUtils = { simpleHtmlToText, multiFieldSort }
 // }
 
 // ESM 导出（Vue / 前端使用）
-// export default commonUtils
-export { simpleHtmlToText }
+export default commonUtils

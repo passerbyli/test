@@ -27,7 +27,7 @@ function mainSendToRender(event, data) {
         currentWindow.webContents.send('fromMain', {
           // 使用可选链操作符
           event: event,
-          data: data,
+          data: data
         })
     }
   } catch (error) {}

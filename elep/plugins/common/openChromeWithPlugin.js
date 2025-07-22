@@ -20,7 +20,7 @@ function openChromeWithPlugin(pluginDir, guidePagePath) {
   const guideUrl = 'file://' + guidePagePath
   const command = `open -na "Google Chrome" --args --load-extension="${pluginEscaped}" "${guideUrl}"`
 
-  exec(command, (err) => {
+  exec(command, err => {
     if (err) {
       console.error('❌ 启动 Chrome 失败:', err.message)
     } else {
