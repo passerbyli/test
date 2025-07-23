@@ -73,6 +73,63 @@ function formatSql(sql, params = [], dbType = 'postgres') {
   return { sql: finalSql, params: finalParams }
 }
 
+function prepareSqlWithParams(sql, params = {}) {
+  const values = []
+  let paramIndex = 1
+
+  // 替换 :paramName 为 $1, $2...
+  const transformedSql = sql.replace(/:([a-zA-Z_][a-zA-Z0-9_]*)/g, (match, key) => {
+    if (!(key in params)) {
+      throw new Error(`Missing parameter: ${key}`)
+    }
+
+    const value = params[key]
+
+    if (Array.isArray(value)) {
+      // 对于 IN (...) 类型的数组，展开为多个 $n
+      const placeholders = value.map(() => `$${paramIndex++}`)
+      values.push(...value)
+      return `(${placeholders.join(', ')})`
+    } else {
+      values.push(value)
+      return `$${paramIndex++}`
+    }
+  })
+
+  return {
+    sql: transformedSql,
+    values
+  }
+}
+
+async function queryNew(dbName, sql, params) {
+  const db = getDb(dbName)
+  const dbType = config[dbName].type
+  const { sql: finalSql, values: finalParams } = prepareSqlWithParams(sql, params)
+
+  if (dbType === 'postgres') {
+    const res = await db.query(finalSql, finalParams)
+    return res.rows
+  } else {
+    const [rows] = await db.execute(finalSql, finalParams)
+    return rows
+  }
+}
+
+const { sql, values } = prepareSqlWithParams(
+  `
+  SELECT * FROM users
+  WHERE name = :name
+    AND age >= :minAge
+    AND status IN :statusList
+`,
+  {
+    name: '李雷',
+    minAge: 18,
+    statusList: ['active', 'pending']
+  }
+)
+
 /**
  * 通用查询
  * @param {*} dbName 数据名称
