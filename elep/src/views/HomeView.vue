@@ -41,7 +41,7 @@
 <script>
 import { FolderOpened } from '@element-plus/icons-vue'
 import { defineComponent, onMounted, toRefs, reactive,ref } from 'vue'
-import { sysOpenchrome, sysOpenDirectory } from '@/services/configService'
+import { sysOpenchrome, sysOpenDirectory } from '../services/configService'
 export default defineComponent({
   name: 'HomeView',
   components: {

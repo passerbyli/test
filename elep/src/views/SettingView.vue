@@ -111,7 +111,7 @@ import { FolderOpened } from '@element-plus/icons-vue'
 import { reactive, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { defaultForm } from '../services/defaultForm.js'
-import { loadConfig, saveConfig } from '../services/configService.js'
+import { loadConfig, saveConfig } from '../services/configService'
 const form = reactive(structuredClone(defaultForm))
 
 const activeTab = ref('global')

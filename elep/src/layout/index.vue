@@ -83,7 +83,7 @@
 <script setup>
 import { ElMessage } from 'element-plus'
 import { Setting } from '@element-plus/icons-vue'
-import { loadConfig } from '../services/configService.js'
+import { loadConfig } from '../services/configService'
 import { defineComponent, h, computed, ref, onMounted, reactive } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 

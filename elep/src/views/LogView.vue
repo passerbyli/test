@@ -28,7 +28,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { sysReadLogs } from '@/services/configService'
+import { sysReadLogs } from '../services/configService'
 
 const selectedDate = ref(new Date())
 const logList = ref([])
