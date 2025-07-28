@@ -2,7 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const axios = require('axios')
 const https = require('https')
-const { getBasePath } = require('../db/configDb')
+const { getBasePath, getConfig, updateConfig } = require('../db/configDb')
 
 function getTodayStr() {
   return new Date().toISOString().split('T')[0]
@@ -69,6 +69,13 @@ myAxios.interceptors.response.use(
     const duration = Date.now() - (config.meta?.startTime || Date.now())
     const tag = config.meta?.tag
 
+    if (config.status == 401) {
+      const _config = getConfig()
+      updateConfig({
+        ..._config,
+        isLogin: false
+      })
+    }
     const lines = [`URL: ${config.method?.toUpperCase()} ${config.url}`, `Duration: ${duration}ms`, `Error: ${error.message}`]
     return Promise.reject(error)
   }
