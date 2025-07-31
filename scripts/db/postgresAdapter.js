@@ -73,6 +73,74 @@ class PostgresAdapter extends BaseAdapter {
   close() {
     this.pool?.end();
   }
+
+  async batchInsert(table, columns, rows) {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      throw new Error("批量插入数据不能为空");
+    }
+    await this.connect();
+
+    const placeholders = [];
+    const values = [];
+
+    rows.forEach((row, rowIndex) => {
+      const rowPlaceholders = columns.map((col, colIndex) => {
+        const placeholderIndex = rowIndex * columns.length + colIndex + 1;
+        values.push(row[col]);
+        return `$${placeholderIndex}`;
+      });
+      placeholders.push(`(${rowPlaceholders.join(", ")})`);
+    });
+
+    const columnList = columns.map((col) => `"${col}"`).join(", ");
+    const sql = `INSERT INTO "${table}" (${columnList}) VALUES ${placeholders.join(
+      ", "
+    )}`;
+
+    this.log("sql", `批量插入SQL: ${sql} [${values.join(", ")}]`);
+    return await this.pool.query(sql, values);
+  }
+
+  async upsert(table, columns, rows, conflictKeys = ["id"]) {
+    if (!Array.isArray(rows) || rows.length === 0) {
+      throw new Error("Upsert 数据不能为空");
+    }
+
+    await this.connect();
+
+    const allColumns = columns.map((c) => `"${c}"`).join(", ");
+    const placeholders = [];
+    const values = [];
+
+    rows.forEach((row, rowIndex) => {
+      const rowPlaceholders = columns.map((col, colIndex) => {
+        const placeholderIndex = rowIndex * columns.length + colIndex + 1;
+        values.push(row[col]);
+        return `$${placeholderIndex}`;
+      });
+      placeholders.push(`(${rowPlaceholders.join(", ")})`);
+    });
+
+    // 构造 ON CONFLICT (id) DO UPDATE SET ...
+    const conflictClause = `ON CONFLICT (${conflictKeys
+      .map((k) => `"${k}"`)
+      .join(", ")}) DO UPDATE SET `;
+    const updateClause = columns
+      .filter((col) => !conflictKeys.includes(col)) // 排除主键
+      .map((col) => `"${col}" = EXCLUDED."${col}"`)
+      .join(", ");
+
+    const sql = `INSERT INTO "${table}" (${allColumns}) VALUES ${placeholders.join(
+      ", "
+    )} ${conflictClause} ${updateClause}`;
+
+    this.log("sql", `UPSERT SQL: ${sql} [${values.join(", ")}]`);
+    return await this.pool.query(sql, values);
+  }
+  async upsertAuto(table, rows, conflictKeys = ["id"]) {
+    const columns = Object.keys(rows[0]);
+    return this.upsert(table, columns, rows, conflictKeys);
+  }
 }
 
 module.exports = PostgresAdapter;
