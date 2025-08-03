@@ -88,7 +88,7 @@ import { defineComponent, h, computed, ref, onMounted, reactive } from 'vue'
 import { RouterView, useRouter, useRoute } from 'vue-router'
 
 import { defaultForm } from '../services/defaultForm.js'
-import { login, changeRole } from '../services/authService.js'
+import { login, changeRole } from '../services/authService.ts'
 import MenuItem from './MenuItem.vue' // 递归组件
 
 
