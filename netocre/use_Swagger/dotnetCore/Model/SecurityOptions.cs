@@ -5,6 +5,27 @@ public class SecurityOptions
     // ====== 大请求限制 ======
     public bool EnableRequestSizeLimit { get; set; } = true;
     public long MaxRequestBodySizeBytes { get; set; } = 256 * 1024; // 256KB
+    
+    
+
+    // —— 新增：按“字段值长度”限制（仅检查第一层）——
+    public bool EnableParamValueLimit { get; set; } = true;
+
+    /// <summary>允许的最大“值”长度（字符数）。超出则按 ParamValueAction 处理。</summary>
+    public int ParamValueMaxLength { get; set; } = 256;
+
+    /// <summary>超限动作：Reject 或 Truncate。GET 一律 Reject（不改URL）。</summary>
+    public string ParamValueAction { get; set; } = "Reject"; // "Reject" | "Truncate"
+
+    /// <summary>POST 检查的内容类型（仅 JSON / 表单），逗号分隔，大小写不敏感。</summary>
+    public string ParamValueContentTypes { get; set; } =
+        "application/json,application/x-www-form-urlencoded";
+
+    /// <summary>是否检查 GET 查询参数</summary>
+    public bool ParamValueCheckGet { get; set; } = true;
+
+    /// <summary>是否检查 POST 参数</summary>
+    public bool ParamValueCheckPost { get; set; } = true;
 
     // ====== XSS 请求过滤 ======
     public bool EnableXssRequestFilter { get; set; } = true;

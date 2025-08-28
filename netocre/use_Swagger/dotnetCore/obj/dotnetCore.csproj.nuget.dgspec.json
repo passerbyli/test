@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/lihaomin/projects/GitHub/test/netocre/useSwagger/dotnetCore/dotnetCore.csproj": {}
+    "/Users/lihaomin/projects/GitHub/test/netocre/use_Swagger/dotnetCore/dotnetCore.csproj": {}
   },
   "projects": {
-    "/Users/lihaomin/projects/GitHub/test/netocre/useSwagger/dotnetCore/dotnetCore.csproj": {
+    "/Users/lihaomin/projects/GitHub/test/netocre/use_Swagger/dotnetCore/dotnetCore.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/lihaomin/projects/GitHub/test/netocre/useSwagger/dotnetCore/dotnetCore.csproj",
+        "projectUniqueName": "/Users/lihaomin/projects/GitHub/test/netocre/use_Swagger/dotnetCore/dotnetCore.csproj",
         "projectName": "dotnetCore",
-        "projectPath": "/Users/lihaomin/projects/GitHub/test/netocre/useSwagger/dotnetCore/dotnetCore.csproj",
+        "projectPath": "/Users/lihaomin/projects/GitHub/test/netocre/use_Swagger/dotnetCore/dotnetCore.csproj",
         "packagesPath": "/Users/lihaomin/.nuget/packages/",
-        "outputPath": "/Users/lihaomin/projects/GitHub/test/netocre/useSwagger/dotnetCore/obj/",
+        "outputPath": "/Users/lihaomin/projects/GitHub/test/netocre/use_Swagger/dotnetCore/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/lihaomin/.nuget/NuGet/NuGet.Config"
