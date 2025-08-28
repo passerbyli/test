@@ -24,4 +24,3 @@ musit-app/package-lock.json
 .DS_Store
 /bin
 /obj
-*.log
