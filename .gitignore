@@ -22,5 +22,8 @@ dist
 musit-app/package-lock.json
 /clone/cloned/*
 .DS_Store
-/bin
-/obj
+*/bin
+*/obj
+/netocre/use_Swagger/dotnetCore/bin
+/netocre/use_Swagger/dotnetCore/obj
+/netocre/use_Swagger/dotnetCore/obj/Debug

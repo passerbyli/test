@@ -47,16 +47,14 @@ namespace dotnetCore.Controllers
         [HttpPost]
         [Route("createTask")]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        public IEnumerable<WeatherForecast> CreateTask(CusTask cusTask)
+        public IList<CusTask> CreateTask(CusTask cusTask)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-                {
-                    Date = DateTime.Now.AddDays(index),
-                    TemperatureC = rng.Next(-20, 55),
-                    Summary = cusTask.CreateTime
-                })
-                .ToArray();
+            var cus = new List<CusTask>();
+            cus.Add(new CusTask()
+            {
+                Title="aaa"
+            });
+            return cus;
         }
 
 
