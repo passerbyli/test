@@ -21,3 +21,7 @@ dist
 /musit-app/out
 musit-app/package-lock.json
 /clone/cloned/*
+.DS_Store
+/bin
+/obj
+*.log
