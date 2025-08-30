@@ -57,4 +57,11 @@ public class SecurityOptions
 
     // 响应头安全
     public bool EnableSecurityHeaders { get; set; } = true;
+    
+    
+    /// <summary>数值允许的最小值（含）。</summary>
+    public double ParamNumericMin { get; set; } = -1_000_000_000_000d; // -1e12
+
+    /// <summary>数值允许的最大值（含）。</summary>
+    public double ParamNumericMax { get; set; } =  1_000_000_000_000d; //  1e12
 }
