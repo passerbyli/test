@@ -9,6 +9,8 @@ using System.IO;
 using System.Text.Encodings.Web;
 using dotnetCore.Middleware;
 using dotnetCore.Model;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 namespace dotnetCore
@@ -41,14 +43,48 @@ namespace dotnetCore
             });
 
 
-
             services.AddControllers()
                 .AddJsonOptions(o =>
-            {
-                // 响应出站的 HTML 编码（降低反射型 XSS 风险）
-                o.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                // 也可以改为 HtmlEncoder.Default 根据需要
-            });
+                {
+                    // 响应出站的 HTML 编码（降低反射型 XSS 风险）
+                    o.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+                    // 也可以改为 HtmlEncoder.Default 根据需要
+                }).ConfigureApiBehaviorOptions(opt =>
+                {
+                    opt.InvalidModelStateResponseFactory = ctx =>
+                    {
+                        // var problem = new ValidationProblemDetails
+                        // {
+                        //     Status = StatusCodes.Status400BadRequest,
+                        //     Title = "Invalid request.",
+                        //     Detail = "Request validation failed.",
+                        //     Instance = ctx.HttpContext.Request.Path
+                        // };
+                        //
+                        // // 自定义扩展字段
+                        // problem.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
+                        // problem.Extensions["code"] = "validation_failed";
+                        //
+                        // // 注意：不再把 ctx.ModelState.Errors 写入响应，避免输出底层 JSON 异常信息
+                        // return new BadRequestObjectResult(problem)
+                        // {
+                        //     ContentTypes = { "application/problem+json" }
+                        // };
+                        
+                        
+                        var result = new
+                        {
+                            status = 500,
+                            error = "参数错误"
+                        };
+
+                        // 固定返回 200
+                        return new OkObjectResult(result)
+                        {
+                            ContentTypes = { "application/json" }
+                        };
+                    };
+                });
 
             services.AddSwaggerGen(c =>
             {
@@ -58,24 +94,27 @@ namespace dotnetCore
                     Version = "V1",
                     Title = $"{ApiName} 接口文档——Netcore 3.0",
                     Description = $"{ApiName} HTTP API V1",
-                    Contact = new OpenApiContact { Name = ApiName, Email = "dotnetCore@xxx.com", Url = new Uri("https://www.baidu.com") },
+                    Contact = new OpenApiContact
+                        { Name = ApiName, Email = "dotnetCore@xxx.com", Url = new Uri("https://www.baidu.com") },
                     License = new OpenApiLicense { Name = ApiName, Url = new Uri("https://www.baidu.com") }
                 });
                 c.OrderActionsBy(o => o.RelativePath);
 
-                
+
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"dotnetCore.xml");
                 c.IncludeXmlComments(xmlPath, true);
 
 
                 #region Token绑定到ConfigureServices
+
                 c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
                     Description = "JWT授权(数据将在请求头中进行传输) 直接在下框中输入Bearer {token}（注意两者之间是一个空格）\"",
-                    Name = "Authorization",//jwt默认的参数名称
-                    In = ParameterLocation.Header,//jwt默认存放Authorization信息的位置(请求头中)
+                    Name = "Authorization", //jwt默认的参数名称
+                    In = ParameterLocation.Header, //jwt默认存放Authorization信息的位置(请求头中)
                     Type = SecuritySchemeType.ApiKey
                 });
+
                 #endregion
             });
 
@@ -93,7 +132,8 @@ namespace dotnetCore
 
             app.UseSwagger();
 
-            app.UseSwaggerUI(c => {
+            app.UseSwaggerUI(c =>
+            {
                 c.SwaggerEndpoint($"/swagger/V1/swagger.json", $"{ApiName} V1");
 
                 //路径配置，设置为空，表示直接在根域名（localhost:8001）访问该文件,注意localhost:8001/swagger是访问不到的，去launchSettings.json把launchUrl去掉，如果你想换一个路径，直接写名字即可，比如直接写c.RoutePrefix = "doc";
@@ -101,10 +141,10 @@ namespace dotnetCore
             });
 
             app.UseHttpsRedirection();
-            
-            
+
+
             app.UseSecurityPipeline(); // 一行启用安全管道
-            
+
             // 顺序：大小限制 > XSS 过滤 > 路由
             // app.UseMiddleware<RequestSizeLimitMiddleware>();
             // app.UseMiddleware<XssRequestFilterMiddleware>();
@@ -113,10 +153,7 @@ namespace dotnetCore
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

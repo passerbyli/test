@@ -56,6 +56,19 @@ namespace dotnetCore.Controllers
             });
             return cus;
         }
+        
+        [HttpPost]
+        [Route("createTasks")]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        public IList<CusTask> CreateTasks(List<CusTask> list)
+        {
+            var cus = new List<CusTask>();
+            cus.Add(new CusTask()
+            {
+                Title="aaa"
+            });
+            return cus;
+        }
 
 
     }
