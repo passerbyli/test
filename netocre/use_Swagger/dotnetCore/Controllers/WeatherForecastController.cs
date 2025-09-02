@@ -29,7 +29,6 @@ namespace dotnetCore.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetWeather")]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
@@ -44,9 +43,13 @@ namespace dotnetCore.Controllers
 
 
         
+        /// <summary>
+        /// 创建任务
+        /// </summary>
+        /// <param name="cusTask"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("createTask")]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public IList<CusTask> CreateTask(CusTask cusTask)
         {
             var cus = new List<CusTask>();
@@ -57,9 +60,13 @@ namespace dotnetCore.Controllers
             return cus;
         }
         
+        /// <summary>
+        /// 批量创建任务
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("createTasks")]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public IList<CusTask> CreateTasks(List<CusTask> list)
         {
             var cus = new List<CusTask>();

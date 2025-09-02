@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
 using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using dotnetCore.Middleware;
 using dotnetCore.Model;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,7 @@ namespace dotnetCore
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // 1) °ó¶¨ Security ½Úµãµ½ Options
+            // 1) ç»‘å®š Security èŠ‚ç‚¹åˆ° Options
             services.Configure<SecurityOptions>(Configuration.GetSection("Security"));
 
             services.Configure<IISServerOptions>(options =>
@@ -43,12 +44,15 @@ namespace dotnetCore
             });
 
 
-            services.AddControllers()
+            services.AddControllers(options =>
+                {
+                    options.Filters.Add<CustomerExceptionFilter>();
+                })
                 .AddJsonOptions(o =>
                 {
-                    // ÏìÓ¦³öÕ¾µÄ HTML ±àÂë£¨½µµÍ·´ÉäÐÍ XSS ·çÏÕ£©
+                    // å“åº”å‡ºç«™çš„ HTML ç¼–ç ï¼ˆé™ä½Žåå°„åž‹ XSS é£Žé™©ï¼‰
                     o.JsonSerializerOptions.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
-                    // Ò²¿ÉÒÔ¸ÄÎª HtmlEncoder.Default ¸ù¾ÝÐèÒª
+                    // ä¹Ÿå¯ä»¥æ”¹ä¸º HtmlEncoder.Default æ ¹æ®éœ€è¦
                 }).ConfigureApiBehaviorOptions(opt =>
                 {
                     opt.InvalidModelStateResponseFactory = ctx =>
@@ -61,11 +65,11 @@ namespace dotnetCore
                         //     Instance = ctx.HttpContext.Request.Path
                         // };
                         //
-                        // // ×Ô¶¨ÒåÀ©Õ¹×Ö¶Î
+                        // // è‡ªå®šä¹‰æ‰©å±•å­—æ®µ
                         // problem.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
                         // problem.Extensions["code"] = "validation_failed";
                         //
-                        // // ×¢Òâ£º²»ÔÙ°Ñ ctx.ModelState.Errors Ð´ÈëÏìÓ¦£¬±ÜÃâÊä³öµ×²ã JSON Òì³£ÐÅÏ¢
+                        // // æ³¨æ„ï¼šä¸å†æŠŠ ctx.ModelState.Errors å†™å…¥å“åº”ï¼Œé¿å…è¾“å‡ºåº•å±‚ JSON å¼‚å¸¸ä¿¡æ¯
                         // return new BadRequestObjectResult(problem)
                         // {
                         //     ContentTypes = { "application/problem+json" }
@@ -75,10 +79,10 @@ namespace dotnetCore
                         var result = new
                         {
                             status = 500,
-                            error = "²ÎÊý´íÎó"
+                            error = "params error"
                         };
 
-                        // ¹Ì¶¨·µ»Ø 200
+                        // å›ºå®šè¿”å›ž 200
                         return new OkObjectResult(result)
                         {
                             ContentTypes = { "application/json" }
@@ -90,35 +94,60 @@ namespace dotnetCore
             {
                 c.SwaggerDoc("V1", new OpenApiInfo
                 {
-                    // {ApiName} ¶¨Òå³ÉÈ«¾Ö±äÁ¿£¬·½±ãÐÞ¸Ä
+                    // {ApiName} å®šä¹‰æˆå…¨å±€å˜é‡ï¼Œæ–¹ä¾¿ä¿®æ”¹
                     Version = "V1",
-                    Title = $"{ApiName} ½Ó¿ÚÎÄµµ¡ª¡ªNetcore 3.0",
+                    Title = $"{ApiName} æŽ¥å£æ–‡æ¡£â€•â€•Netcore 3.0",
                     Description = $"{ApiName} HTTP API V1",
                     Contact = new OpenApiContact
                         { Name = ApiName, Email = "dotnetCore@xxx.com", Url = new Uri("https://www.baidu.com") },
                     License = new OpenApiLicense { Name = ApiName, Url = new Uri("https://www.baidu.com") }
                 });
                 c.OrderActionsBy(o => o.RelativePath);
-
+                c.OperationFilter<SingleJsonContentOperationFilter>();
 
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"dotnetCore.xml");
                 c.IncludeXmlComments(xmlPath, true);
 
 
-                #region Token°ó¶¨µ½ConfigureServices
+                c.CustomOperationIds(api =>
+                {
+                    // æŽ§åˆ¶å™¨å
+                    var ctrl = api.ActionDescriptor.RouteValues.TryGetValue("controller", out var vCtrl) ? vCtrl : "Unknown";
+                    // Action åæˆ–æ˜¾å¼ Nameï¼ˆä¼˜å…ˆè·¯ç”± Nameï¼‰
+                    var action = api.ActionDescriptor.RouteValues.TryGetValue("action", out var vAct) ? vAct : null;
+                    var http = api.HttpMethod?.ToLowerInvariant() ?? "http";
+
+                    // è·¯å¾„é‡Œå¯èƒ½æœ‰ {id} ç­‰ï¼Œå¸¦ä¸Šå¯å¢žå¼ºå”¯ä¸€æ€§ï¼ˆå¯é€‰ï¼‰
+                    var path = api.RelativePath // e.g. "users/{id}"
+                        ?.Replace("/", "_")
+                        ?.Replace("{", "")
+                        ?.Replace("}", "")
+                        ?.Replace("-", "_");
+
+                    // ä½ å¯ä»¥æŒ‰éœ€è£å‰ªï¼šå¸¸è§æ˜¯ Controller + Http + Action
+                    // ä¸ºç¡®ä¿å”¯ä¸€ï¼Œè¿™é‡Œå†æ‹¼ä¸Šè§„èŒƒåŒ–åŽçš„ path
+                    var baseId = $"{ctrl}_{http}_{(action ?? "op")}_{path}".TrimEnd('_');
+
+                    // æ¸…ç†éžæ³•å­—ç¬¦ï¼Œè½¬é©¼å³°/è›‡å½¢éƒ½è¡Œ
+                    var opId = Regex.Replace(baseId, @"[^A-Za-z0-9_]", "_");
+                    return opId;
+                });
+                
+                
+                #region Tokenç»‘å®šåˆ°ConfigureServices
 
                 c.AddSecurityDefinition("oauth2", new OpenApiSecurityScheme
                 {
-                    Description = "JWTÊÚÈ¨(Êý¾Ý½«ÔÚÇëÇóÍ·ÖÐ½øÐÐ´«Êä) Ö±½ÓÔÚÏÂ¿òÖÐÊäÈëBearer {token}£¨×¢ÒâÁ½ÕßÖ®¼äÊÇÒ»¸ö¿Õ¸ñ£©\"",
-                    Name = "Authorization", //jwtÄ¬ÈÏµÄ²ÎÊýÃû³Æ
-                    In = ParameterLocation.Header, //jwtÄ¬ÈÏ´æ·ÅAuthorizationÐÅÏ¢µÄÎ»ÖÃ(ÇëÇóÍ·ÖÐ)
+                    Description = "JWTæŽˆæƒ(æ•°æ®å°†åœ¨è¯·æ±‚å¤´ä¸­è¿›è¡Œä¼ è¾“) ç›´æŽ¥åœ¨ä¸‹æ¡†ä¸­è¾“å…¥Bearer {token}ï¼ˆæ³¨æ„ä¸¤è€…ä¹‹é—´æ˜¯ä¸€ä¸ªç©ºæ ¼ï¼‰\"",
+                    Name = "Authorization", //jwté»˜è®¤çš„å‚æ•°åç§°
+                    In = ParameterLocation.Header, //jwté»˜è®¤å­˜æ”¾Authorizationä¿¡æ¯çš„ä½ç½®(è¯·æ±‚å¤´ä¸­)
                     Type = SecuritySchemeType.ApiKey
                 });
 
                 #endregion
             });
 
-            // HtmlEncoder ¹©ÖÐ¼ä¼þÊ¹ÓÃ£¨¼òµ¥ÇåÏ´Ê±£©
+            // HtmlEncoder ä¾›ä¸­é—´ä»¶ä½¿ç”¨ï¼ˆç®€å•æ¸…æ´—æ—¶ï¼‰
             services.AddSingleton(HtmlEncoder.Default);
         }
 
@@ -136,16 +165,16 @@ namespace dotnetCore
             {
                 c.SwaggerEndpoint($"/swagger/V1/swagger.json", $"{ApiName} V1");
 
-                //Â·¾¶ÅäÖÃ£¬ÉèÖÃÎª¿Õ£¬±íÊ¾Ö±½ÓÔÚ¸ùÓòÃû£¨localhost:8001£©·ÃÎÊ¸ÃÎÄ¼þ,×¢Òâlocalhost:8001/swaggerÊÇ·ÃÎÊ²»µ½µÄ£¬È¥launchSettings.json°ÑlaunchUrlÈ¥µô£¬Èç¹ûÄãÏë»»Ò»¸öÂ·¾¶£¬Ö±½ÓÐ´Ãû×Ö¼´¿É£¬±ÈÈçÖ±½ÓÐ´c.RoutePrefix = "doc";
+                //è·¯å¾„é…ç½®ï¼Œè®¾ç½®ä¸ºç©ºï¼Œè¡¨ç¤ºç›´æŽ¥åœ¨æ ¹åŸŸåï¼ˆlocalhost:8001ï¼‰è®¿é—®è¯¥æ–‡ä»¶,æ³¨æ„localhost:8001/swaggeræ˜¯è®¿é—®ä¸åˆ°çš„ï¼ŒåŽ»launchSettings.jsonæŠŠlaunchUrlåŽ»æŽ‰ï¼Œå¦‚æžœä½ æƒ³æ¢ä¸€ä¸ªè·¯å¾„ï¼Œç›´æŽ¥å†™åå­—å³å¯ï¼Œæ¯”å¦‚ç›´æŽ¥å†™c.RoutePrefix = "doc";
                 c.RoutePrefix = "";
             });
 
             app.UseHttpsRedirection();
 
 
-            app.UseSecurityPipeline(); // Ò»ÐÐÆôÓÃ°²È«¹ÜµÀ
+            app.UseSecurityPipeline(); // ä¸€è¡Œå¯ç”¨å®‰å…¨ç®¡é“
 
-            // Ë³Ðò£º´óÐ¡ÏÞÖÆ > XSS ¹ýÂË > Â·ÓÉ
+            // é¡ºåºï¼šå¤§å°é™åˆ¶ > XSS è¿‡æ»¤ > è·¯ç”±
             // app.UseMiddleware<RequestSizeLimitMiddleware>();
             // app.UseMiddleware<XssRequestFilterMiddleware>();
 
