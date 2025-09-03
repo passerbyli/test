@@ -57,25 +57,7 @@ namespace dotnetCore
                 {
                     opt.InvalidModelStateResponseFactory = ctx =>
                     {
-                        // var problem = new ValidationProblemDetails
-                        // {
-                        //     Status = StatusCodes.Status400BadRequest,
-                        //     Title = "Invalid request.",
-                        //     Detail = "Request validation failed.",
-                        //     Instance = ctx.HttpContext.Request.Path
-                        // };
-                        //
-                        // // 自定义扩展字段
-                        // problem.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
-                        // problem.Extensions["code"] = "validation_failed";
-                        //
-                        // // 注意：不再把 ctx.ModelState.Errors 写入响应，避免输出底层 JSON 异常信息
-                        // return new BadRequestObjectResult(problem)
-                        // {
-                        //     ContentTypes = { "application/problem+json" }
-                        // };
-                        
-                        
+
                         var result = new
                         {
                             status = 500,
@@ -108,7 +90,9 @@ namespace dotnetCore
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, $"dotnetCore.xml");
                 c.IncludeXmlComments(xmlPath, true);
 
+                
 
+                c.AddServer(new OpenApiServer(){Url ="http://localhost:5001",Description = "本地"});
                 c.CustomOperationIds(api =>
                 {
                     // 控制器名
@@ -167,6 +151,7 @@ namespace dotnetCore
 
                 //路径配置，设置为空，表示直接在根域名（localhost:8001）访问该文件,注意localhost:8001/swagger是访问不到的，去launchSettings.json把launchUrl去掉，如果你想换一个路径，直接写名字即可，比如直接写c.RoutePrefix = "doc";
                 c.RoutePrefix = "";
+                
             });
 
             app.UseHttpsRedirection();

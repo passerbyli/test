@@ -1,93 +1,76 @@
 #!/usr/bin/env node
 /**
- * 读取当前目录 ./swagger.json，解析后写入 PostgreSQL（两张表：api_endpoint + api_field）
+ * openGauss 导入脚本（两表：api_endpoint / api_field）
+ * 约束：
+ *  - 不做建表/初始化
+ *  - api_endpoint 含字段：service_name, app_id
+ *  - main 入参：--service_name --app_id --route_prefix
+ *  - path = route_prefix + 原 swagger path（规范化拼接）
+ *  - 以 (method, path) 判断存在：存在则先删除 endpoint（级联删字段），再插入新数据
  *
  * 依赖：
  *   npm i pg
- *
- * 配置：
- *   db.config.json 同目录（见示例）
  */
 
 const fs = require('fs')
 const path = require('path')
 const { Pool } = require('pg')
 
-// ---------- 配置 ----------
-const INPUT = path.resolve(process.cwd(), 'swagger.json')
-const CONF_PATH = path.resolve(process.cwd(), 'db.config.json')
+// ---------- 读取入参 ----------
+const args = require('node:process').argv.slice(2)
+function getArg(name, def = '') {
+  const idx = args.indexOf(`--${name}`)
+  return idx >= 0 && args[idx + 1] ? args[idx + 1] : def
+}
+// const SERVICE_NAME = getArg('service_name')
+// const APP_ID = getArg('app_id')
+// const ROUTE_PREFIX = getArg('route_prefix', '')
+
+const SERVICE_NAME = 'minservice'
+const APP_ID = 'app_id'
+const ROUTE_PREFIX = '/api/'
+
+if (!SERVICE_NAME || !APP_ID) {
+  console.error('缺少必需入参：--service_name 与 --app_id')
+  process.exit(1)
+}
+
+const INPUT = path.join(__dirname, 'swagger.json')
+const CONF_PATH = path.join(__dirname, './db.config.json')
 
 if (!fs.existsSync(CONF_PATH)) {
-  console.error('缺少 db.config.json，请先创建配置文件。')
+  console.error('缺少 db.config.json')
   process.exit(1)
 }
+if (!fs.existsSync(INPUT)) {
+  console.error('缺少 swagger.json')
+  process.exit(1)
+}
+
 const CONF = JSON.parse(fs.readFileSync(CONF_PATH, 'utf-8'))
 const pool = new Pool(CONF.postgres)
-
-if (!fs.existsSync(INPUT)) {
-  console.error('未找到 swagger.json，请放在当前目录。')
-  process.exit(1)
-}
 const DOC = JSON.parse(fs.readFileSync(INPUT, 'utf-8'))
 
-// ---------- SQL ----------
-const SQL = {
-  ensure: `
-  CREATE TABLE IF NOT EXISTS api_endpoint (
-    id           BIGSERIAL PRIMARY KEY,
-    method       VARCHAR(10) NOT NULL,
-    path         TEXT        NOT NULL,
-    name         TEXT        NOT NULL,
-    summary      TEXT        NULL,
-    description  TEXT        NULL,
-    operation_id TEXT        NULL,
-    tag          TEXT        NULL,
-    UNIQUE (method, path)
-  );
-
-  CREATE TABLE IF NOT EXISTS api_field (
-    id          BIGSERIAL PRIMARY KEY,
-    api_id      BIGINT      NOT NULL REFERENCES api_endpoint(id) ON DELETE CASCADE,
-    io          VARCHAR(16) NOT NULL,
-    location    VARCHAR(16) NOT NULL,
-    field_path  TEXT        NOT NULL,
-    level       INT         NOT NULL DEFAULT 1,
-    type        TEXT        NULL,
-    required    BOOLEAN     NOT NULL DEFAULT FALSE,
-    description TEXT        NULL,
-    possible    TEXT        NULL
-  );
-
-  CREATE INDEX IF NOT EXISTS idx_field_api ON api_field(api_id);
-  CREATE INDEX IF NOT EXISTS idx_field_api_io ON api_field(api_id, io);
-  `,
-  upsertEndpoint: `
-    INSERT INTO api_endpoint (method, path, name, summary, description, operation_id, tag)
-    VALUES ($1,$2,$3,$4,$5,$6,$7)
-    ON CONFLICT (method, path) DO UPDATE SET
-      name = EXCLUDED.name,
-      summary = EXCLUDED.summary,
-      description = EXCLUDED.description,
-      operation_id = EXCLUDED.operation_id,
-      tag = EXCLUDED.tag
-    RETURNING id
-  `,
-  deleteFields: `DELETE FROM api_field WHERE api_id=$1`,
-  insertField: `
-    INSERT INTO api_field (api_id, io, location, field_path, level, type, required, description, possible)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-  `
-}
-
-// ---------- 解析工具 ----------
+// ---------- 工具 ----------
 const methods = ['get', 'post', 'put', 'delete', 'patch', 'head', 'options', 'trace']
 const isOAS3 = !!DOC.openapi
 const arrayify = x => (Array.isArray(x) ? x : x ? [x] : [])
 
+function joinPath(prefix, p) {
+  const a = String(prefix || '')
+  const b = String(p || '')
+  if (!a && !b) return '/'
+  if (!a) return b.startsWith('/') ? b : '/' + b
+  if (!b) return a.startsWith('/') ? a : '/' + a
+  const left = a.endsWith('/') ? a.slice(0, -1) : a
+  const right = b.startsWith('/') ? b : '/' + b
+  return left + right
+}
+
 function resolveRef(node) {
   if (!node || typeof node !== 'object' || !node.$ref) return node
   const ref = node.$ref
-  if (!ref.startsWith('#/')) return node // 不解析外部
+  if (!ref.startsWith('#/')) return node // 不解析外部文件
   const parts = ref.slice(2).split('/')
   let cur = DOC
   for (const p of parts) {
@@ -127,9 +110,9 @@ function flattenProperties(schema, parent = '', level = 1, rows = []) {
       description: prop.description || '',
       possible: Array.isArray(prop.enum) ? prop.enum.map(String).join(',') : ''
     })
-    // 嵌套 object
+    // object 嵌套
     if (prop.type === 'object' || prop.properties) flattenProperties(prop, field, level + 1, rows)
-    // 数组对象
+    // array<object> 嵌套
     if (prop.type === 'array') {
       const it = resolveRef(prop.items) || {}
       if (it.type === 'object' || it.properties) flattenProperties(it, field + '[]', level + 1, rows)
@@ -138,6 +121,12 @@ function flattenProperties(schema, parent = '', level = 1, rows = []) {
   return rows
 }
 
+/*
+ * 收集 path + operation 的 parameters
+ * @param {Object} pathItem 路径项
+ * @param {Object} op 操作项
+ * @returns {Array<Object>} 参数列表
+ */
 function collectParameters(pathItem, op) {
   const list = [...arrayify(pathItem.parameters), ...arrayify(op.parameters)].filter(Boolean)
   return list.map(p => ({
@@ -148,7 +137,7 @@ function collectParameters(pathItem, op) {
     type: schemaToType(p.schema) || p.type || '',
     required: !!p.required,
     description: p.description || '',
-    possible: '' // 参数级别一般不直接挂 enum，这里如需可扩展
+    possible: ''
   }))
 }
 
@@ -185,41 +174,65 @@ function extractResponseBodySchema(op) {
   return null
 }
 
+// ---------- SQL（不做初始化、不用 ON CONFLICT） ----------
+const SQL = {
+  selectEndpointId: `SELECT id FROM api_endpoint WHERE method=$1 AND path=$2 LIMIT 1`,
+  deleteEndpointById: `DELETE FROM api_endpoint WHERE id=$1`, // 依赖 ON DELETE CASCADE 清理 api_field
+  insertEndpoint: `
+    INSERT INTO api_endpoint
+      (method, path, name, summary, description, operation_id, tag, service_name, app_id)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+    RETURNING id
+  `,
+  insertField: `
+    INSERT INTO api_field
+      (api_id, io, location, field_path, level, type, required, description, possible)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+  `
+}
+
 // ---------- 主流程 ----------
 ;(async function main() {
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
-    await client.query(SQL.ensure)
 
     const paths = DOC.paths || {}
     let count = 0
 
-    for (const [p, pathItem] of Object.entries(paths)) {
+    for (const [rawPath, pathItem] of Object.entries(paths)) {
       for (const m of methods) {
         if (!pathItem[m]) continue
         const op = pathItem[m]
 
-        const name = op.summary || op.operationId || `${m.toUpperCase()} ${p}`
-        const meta = {
-          name,
-          summary: op.summary || '',
-          description: op.description || '',
-          operation_id: op.operationId || '',
-          tag: Array.isArray(op.tags) && op.tags.length ? op.tags[0] : ''
+        const name = op.summary || op.operationId || `${m.toUpperCase()} ${rawPath}`
+        const pathWithPrefix = joinPath(ROUTE_PREFIX, rawPath)
+        const methodUpper = m.toUpperCase()
+
+        // 先查是否存在
+        const existed = await client.query(SQL.selectEndpointId, [methodUpper, pathWithPrefix])
+        if (existed.rowCount > 0) {
+          const oldId = existed.rows[0].id
+          // 直接删除 endpoint（依赖外键级联清理 api_field）
+          await client.query(SQL.deleteEndpointById, [oldId])
         }
 
-        // upsert endpoint
-        const res = await client.query(SQL.upsertEndpoint, [m.toUpperCase(), p, meta.name, meta.summary, meta.description, meta.operation_id, meta.tag])
-        const apiId = res.rows[0].id
+        // 插入新 endpoint
+        const summary = op.summary || ''
+        const description = op.description || ''
+        const operationId = op.operationId || ''
+        const tag = Array.isArray(op.tags) && op.tags.length ? op.tags[0] : ''
 
-        // fields
+        const insertRes = await client.query(SQL.insertEndpoint, [methodUpper, pathWithPrefix, name, summary, description, operationId, tag, SERVICE_NAME, APP_ID])
+        const apiId = insertRes.rows[0].id
+
+        // 组装字段 rows
         const fields = []
 
-        // 1) 参数（query/path/header/cookie）
+        // 参数
         fields.push(...collectParameters(pathItem, op))
 
-        // 2) 请求体
+        // 请求体
         const reqSchema = extractRequestBodySchema(op)
         if (reqSchema) {
           const rows = flattenProperties(reqSchema)
@@ -237,7 +250,7 @@ function extractResponseBodySchema(op) {
           )
         }
 
-        // 3) 响应体
+        // 响应体
         const respSchema = extractResponseBodySchema(op)
         if (respSchema) {
           const rows = flattenProperties(respSchema)
@@ -255,10 +268,7 @@ function extractResponseBodySchema(op) {
           )
         }
 
-        // 覆盖写入子表
-        if (CONF.truncate_fields_before_upsert !== false) {
-          await client.query(SQL.deleteFields, [apiId])
-        }
+        // 写字段
         for (const f of fields) {
           await client.query(SQL.insertField, [apiId, f.io, f.location, f.field_path, f.level, f.type, f.required, f.description, f.possible])
         }
@@ -269,10 +279,10 @@ function extractResponseBodySchema(op) {
     }
 
     await client.query('COMMIT')
-    console.log(`✅ 完成：写入/更新 ${count} 个接口，已落库到 api_endpoint / api_field。`)
+    console.log(`✅ 完成：共写入 ${count} 个接口到 api_endpoint / api_field。`)
   } catch (e) {
     await client.query('ROLLBACK')
-    console.error('❌ 失败：', e.message || e)
+    console.error('❌ 导入失败：', e.code ? `${e.code} - ${e.message}` : e)
     process.exit(1)
   } finally {
     client.release()
