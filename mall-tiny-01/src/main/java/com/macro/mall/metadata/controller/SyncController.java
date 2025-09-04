@@ -16,6 +16,7 @@ public class SyncController {
     @Autowired
     private SyncService syncService;
 
+
     @PostMapping("/all")
     public String syncAll(@RequestParam(defaultValue = "1000") int batchSize) {
         syncService.syncAll(batchSize);
