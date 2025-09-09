@@ -19,7 +19,7 @@ pnpm-lock.yaml
 dist
 *.xlsx
 /musit-app/out
-musit-app/package-lock.json
+*package-lock.json
 /clone/cloned/*
 .DS_Store
 */bin
@@ -27,3 +27,5 @@ musit-app/package-lock.json
 /netocre/use_Swagger/dotnetCore/bin
 /netocre/use_Swagger/dotnetCore/obj
 /netocre/use_Swagger/dotnetCore/obj/Debug
+.vscode
+*.pnpm-lock.yaml
