@@ -9,6 +9,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
+using dotnetCore.Manager;
 using dotnetCore.Middleware;
 using dotnetCore.Model;
 using Microsoft.AspNetCore.Http;
@@ -35,6 +36,7 @@ namespace dotnetCore
             // 1) 绑定 Security 节点到 Options
             services.Configure<SecurityOptions>(Configuration.GetSection("Security"));
 
+            services.Configure<AppConfig>(Configuration.GetSection("AppConfig"));
             services.Configure<IISServerOptions>(options =>
             {
                 options.MaxRequestBodySize = 10 * 1024; // 10KB
