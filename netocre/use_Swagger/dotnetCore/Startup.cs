@@ -6,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using dotnetCore.Middleware;
@@ -13,6 +14,7 @@ using dotnetCore.Model;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Options;
 
 namespace dotnetCore
 {
@@ -133,6 +135,28 @@ namespace dotnetCore
 
             // HtmlEncoder 供中间件使用（简单清洗时）
             services.AddSingleton(HtmlEncoder.Default);
+            
+            /********/
+            services.Configure<ParamAuthOptions>(Configuration.GetSection("ParamAuth"));
+
+            // services.AddHttpClient("ParamAuthClient", (sp, c) =>
+            //     {
+            //         var opt = sp.GetRequiredService<IOptionsMonitor<ParamAuthOptions>>().CurrentValue;
+            //         c.BaseAddress = new Uri(opt.AuthServiceBaseUrl ?? "https://authz.example.com");
+            //         c.Timeout = TimeSpan.FromSeconds(5);
+            //     })
+            //     .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            //     {
+            //         SslProtocols = System.Security.Authentication.SslProtocols.Tls12
+            //     });
+
+            services.AddScoped<IParamAuthorizer, HttpParamAuthorizer>();
+
+            services.AddControllers(options =>
+            {
+                // 全局注册唯一过滤器
+                options.Filters.Add<ParamAuthGlobalFilter>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

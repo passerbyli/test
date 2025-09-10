@@ -29,6 +29,8 @@ namespace dotnetCore.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("GetWeather")]
+        [HttpPost("create")]
+        [BindAndPick(typeof(WeatherForecast), AuthFieldKind.BusinessId)]
         public IEnumerable<WeatherForecast> Get()
         {
             var rng = new Random();
