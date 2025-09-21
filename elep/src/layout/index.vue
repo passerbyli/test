@@ -112,7 +112,7 @@ onMounted(async () => {
 
     menuPosition.value = config.global.menuPosition || 'top'
     form.value = Object.assign(form, defaultForm, config.global.auth)
-    if (config.global.auth.username && config.global.auth.password && config.global.auth.role) {
+    if (config.global.auth?.username && config.global.auth.password && config.global.auth.role) {
         const res = await login(config.global.auth.username, config.global.auth.password, config.global.auth.role)
         handleLogin2(res)
     }

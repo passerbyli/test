@@ -16,8 +16,8 @@ function registerAuthIpc(ipcMain) {
     updateConfig({
       global: {
         ...config.global,
-        isLogin: false,
-      },
+        isLogin: false
+      }
     })
     return { success: true }
   })
@@ -29,8 +29,8 @@ function registerAuthIpc(ipcMain) {
     updateConfig({
       global: {
         ...config.global,
-        auth,
-      },
+        auth
+      }
     })
     return { success: true }
   })
@@ -58,9 +58,9 @@ function loninHandle(username, password, role, isAuto = false) {
   return myAxios
     .post(constants.API.prod.login, {
       username: username,
-      password: password,
+      password: password
     })
-    .then((response) => {
+    .then(response => {
       consoleUtil.log('登录成功', response)
       auth = {
         username,
@@ -69,20 +69,20 @@ function loninHandle(username, password, role, isAuto = false) {
         errorCount: 0,
         errorMessage: '',
         displayName: username,
-        cookies: response.headers['set-cookie'],
+        cookies: response.headers['set-cookie']
       }
       updateConfig({
         global: {
           ...config.global,
           auth: auth,
-          isLogin: true,
-        },
+          isLogin: true
+        }
       })
 
       job()
       return { ...resultData, isLogin: true, success: true, type: '', message: '登录成功' }
     })
-    .catch((err) => {
+    .catch(err => {
       consoleUtil.log(err.response?.data.message)
       auth.cookies = ''
       auth.errorCount = auth.errorCount + 1
@@ -91,8 +91,8 @@ function loninHandle(username, password, role, isAuto = false) {
         global: {
           ...config.global,
           auth,
-          isLogin: false,
-        },
+          isLogin: false
+        }
       })
       return { ...resultData, message: err.response?.data.message }
     })
@@ -105,28 +105,28 @@ function checkLoginHandle() {
   return myAxios
     .get(constants.API.prod.checkLogin, {
       headers: {
-        Cookie: auth.cookies,
-      },
+        Cookie: auth.cookies
+      }
     })
-    .then((response) => {
+    .then(response => {
       auth.displayName = response.data.data.username
       updateConfig({
         global: {
           ...config.global,
-          auth,
-        },
+          auth
+        }
       })
       return { ...resultData, success: true, type: '' }
     })
-    .catch((err) => {
+    .catch(err => {
       if (err.status == 401) {
         auth.cookies = ''
         updateConfig({
           global: {
             ...config.global,
             auth,
-            isLogin: false,
-          },
+            isLogin: false
+          }
         })
         return { ...resultData, message: err.response.data.message }
       }
@@ -137,17 +137,17 @@ function checkLoginHandle() {
 function authLogin() {
   const config = getConfig()
   let auth = config.global.auth
-  if (auth.errorCount > 2) {
+  if (auth && auth.errorCount > 2) {
     jobTask.stop()
     mainSendToRender('loginInfo', { message: 'xxx' })
     return
   }
-  if (auth.username && auth.password && auth.role) {
+  if (auth && auth.username && auth.password && auth.role) {
     loninHandle(auth.username, auth.password, auth.role, true)
-      .then((res) => {
+      .then(res => {
         job()
       })
-      .catch((err) => {
+      .catch(err => {
         console.log('err', err)
       })
   }
@@ -159,7 +159,7 @@ function job() {
   jobTask.setExpression(cron)
   jobTask.setCallback(() => {
     console.log('定时任务触发', new Date().toLocaleTimeString())
-    checkLoginHandle().then((res) => {
+    checkLoginHandle().then(res => {
       mainSendToRender('loginInfo', { global: res.global })
       sendNotice('xxxxxx')
       if (res.message == '未登录，请先登录') {
