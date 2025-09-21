@@ -5,12 +5,13 @@ const path = require('node:path')
 // const db = require('./electron/db/postgres')
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged
+const { initSpotlight } = require('./main/spotlight')
 
 const { registerAllIpc, ipcHandle } = require('./electron/ipc/index')
 
 const commonUtils = require('./common/commonUtil')
 console.log(commonUtils.simpleHtmlToText('<p>Hello <strong>World</strong></p>'))
-
+// if (!app.isPackaged) spotlightWindow.webContents.openDevTools({ mode: 'detach' })
 let win = null
 // 检查是否已存在实例
 const gotTheLock = app.requestSingleInstanceLock()
@@ -31,6 +32,7 @@ if (!gotTheLock) {
   app.whenReady().then(() => {
     registerAllIpc(ipcMain)
     createWindow()
+    initSpotlight()
   })
 
   // 所有窗口关闭时退出（可选，如果你希望退出应用时）

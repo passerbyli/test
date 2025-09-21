@@ -271,6 +271,15 @@ const router = createRouter({
           }
         }
       ]
+    },
+    {
+      path: '/spotlight',
+      name: 'Spotlight',
+      component: () => import('../views/SpotlightView.vue'),
+      meta: {
+        layout: 'empty',
+        title: 'xxx'
+      } // 如果你有布局控制
     }
   ]
 })
