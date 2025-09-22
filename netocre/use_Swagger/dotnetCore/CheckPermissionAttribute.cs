@@ -37,7 +37,10 @@ public class CheckPermissionAttribute : Attribute, IAsyncActionFilter
         {
             await next(); return;
         }
-        string raw = http.data.toString();
+
+        string raw = null;
+        
+        // raw=http.data.toString();
 
         object model = null;
         string fieldValue = null;

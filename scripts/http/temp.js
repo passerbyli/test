@@ -78,9 +78,15 @@ async function replaceImageUrls(inputString) {
     return inputString;
 }
 
-// 示例使用
-(async () => {
+
+const secret = "1234567899999999999";
+
+
+(
+  // 示例使用
+  async () => {
     const inputStr = `Here is an image: https://example.com/dev/MD123454/excute and another one: https://example.com/dev/MD123455/excute.`;
     const resultStr = await replaceImageUrls(inputStr);
-    console.log('Result:', resultStr);
-})();
+    console.log("Result:", resultStr);
+  }
+)();
