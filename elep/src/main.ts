@@ -15,4 +15,11 @@ app.use(createPinia())
 app.use(ElementPlus)
 app.use(router)
 
+if (window.electron) {
+  window.electron.onNavigate(route => {
+    console.log('主窗口收到 navigate:', route)
+    router.push({ name: route }) // 在主窗口跳转
+  })
+}
+
 app.mount('#app')

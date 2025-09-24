@@ -19,6 +19,7 @@ function maximize() {
 function handleDoubleClick() {
   window.electronAPI?.toggleMaximize()
 }
+
 </script>
 <style>
 body {

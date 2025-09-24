@@ -17,6 +17,14 @@ contextBridge.exposeInMainWorld('authApi', {
   authLogin: () => ipcRenderer.invoke('auth:authLogin')
 })
 
+contextBridge.exposeInMainWorld('electron', {
+  onNavigate: callback => {
+    ipcRenderer.on('navigate', (event, route) => {
+      callback(route)
+    })
+  }
+})
+
 contextBridge.exposeInMainWorld('ipc', {
   /**
    * 用于单向消息发送，不带返回
@@ -108,4 +116,11 @@ contextBridge.exposeInMainWorld('serviceApi', {
   diffApiByRoute: router_id => ipcRenderer.invoke('diffApiByRoute', router_id),
   queryApiListByRoute: params => ipcRenderer.invoke('queryApiListByRoute', params),
   getApiDetailByRouteId: router_id => ipcRenderer.invoke('getApiDetailByRouteId', router_id)
+})
+
+contextBridge.exposeInMainWorld('spotlightApi', {
+  onFocusInput: callback => ipcRenderer.on('focus-input', callback),
+  resizeWindow: h => ipcRenderer.send('spotlight-resize', { h }),
+  hide: () => ipcRenderer.send('spotlight-hide'),
+  executeCommand: cmd => ipcRenderer.send('spotlight-cmd', cmd)
 })

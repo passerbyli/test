@@ -1,13 +1,12 @@
 appId: com.example.eleplus
 productName: elep
 copyright: Copyright © 2025 YourName
-
+npmRebuild: false
 files:
   - dist/**/*
   - electron/**/*
   - pages/**/*
   - plugins/**/*
-  - node_modules/**/*
   - public
   - preload.js
   - main.js
@@ -60,9 +59,6 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-
-linux:
-  target: AppImage
 
 publish: null
 generateUpdatesFilesForAllChannels: false
